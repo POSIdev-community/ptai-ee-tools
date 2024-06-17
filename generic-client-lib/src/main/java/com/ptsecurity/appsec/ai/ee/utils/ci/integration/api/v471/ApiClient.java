@@ -66,7 +66,7 @@ public class ApiClient extends AbstractApiClient {
     @Getter
     @ToString.Exclude
     protected final ProjectsApi dateFormattedProjectsApi = new ProjectsApi(new com.ptsecurity.appsec.ai.ee.server.v471.api.ApiClient()
-            .setOffsetDateTimeFormat(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC)));
+            .setOffsetDateTimeFormat(DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneOffset.UTC)));
 
     @Getter
     @ToString.Exclude
