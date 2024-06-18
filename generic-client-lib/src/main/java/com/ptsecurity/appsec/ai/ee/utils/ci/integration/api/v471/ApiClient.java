@@ -5,7 +5,6 @@ import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
-import com.ptsecurity.appsec.ai.ee.server.v471.api.JSON;
 import com.ptsecurity.appsec.ai.ee.server.v471.api.api.*;
 import com.ptsecurity.appsec.ai.ee.server.v471.api.model.ScanAgentModel;
 import com.ptsecurity.appsec.ai.ee.server.v471.auth.ApiResponse;
@@ -39,8 +38,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.lang.reflect.Type;
 import java.security.SecureRandom;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
@@ -62,11 +59,6 @@ public class ApiClient extends AbstractApiClient {
     @Getter
     @ToString.Exclude
     protected final ProjectsApi projectsApi = new ProjectsApi(new com.ptsecurity.appsec.ai.ee.server.v471.api.ApiClient());
-
-    @Getter
-    @ToString.Exclude
-    protected final ProjectsApi dateFormattedProjectsApi = new ProjectsApi(new com.ptsecurity.appsec.ai.ee.server.v471.api.ApiClient()
-            .setOffsetDateTimeFormat(DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneOffset.UTC)));
 
     @Getter
     @ToString.Exclude
@@ -102,12 +94,12 @@ public class ApiClient extends AbstractApiClient {
 
     public ApiClient(@NonNull final ConnectionSettings connectionSettings) {
         super(connectionSettings, AdvancedSettings.getDefault());
-        apis.addAll(Arrays.asList(authApi, projectsApi, dateFormattedProjectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, healthCheckApi, versionApi));
+        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, healthCheckApi, versionApi));
     }
 
     public ApiClient(@NonNull final ConnectionSettings connectionSettings, @NonNull final AdvancedSettings advancedSettings) {
         super(connectionSettings, advancedSettings);
-        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, dateFormattedProjectsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, healthCheckApi, versionApi));
+        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, healthCheckApi, versionApi));
     }
 
     protected ApiResponse<AuthResultModel> initialAuthentication() throws GenericException {

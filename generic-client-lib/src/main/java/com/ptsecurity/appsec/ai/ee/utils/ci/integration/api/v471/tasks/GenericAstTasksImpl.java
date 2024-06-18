@@ -95,7 +95,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                     if (interval > Duration.between(lastResetTime, LocalDateTime.now()).getSeconds()) continue;
                     log.trace("Poll {} project {} scan state", projectId, scanResultId);
                     ScanResultModel scanResult = call(
-                            () -> client.getDateFormattedProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
+                            () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
                             "Get project scan result with formatted date failed");
                     reset();
                     // TODO: Properly process this
@@ -170,7 +170,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     public ScanBrief createScanBrief(@NonNull final UUID projectId, @NonNull final UUID scanResultId) throws GenericException {
         String projectName = new ProjectTasksImpl(client).searchProject(projectId);
         ScanResultModel scanResult = call(
-                () -> client.getDateFormattedProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
+                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
                 "Get project scan result with formatted date failed");
         log.debug("Project {} scan result {} load complete", projectId, scanResultId);
 
@@ -203,7 +203,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     public void appendStatistics(@NonNull final ScanBrief scanBrief) throws GenericException {
         log.trace("Getting project {} scan results {}", scanBrief.getProjectId(), scanBrief.getId());
         ScanResultModel scanResult = call(
-                () -> client.getDateFormattedProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(scanBrief.getProjectId(), scanBrief.getId()),
+                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(scanBrief.getProjectId(), scanBrief.getId()),
                 "Get project scan result with formatted date failed");
         log.debug("Project {} scan result {} load complete", scanBrief.getProjectId(), scanBrief.getId());
 
@@ -224,7 +224,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     @Override
     public ScanResult getScanResult(@NonNull UUID projectId, @NonNull UUID scanResultId) throws GenericException {
         ScanResultModel scanResult = call(
-                () -> client.getDateFormattedProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
+                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
                 "Get project scan result with formatted date failed");
         log.debug("Project {} scan result {} load complete", projectId, scanResultId);
         List<VulnerabilityModel> issues = call(

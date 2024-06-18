@@ -9306,7 +9306,6 @@ components:
           format: uuid
         scanDate:
           type: string
-          format: date-time
         progress:
           $ref: '#/components/schemas/ScanProgressModel'
         statistic:
