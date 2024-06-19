@@ -119,6 +119,7 @@ public class IssuesConverter {
 
     /**
      * Method converts PT AI v.4.3 API scan settings to API version independent scan settings
+     *
      * @param scanSettings PT AI v.4.3 API scan settings
      * @return PT AI API version independent scan settings
      */
@@ -153,6 +154,7 @@ public class IssuesConverter {
      * Method converts C#-style TimeSpan serialized string
      * (https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings)
      * to Java 8 Duration instance
+     *
      * @param value TimeSpan serialized value like "00:05:06.2269294"
      * @return Java 8 Duration instance
      */
@@ -162,8 +164,9 @@ public class IssuesConverter {
 
     /**
      * Method converts PT AI v.4.3 API scan result and issues model pair to API version independent scan result
-     * @param scanResult PT AI v.4.3 API scan result that contains scan statistic
-     * @param issues PT AI v.4.3 API scan issues list with NO detailed information about vulnerabilities found
+     *
+     * @param scanResult   PT AI v.4.3 API scan result that contains scan statistic
+     * @param issues       PT AI v.4.3 API scan issues list with NO detailed information about vulnerabilities found
      * @param scanSettings PT AI v.4.3 API scan settings
      * @return PT AI API version independent scan results instance
      */
@@ -188,7 +191,8 @@ public class IssuesConverter {
 
     /**
      * Convert PT AI version-dependent sacn statistics into version-agnostic data
-     * @param statistic PT AI 4.4.X scan statistics
+     *
+     * @param statistic  PT AI 4.4.X scan statistics
      * @param scanResult PT AI 4.4.X scan result
      * @return Version-independent scan statistics
      */
@@ -198,10 +202,12 @@ public class IssuesConverter {
         if (null == statistic) return null;
 
         // PT AI REST API uses UTC date / time representation, but without "Z" letter at the end of ISO 8601 representation
-        // String scanDateString = Objects.requireNonNull(scanResult.getScanDate(), "Scan result date is null");
-        // if (!StringUtils.endsWith(scanDateString, "Z")) scanDateString = scanDateString + "Z";
-        // ZonedDateTime zonedScanDate = ZonedDateTime.parse(scanDateString, DateTimeFormatter.ISO_DATE_TIME);
-        ZonedDateTime zonedScanDate = Objects.requireNonNull(scanResult.getScanDate(), "Scan result date is null").toZonedDateTime();
+        String scanDateString = Objects.requireNonNull(scanResult.getScanDate(), "Scan result date is null");
+        if (!StringUtils.endsWith(scanDateString, "Z")) {
+            scanDateString = scanDateString + "Z";
+        }
+        ZonedDateTime zonedScanDate = ZonedDateTime.parse(scanDateString, DateTimeFormatter.ISO_DATE_TIME);
+//        ZonedDateTime zonedScanDate = Objects.requireNonNull(scanResult.getScanDate(), "Scan result date is null").toZonedDateTime();
         String scanDurationString = Objects.requireNonNull(statistic.getScanDuration(), "Scan duration is null");
         Duration scanDuration = parseDuration(scanDurationString);
 
@@ -217,7 +223,8 @@ public class IssuesConverter {
 
     /**
      * Method copies generic fields data from PT AI v.4.4.X issue to version-independent issue
-     * @param source PT AI v.4.4.X base issue where fields data is copied from
+     *
+     * @param source      PT AI v.4.4.X base issue where fields data is copied from
      * @param destination PT AI API version independent base issue
      */
     protected static void setBaseFields(
@@ -274,8 +281,9 @@ public class IssuesConverter {
 
     /**
      * Method converts PT AI v.4.4.X API issue to list of API version independent vulnerabilities
+     *
      * @param issue Base information about vulnerability. Exact descendant issue class type depends
-     *                  on a propertyClass field value
+     *              on a propertyClass field value
      */
     protected static void convert(
             @NonNull final VulnerabilityModel issue,
@@ -305,7 +313,8 @@ public class IssuesConverter {
             scaIssue.setComponentVersion(issue.getVulnerableComponent().getVersion());
             scaIssue.setFile(issue.getSourceFile());
             String fingerprintId = Objects.requireNonNull(scaIssue.getComponentName());
-            if (StringUtils.isNotEmpty(scaIssue.getComponentVersion())) fingerprintId += " " + scaIssue.getComponentVersion();
+            if (StringUtils.isNotEmpty(scaIssue.getComponentVersion()))
+                fingerprintId += " " + scaIssue.getComponentVersion();
             scaIssue.setFingerprintId(fingerprintId);
             scaIssue.setTypeId(fingerprintId);
             baseIssue = scaIssue;
@@ -316,14 +325,14 @@ public class IssuesConverter {
             ((VulnerabilityIssue) baseIssue).setSecondOrder(issue.getIsSecondOrder());
             ((VulnerabilityIssue) baseIssue).setPvf(issue.getFunction());
             ((VulnerabilityIssue) baseIssue).setVulnerableExpression(
-                BaseSourceIssue.Place.builder()
-                    .file(Objects.requireNonNull(issue.getSourceFile()))
-                    .value(issue.getVulnerableValue())
-                    .beginLine(Objects.requireNonNull(issue.getSourceBeginLine()))
-                    .endLine(Objects.requireNonNull(issue.getSourceEndLine()))
-                    .beginColumn(Objects.requireNonNull(issue.getSourceBeginColumn()))
-                    .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
-                    .build());
+                    BaseSourceIssue.Place.builder()
+                            .file(Objects.requireNonNull(issue.getSourceFile()))
+                            .value(issue.getVulnerableValue())
+                            .beginLine(Objects.requireNonNull(issue.getSourceBeginLine()))
+                            .endLine(Objects.requireNonNull(issue.getSourceEndLine()))
+                            .beginColumn(Objects.requireNonNull(issue.getSourceBeginColumn()))
+                            .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
+                            .build());
             ((VulnerabilityIssue) baseIssue).setEntryPoint(BaseSourceIssue.Place.builder()
                     .file(Objects.requireNonNull(issue.getEntryPointFile()))
                     .beginLine(Objects.requireNonNull(issue.getEntryPointLine()))
@@ -333,12 +342,12 @@ public class IssuesConverter {
             ((VulnerabilityIssue) baseIssue).setScanMode(SCAN_MODE_MAP.getOrDefault(issue.getScanMode(), VulnerabilityIssue.ScanMode.FROM_OTHER));
             if (StringUtils.isNotEmpty(issue.getBestPlaceToFixFile()) && null != issue.getBestPlaceToFixLine())
                 ((VulnerabilityIssue) baseIssue).setBpf(VulnerabilityIssue.BestPlaceToFix.builder()
-                                .place(BaseSourceIssue.Place.builder()
-                                        .file(Objects.requireNonNull(issue.getBestPlaceToFixFile()))
-                                        .beginLine(Objects.requireNonNull(issue.getBestPlaceToFixLine()))
-                                        .endLine(Objects.requireNonNull(issue.getBestPlaceToFixLine()))
-                                        .beginColumn(0).endColumn(0)
-                                        .build())
+                        .place(BaseSourceIssue.Place.builder()
+                                .file(Objects.requireNonNull(issue.getBestPlaceToFixFile()))
+                                .beginLine(Objects.requireNonNull(issue.getBestPlaceToFixLine()))
+                                .endLine(Objects.requireNonNull(issue.getBestPlaceToFixLine()))
+                                .beginColumn(0).endColumn(0)
+                                .build())
                         .build());
         } else if (IssueType.WEAKNESS == issueType) {
             baseIssue = new WeaknessIssue();
@@ -365,6 +374,7 @@ public class IssuesConverter {
 
     /**
      * Method collects
+     *
      * @param projectName
      * @param scanResult
      * @param scanSettings

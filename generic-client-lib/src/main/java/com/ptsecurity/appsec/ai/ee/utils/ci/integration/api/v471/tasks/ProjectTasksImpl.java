@@ -18,6 +18,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -100,10 +102,11 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         List<ScanResultModel> scanResults = call(
                 () -> client.getProjectsApi().apiProjectsProjectIdScanResultsGet(id),
                 "PT AI project scan results load failed");
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         ScanResultModel result = scanResults.stream()
                 .filter(r -> null != r.getProgress())
                 .filter(r -> Stage.DONE.equals(r.getProgress().getStage()))
-                .sorted(Comparator.comparing(ScanResultModel::getScanDate).reversed())
+                .sorted(Comparator.comparing(r -> LocalDateTime.parse(((ScanResultModel) r).getScanDate(), formatter)).reversed())
                 .findAny()
                 .orElseThrow(() -> GenericException.raise("Project finished scan results are not found", new IllegalArgumentException(id.toString())));
         assert result.getId() != null;
