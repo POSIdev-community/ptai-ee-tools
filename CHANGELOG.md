@@ -239,3 +239,5 @@
 + [Feature] PT AI v.4.7.0 support approved
 ### 20240429
 + [Feature] PT AI v.4.7.1 support approved
++ ### 20240628
++ [Feature] PT AI v.4.7.1 support approved
