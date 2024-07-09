@@ -116,9 +116,9 @@ subprojects {
                     description = project.description
 
                     scm {
-                        url = 'https://github.com/ZhukovAN/ptaiPlugins'
-                        connection = 'scm:git:https://github.com/ZhukovAN/ptaiPlugins.git'
-                        developerConnection = 'scm:git:https://github.com/ZhukovAN/ptaiPlugins.git'
+                        url = 'https://github.com/POSIdev-community/ptai-ee-tools'
+                        connection = 'scm:git:https://github.com/POSIdev-community/ptai-ee-tools.git'
+                        developerConnection = 'scm:git:https://github.com/POSIdev-community/ptai-ee-tools.git'
                     }
 
                     developers {
