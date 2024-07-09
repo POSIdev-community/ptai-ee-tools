@@ -37,9 +37,10 @@ subprojects {
 
     repositories {
         mavenLocal()
-        mavenCentral()
-        maven { url 'https://repo.jenkins-ci.org/releases/' }
-        maven { url 'https://download.jetbrains.com/teamcity-repository/' }
+        maven { url mavenCentralRepoUrl }
+        maven { url gradlePluginRepoUrl }
+        maven { url jenkinsReleasesRepoUrl }
+        maven { url teamcityRepoUrl }
     }
 
     dependencies {

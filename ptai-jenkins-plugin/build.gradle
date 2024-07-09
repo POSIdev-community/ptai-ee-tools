@@ -8,8 +8,8 @@ description = 'This plugin used to implement AST using PT Application Inspector'
 version = "${version}"
 
 repositories {
-    maven { url 'https://repo.jenkins-ci.org/public/' }
-    maven { url 'https://repo.jenkins-ci.org/incrementals/' }
+    maven { url jenkinsPublicRepoUrl }
+    maven { url jenkinsIncrementalRepoUrl }
 }
 
 jenkinsPlugin {
