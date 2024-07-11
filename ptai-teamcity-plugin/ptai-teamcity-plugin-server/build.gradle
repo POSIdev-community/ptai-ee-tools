@@ -17,6 +17,8 @@ dependencies {
 
 teamcity {
     version = teamcityVersion
+    defaultRepositories = false
+
     server {
         descriptor {
             name = 'ptai-teamcity-plugin'

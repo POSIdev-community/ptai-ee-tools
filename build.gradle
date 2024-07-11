@@ -37,9 +37,9 @@ subprojects {
 
     repositories {
         mavenLocal()
-        mavenCentral()
-        maven { url 'https://repo.jenkins-ci.org/releases/' }
-        maven { url 'https://download.jetbrains.com/teamcity-repository/' }
+        maven { url mavenCentralRepoUrl }
+        maven { url jenkinsReleasesRepoUrl }
+        maven { url teamcityRepoUrl }
     }
 
     dependencies {
@@ -115,9 +115,9 @@ subprojects {
                     description = project.description
 
                     scm {
-                        url = 'https://github.com/ZhukovAN/ptaiPlugins'
-                        connection = 'scm:git:https://github.com/ZhukovAN/ptaiPlugins.git'
-                        developerConnection = 'scm:git:https://github.com/ZhukovAN/ptaiPlugins.git'
+                        url = 'https://github.com/POSIdev-community/ptai-ee-tools'
+                        connection = 'scm:git:https://github.com/POSIdev-community/ptai-ee-tools.git'
+                        developerConnection = 'scm:git:https://github.com/POSIdev-community/ptai-ee-tools.git'
                     }
 
                     developers {

@@ -11,6 +11,16 @@ Jenkins and Teamcity plugins will be built for CI versions defined in ```gradle.
 ```
 $ ./gradlew build -P jenkinsVersion=2.150.2 -P teamcityVersion=2020.1
 ```
+
+You can override maven repositories used during the build:
+```
+$ ./gradlew build -PmavenCentralRepoUrl=https://maven.example.com/ -PgradlePluginRepoUrl=https://gradle-plugins.example.com/ -P...
+```
+
+The full list of used repositories is available [here](./gradle.properties).
+
+Also, you can use [HTTP proxy settings](https://docs.gradle.org/current/userguide/networking.html#sec:accessing_the_web_via_a_proxy). 
+
 ### Build plugins using Docker Gradle image
 Execute ```docker run``` command in project root:
 ```
