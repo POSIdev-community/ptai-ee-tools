@@ -156,10 +156,13 @@ public class AiProjConverter {
         JavaSettings javaSettings = settings.getJavaSettings();
         // Set isUnpackUserJarFiles
         model.setUnpackUserPackages(javaSettings.getUnpackUserPackages());
+        model.setDownloadDependencies(javaSettings.getDownloadDependencies());
+        model.setUseAvailablePublicAndProtectedMethods(model.getUseAvailablePublicAndProtectedMethods());
+        model.setVersion(JAVA_VERSION_MAP.getOrDefault(javaSettings.getJavaVersion(), JavaVersions._11));
         // Set userPackagePrefixes and launchJvmParameters
         model.setUserPackagePrefixes(javaSettings.getUserPackagePrefixes());
         model.setParameters(javaSettings.getParameters());
-        model.setVersion(JAVA_VERSION_MAP.getOrDefault(javaSettings.getJavaVersion(), JavaVersions._11));
+        model.setLaunchParameters(javaSettings.getCustomParameters());
         return model;
     }
 
@@ -172,6 +175,9 @@ public class AiProjConverter {
         // Set projectType
         model.setProjectType(DOTNET_PROJECT_TYPE_MAP.getOrDefault(dotNetSettings.getProjectType(), DotNetProjectType.NONE));
         model.setSolutionFile(dotNetSettings.getSolutionFile());
+        model.setLaunchParameters(dotNetSettings.getCustomParameters());
+        model.setDownloadDependencies(dotNetSettings.getDownloadDependencies());
+        model.setUseAvailablePublicAndProtectedMethods(dotNetSettings.getUsePublicAnalysisMethod());
         return model;
     }
 
@@ -184,6 +190,9 @@ public class AiProjConverter {
         // Set projectType
         model.setProjectType(DOTNET_PROJECT_TYPE_MAP.getOrDefault(dotNetSettings.getProjectType(), DotNetProjectType.NONE));
         model.setSolutionFile(dotNetSettings.getSolutionFile());
+        model.setLaunchParameters(dotNetSettings.getCustomParameters());
+        model.setDownloadDependencies(dotNetSettings.getDownloadDependencies());
+        model.setUseAvailablePublicAndProtectedMethods(dotNetSettings.getUsePublicAnalysisMethod());
         return model;
     }
 
