@@ -273,6 +273,21 @@ public class AiProjConverter {
     }
 
     @SneakyThrows
+    public static RubySettingsModel apply(
+            @NonNull final UnifiedAiProjScanSettings settings,
+            RubySettingsModel model) {
+        if (model == null) {
+            model = new RubySettingsModel();
+        }
+        if (null == settings.getRubySettings()) return model;
+        UnifiedAiProjScanSettings.RubySettings rubySettings = settings.getRubySettings();
+
+        model.setUseAvailablePublicAndProtectedMethods(rubySettings.getUsePublicAnalysisMethod());
+        model.setLaunchParameters(rubySettings.getCustomParameters());
+        return model;
+    }
+
+    @SneakyThrows
     public static PmTaintBaseSettingsModel apply(
             @NonNull final UnifiedAiProjScanSettings settings,
             PmTaintBaseSettingsModel model) {
@@ -315,9 +330,9 @@ public class AiProjConverter {
         model.setJavaSettings(apply(settings, model.getJavaSettings()));
         model.setJsaDotNetSettings(apply(settings, model.getJsaDotNetSettings()));
         model.setPhpSettings(apply(settings, model.getPhpSettings()));
-        model.setPmTaintSettings(apply(settings, model.getPmTaintSettings()));
         model.setPythonSettings(apply(settings, model.getPythonSettings()));
-        // TODO: add ruby
+        model.setRubySettings(apply(settings, model.getRubySettings()));
+        model.setPmTaintSettings(apply(settings, model.getPmTaintSettings()));
 
         return model;
     }
