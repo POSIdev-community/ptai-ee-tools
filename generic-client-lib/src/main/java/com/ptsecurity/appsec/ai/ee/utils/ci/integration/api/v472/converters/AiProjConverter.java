@@ -76,6 +76,7 @@ public class AiProjConverter {
         REVERSE_LANGUAGE_GROUP_MAP.put(Language.VB, LegacyProgrammingLanguageGroup.VB);
         REVERSE_LANGUAGE_GROUP_MAP.put(Language.PHP, LegacyProgrammingLanguageGroup.PHP);
         REVERSE_LANGUAGE_GROUP_MAP.put(Language.OBJECTIVEC, LegacyProgrammingLanguageGroup.OBJECTIVEC);
+        REVERSE_LANGUAGE_GROUP_MAP.put(Language.RUBY, LegacyProgrammingLanguageGroup.RUBY);
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.NONE, DotNetProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.SOLUTION, DotNetProjectType.SOLUTION);
