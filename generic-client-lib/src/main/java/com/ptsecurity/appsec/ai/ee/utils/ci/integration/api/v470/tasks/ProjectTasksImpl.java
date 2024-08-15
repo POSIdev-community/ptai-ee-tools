@@ -148,7 +148,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         projectSettingsModel.languages(projectSettings.getLanguages());
 
         log.trace("Apply AIPROJ-defined project generic settings");
-        AiProjConverter.apply(settings, projectSettingsModel);
+        AiProjConverter.apply(settings, projectSettingsModel, client);
         log.trace("Save modified settings");
         ProjectSettingsUpdatedModel projectSettingsUpdatedModel = new ProjectSettingsUpdatedModel()
                 .projectName(projectSettingsModel.getProjectName())
