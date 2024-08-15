@@ -11,6 +11,7 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.Black
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.DotNetSettings;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings;
 import com.ptsecurity.appsec.ai.ee.server.v470.api.model.*;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v470.ApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ScanModule.BLACKBOX;
+import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isNotEmpty;
 
 @Slf4j
@@ -274,6 +276,38 @@ public class AiProjConverter {
     }
 
     @SneakyThrows
+    public static MailingProjectSettingsModel apply(
+            @NonNull final UnifiedAiProjScanSettings settings,
+            @NonNull final MailingProjectSettingsModel model,
+            ApiClient client) {
+        if (null == settings.getMailingProjectSettings()) return model;
+        UnifiedAiProjScanSettings.MailingProjectSettings mailingProjectSettings = settings.getMailingProjectSettings();
+
+        List<MailProfileModel> mailProfiles = call(
+                () -> client.getMailingApi().apiMailingMailProfilesGet(),
+                "Failed to get PT AI mailing profiles");
+        MailProfileModel userDefinedProfile = getMailProfileModel(mailingProjectSettings, mailProfiles);
+
+        model.setEnabled(mailingProjectSettings.getEnabled());
+        model.setMailProfileId(userDefinedProfile.getId());
+        model.setEmailRecipients(mailingProjectSettings.getEmailRecipients());
+        return model;
+    }
+
+    private static @NonNull MailProfileModel getMailProfileModel(UnifiedAiProjScanSettings.MailingProjectSettings mailingProjectSettings, List<MailProfileModel> mailProfiles) {
+        String userDefinedProfileName = mailingProjectSettings.getMailProfileName();
+
+        for (MailProfileModel mailProfile : mailProfiles) {
+            String profileName = mailProfile.getProfileName();
+            if (profileName != null && profileName.equals(userDefinedProfileName)) {
+                return mailProfile;
+            }
+        }
+
+        throw new IllegalArgumentException("Can't find mail profile with such name: " + userDefinedProfileName);
+    }
+
+    @SneakyThrows
     public static AnalysisRulesBaseModel apply(
             @NonNull final UnifiedAiProjScanSettings settings) {
         return new AnalysisRulesBaseModel()
@@ -287,7 +321,8 @@ public class AiProjConverter {
     @SneakyThrows
     public static ProjectSettingsModel apply(
             @NonNull final UnifiedAiProjScanSettings settings,
-            @NonNull final ProjectSettingsModel model) {
+            @NonNull final ProjectSettingsModel model,
+            ApiClient client) {
         log.trace("Set base project settings");
 
         model.setSourceType(SourceType.EMPTY);
@@ -302,6 +337,7 @@ public class AiProjConverter {
         model.setPythonSettings(apply(settings, new PythonSettingsModel()));
         model.setRubySettings(apply(settings, new RubySettingsModel()));
         model.setPmTaintSettings(apply(settings, new PmTaintBaseSettingsModel()));
+        model.setReportAfterScan(apply(settings, new MailingProjectSettingsModel(), client));
 
         return model;
     }
