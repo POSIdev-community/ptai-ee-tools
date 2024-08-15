@@ -456,6 +456,19 @@ public abstract class UnifiedAiProjScanSettings {
         return null;
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class RubySettings {
+        protected Boolean usePublicAnalysisMethod;
+        protected String customParameters;
+    }
+
+    public RubySettings getRubySettings() {
+        return null;
+    }
+
     @NonNull
     public abstract Boolean isSkipGitIgnoreFiles();
     @NonNull

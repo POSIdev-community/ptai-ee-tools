@@ -284,6 +284,15 @@ public class AiProjV13ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    public RubySettings getRubySettings() {
+        if (N("RubySettings").isMissingNode()) return null;
+        return RubySettings.builder()
+                .usePublicAnalysisMethod(B("RubySettings.UsePublicAnalysisMethod"))
+                .customParameters(S("RubySettings.CustomParameters"))
+                .build();
+    }
+
+    @Override
     public @NonNull Boolean isSkipGitIgnoreFiles() {
         return B("SkipGitIgnoreFiles");
     }

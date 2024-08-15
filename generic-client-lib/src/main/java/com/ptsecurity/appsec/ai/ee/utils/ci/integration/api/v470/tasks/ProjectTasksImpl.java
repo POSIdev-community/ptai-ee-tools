@@ -160,6 +160,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
                 .javaSettings(projectSettingsModel.getJavaSettings())
                 .jsaDotNetSettings(projectSettingsModel.getJsaDotNetSettings())
                 .phpSettings(projectSettingsModel.getPhpSettings())
+                .rubySettings(projectSettingsModel.getRubySettings())
                 .pmTaintSettings(projectSettingsModel.getPmTaintSettings())
                 .pythonSettings(projectSettingsModel.getPythonSettings())
                 .rubySettings(projectSettingsModel.getRubySettings())
