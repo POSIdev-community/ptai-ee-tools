@@ -127,13 +127,16 @@ public class AiProjConverter {
         log.trace("Set base project settings");
         result.setName(settings.getProjectName());
         result.setLanguages(convertLanguagesGroup(settings.getProgrammingLanguages()));
-        if (null != settings.getBlackBoxSettings())
-            result.setProjectUrl(settings.getBlackBoxSettings().getSite());
+        BlackBoxSettings blackBoxSettings = settings.getBlackBoxSettings();
+        if (null != blackBoxSettings) {
+            result.setProjectUrl(blackBoxSettings.getSite());
+        }
 
         result.setWhiteBox(apply(settings, new WhiteBoxSettingsModel()));
 
         result.setBlackBoxEnabled(settings.getScanModules().contains(BLACKBOX));
-        if (Boolean.TRUE.equals(result.getBlackBoxEnabled())) {
+        boolean autocheckEnabled = blackBoxSettings != null ? blackBoxSettings.getRunAutocheckAfterScan() : false;
+        if (Boolean.TRUE.equals(result.getBlackBoxEnabled()) || autocheckEnabled) {
             log.trace("Set base project blackbox settings");
             result.setBlackBox(apply(settings, new BlackBoxSettingsBaseModel()));
         }
@@ -418,12 +421,13 @@ public class AiProjConverter {
             @NonNull final UnifiedAiProjScanSettings settings,
             @NonNull final BlackBoxSettingsModel model) {
         BlackBoxSettings blackBoxSettings = settings.getBlackBoxSettings();
-        if (null == blackBoxSettings || !settings.getScanModules().contains(BLACKBOX))
+        if (null == blackBoxSettings || (!settings.getScanModules().contains(BLACKBOX) && !blackBoxSettings.getRunAutocheckAfterScan())) {
             return model;
+        }
 
         model.setRunAutocheckAfterScan(blackBoxSettings.getRunAutocheckAfterScan());
         model.setSite(blackBoxSettings.getSite());
-        model.setIsActive(true);
+        model.setIsActive(settings.getScanModules().contains(BLACKBOX));
         model.setLevel(BLACKBOX_SCAN_LEVEL_MAP.get(blackBoxSettings.getScanLevel()));
         model.setScanScope(BLACKBOX_SCAN_SCOPE_MAP.get(blackBoxSettings.getScanScope()));
         model.setSslCheck(blackBoxSettings.getSslCheck());
@@ -465,8 +469,9 @@ public class AiProjConverter {
             @NonNull final UnifiedAiProjScanSettings settings,
             @NonNull final BlackBoxSettingsBaseModel model) {
         BlackBoxSettings blackBoxSettings = settings.getBlackBoxSettings();
-        if (null == blackBoxSettings || !settings.getScanModules().contains(BLACKBOX))
+        if (null == blackBoxSettings || (!settings.getScanModules().contains(BLACKBOX) && !blackBoxSettings.getRunAutocheckAfterScan())) {
             return model;
+        }
 
         model.setRunAutocheckAfterScan(blackBoxSettings.getRunAutocheckAfterScan());
         model.setSite(blackBoxSettings.getSite());

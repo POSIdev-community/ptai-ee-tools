@@ -453,7 +453,6 @@ public class AiProjV13ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public BlackBoxSettings getBlackBoxSettings() {
-        if (!getScanModules().contains(ScanModule.BLACKBOX)) return null;
         JsonNode blackBoxSettings = N("BlackBoxSettings");
         if (blackBoxSettings.isMissingNode()) return null;
 
@@ -464,6 +463,8 @@ public class AiProjV13ScanSettings extends UnifiedAiProjScanSettings {
         res.setSite(S(blackBoxSettings, "Site"));
         res.setScanScope(BLACKBOX_SCAN_SCOPE_MAP.getOrDefault(S("BlackBoxSettings.ScanScope"), BlackBoxSettings.ScanScope.PATH));
         res.setSslCheck(B(blackBoxSettings, "SslCheck"));
+
+        if (!getScanModules().contains(ScanModule.BLACKBOX) && !res.getRunAutocheckAfterScan()) return null;
 
         JsonNode proxySettings = N(blackBoxSettings, "ProxySettings");
         if (!proxySettings.isMissingNode())
