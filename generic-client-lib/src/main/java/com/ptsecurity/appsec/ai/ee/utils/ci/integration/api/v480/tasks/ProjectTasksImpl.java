@@ -1,11 +1,11 @@
-package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v472.tasks;
+package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v480.tasks;
 
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
-import com.ptsecurity.appsec.ai.ee.server.v472.api.ApiException;
-import com.ptsecurity.appsec.ai.ee.server.v472.api.model.*;
+import com.ptsecurity.appsec.ai.ee.server.v480.api.ApiException;
+import com.ptsecurity.appsec.ai.ee.server.v480.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v472.converters.AiProjConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v480.converters.AiProjConverter;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.ptsecurity.appsec.ai.ee.server.v472.api.model.LegacyProgrammingLanguageGroup.*;
+import static com.ptsecurity.appsec.ai.ee.server.v480.api.model.LegacyProgrammingLanguageGroup.*;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 import static java.nio.charset.StandardCharsets.UTF_8;
 

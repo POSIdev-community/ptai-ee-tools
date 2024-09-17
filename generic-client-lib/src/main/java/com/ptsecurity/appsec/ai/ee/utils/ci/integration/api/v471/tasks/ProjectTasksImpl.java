@@ -20,10 +20,7 @@ import org.apache.http.HttpStatus;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.ptsecurity.appsec.ai.ee.server.v471.api.model.LegacyProgrammingLanguageGroup.*;
@@ -264,9 +261,9 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
 
     private List<LegacyProgrammingLanguageGroup> getLanguagesFromDetectionObject(DefaultProjectSettingsModelLangPercentDistribution detection) {
         if (detection == null) {
-            return List.of();
+            return Collections.emptyList();
         }
-        List<LegacyProgrammingLanguageGroup> result = new ArrayList<>(List.of());
+        List<LegacyProgrammingLanguageGroup> result = new ArrayList<>(Collections.emptyList());
 
         if (detection.getJava() != null && detection.getJava() > 0) {
             result.add(JAVA);
