@@ -285,7 +285,10 @@ public class AiProjConverter {
             ApiClient client) {
         if (null == settings.getMailingProjectSettings()) return model;
         UnifiedAiProjScanSettings.MailingProjectSettings mailingProjectSettings = settings.getMailingProjectSettings();
-        if (!mailingProjectSettings.getEnabled()) return model;
+        if (!mailingProjectSettings.getEnabled()) {
+            model.setEnabled(false);
+            return model;
+        }
 
         List<MailProfileModel> mailProfiles = call(
                 () -> client.getMailingApi().apiMailingMailProfilesGet(),
