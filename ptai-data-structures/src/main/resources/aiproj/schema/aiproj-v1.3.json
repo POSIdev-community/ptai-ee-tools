@@ -452,6 +452,11 @@
           "title": "Download dependencies",
           "type": ["null", "boolean"]
         },
+        "DependenciesPath": {
+          "title": "Dependencies path",
+          "description": "Path that the Java kernel will use as classPath",
+          "type": ["null", "string"]
+        },
         "CustomParameters": {
           "title": "Custom parameters",
           "description": "Custom Java kernel startup parameters",
@@ -535,6 +540,11 @@
         "DownloadDependencies": {
           "title": "Download dependencies",
           "type": ["null", "boolean"]
+        },
+        "DependenciesPath": {
+          "title": "Dependencies path",
+          "description": "Path to venv or path to directory with dependencies if venv was not used to restore them",
+          "type": ["null", "string"]
         },
         "CustomParameters": {
           "title": "Custom parameters",

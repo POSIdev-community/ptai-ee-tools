@@ -238,6 +238,7 @@ public class AiProjV13ScanSettings extends UnifiedAiProjScanSettings {
                 .parameters(S("JavaSettings.Parameters"))
                 .usePublicAnalysisMethod(B("JavaSettings.UsePublicAnalysisMethod"))
                 .downloadDependencies(B("JavaSettings.DownloadDependencies"))
+                .dependenciesPath(S("JavaSettings.DependenciesPath"))
                 .customParameters(S("JavaSettings.CustomParameters"))
                 .build();
     }
@@ -279,6 +280,7 @@ public class AiProjV13ScanSettings extends UnifiedAiProjScanSettings {
         return PythonSettings.builder()
                 .usePublicAnalysisMethod(B("PythonSettings.UsePublicAnalysisMethod"))
                 .downloadDependencies(B("PythonSettings.DownloadDependencies"))
+                .dependenciesPath(S("PythonSettings.DependenciesPath"))
                 .customParameters(S("PythonSettings.CustomParameters"))
                 .build();
     }

@@ -171,6 +171,7 @@ public class AiProjConverter {
         model.setUserPackagePrefixes(javaSettings.getUserPackagePrefixes());
         model.setParameters(javaSettings.getParameters());
         model.setLaunchParameters(javaSettings.getCustomParameters());
+        model.setDependenciesPath(javaSettings.getDependenciesPath());
         return model;
     }
 
@@ -275,6 +276,7 @@ public class AiProjConverter {
         model.setUseAvailablePublicAndProtectedMethods(pythonSettings.getUsePublicAnalysisMethod());
         model.setLaunchParameters(pythonSettings.getCustomParameters());
         model.setDownloadDependencies(pythonSettings.getDownloadDependencies());
+        model.setDependenciesPath(pythonSettings.getDependenciesPath());
         return model;
     }
 

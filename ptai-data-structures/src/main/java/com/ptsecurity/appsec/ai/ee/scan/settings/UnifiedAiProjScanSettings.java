@@ -395,6 +395,7 @@ public abstract class UnifiedAiProjScanSettings {
         protected UnifiedAiProjScanSettings.JavaSettings.JavaVersion javaVersion;
         protected Boolean usePublicAnalysisMethod;
         protected Boolean downloadDependencies;
+        protected String dependenciesPath;
         protected String customParameters;
     }
     public abstract JavaSettings getJavaSettings();
@@ -449,6 +450,7 @@ public abstract class UnifiedAiProjScanSettings {
     public static class PythonSettings {
         protected Boolean usePublicAnalysisMethod;
         protected Boolean downloadDependencies;
+        protected String dependenciesPath;
         protected String customParameters;
     }
 

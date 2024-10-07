@@ -7754,6 +7754,9 @@ components:
           type: boolean
         downloadDependencies:
           type: boolean
+        dependenciesPath:
+          type: string
+          nullable: true
       additionalProperties: false
     JavaVersions:
       enum:
@@ -8751,6 +8754,9 @@ components:
           type: boolean
         downloadDependencies:
           type: boolean
+        dependenciesPath:
+          type: string
+          nullable: true
       additionalProperties: false
     RefreshTokenResultModel:
       type: object
