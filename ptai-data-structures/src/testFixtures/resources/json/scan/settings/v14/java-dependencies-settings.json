@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.4.json",
+  "Version": "1.4",
+  "ProjectName": "Java",
+  "ProgrammingLanguages": ["Java"],
+  "ScanModules": [
+    "StaticCodeAnalysis",
+    "Configuration"
+  ],
+  "JavaSettings": {
+    "DependenciesPath": "/somePath"
+  }
+}
