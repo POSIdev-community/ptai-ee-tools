@@ -52,7 +52,7 @@ public class ScanBriefDetailedTest extends BaseTest {
                     String json = serialize(scanBriefDetailed);
                     ArchiveHelper.packData7Zip(destination.resolve(projectTemplate.getName() + ".json.7z"), json);
 
-                    // this checks not work since staticCodeAnalysis was added (v460 or smth)
+                    // this checks not work since staticCodeAnalysis was added (v470)
                     // if want to fix need change resources generator generateRestApiDataStructures based on this versions
                     if (version == ScanBrief.ApiVersion.V470 || version == ScanBrief.ApiVersion.V471 ||
                             version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
