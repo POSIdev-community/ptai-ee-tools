@@ -138,7 +138,17 @@ l.layout(title: Resources.i18n_ast_result_label()) {
         def url = scanBriefDetailed.scanSettings.url;
         if (null == url) url = Resources.i18n_misc_strings_empty();
         scanSettings[Resources.i18n_ast_settings_base_url_label()] = url
-        scanSettings[Resources.i18n_ast_settings_base_programminglanguage_label()] = "${scanBriefDetailed.scanSettings.language}"
+        def language = scanBriefDetailed.scanSettings.language;
+        if (null == language) {
+            def languages = scanBriefDetailed.scanSettings.languages;
+            if (languages != null && languages.size() == 1) {
+                scanSettings[Resources.i18n_ast_settings_base_programminglanguage_label()] = "${languages.get(0)}"
+            } else {
+                scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = "${scanBriefDetailed.scanSettings.languages}"
+            }
+        } else {
+            scanSettings[Resources.i18n_ast_settings_base_programminglanguage_label()] = "${scanBriefDetailed.scanSettings.language}"
+        }
         scanSettings[Resources.i18n_ast_settings_mode_label()] = scanBriefDetailed.getUseAsyncScan()
                 ? Resources.i18n_ast_settings_mode_asynchronous_label()
                 : Resources.i18n_ast_settings_mode_synchronous_label()
