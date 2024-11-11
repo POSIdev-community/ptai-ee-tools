@@ -26,7 +26,7 @@ public class ScanBrief {
         @Deprecated V36,
         @Deprecated V40,
         @Deprecated V41,
-        V411, V420, V430, V44X, V450, V460, V470, V471, V472, V480;
+        V411, V420, V430, V44X, V450, V460, V470, V471, V472, V480, V481;
 
         @SneakyThrows
         public static boolean isDeprecated(@NonNull final ApiVersion version) {
@@ -137,7 +137,8 @@ public class ScanBrief {
             OBJECTIVEC("ObjectiveC"),
             SWIFT("Swift"),
             KOTLIN("Kotlin"),
-            RUBY("Ruby");
+            RUBY("Ruby"),
+            SOLIDITY("Solidity");
 
             public static Language fromString(@NonNull final String value) {
                 for (Language language : Language.values())

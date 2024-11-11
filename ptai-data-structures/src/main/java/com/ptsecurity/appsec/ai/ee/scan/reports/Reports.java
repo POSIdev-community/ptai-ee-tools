@@ -128,6 +128,7 @@ public class Reports {
             KOTLIN,
             SQL,
             RUBY,
+            SOLIDITY,
             ALL
         }
 

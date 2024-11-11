@@ -180,7 +180,7 @@ public class Sarif extends Export {
             } else if (BaseIssue.Type.WEAKNESS.equals(issue.getClazz())) {
                 WeaknessIssue weaknessIssue = (WeaknessIssue) issue;
                 location.withPhysicalLocation(phl(weaknessIssue.getVulnerableExpression()));
-            } else if (BaseIssue.Type.YARAMATCH.equals(issue.getClazz()))
+            } else if (BaseIssue.Type.YARAMATCH.equals(issue.getClazz()) || BaseIssue.Type.PYGREP.equals(issue.getClazz()))
                 continue;
 
             sarifRun.getResults().add(result);

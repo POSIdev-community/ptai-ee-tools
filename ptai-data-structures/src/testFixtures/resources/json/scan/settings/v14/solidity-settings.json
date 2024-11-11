@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.4.json",
+  "Version": "1.4",
+  "ProjectName": "Solidity",
+  "ProgrammingLanguages": ["Solidity"],
+  "ScanModules": [
+    "StaticCodeAnalysis",
+    "Configuration"
+  ],
+  "PygrepSettings": {
+    "RulesDirPath": "/somePath"
+  }
+}
