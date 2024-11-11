@@ -30,7 +30,8 @@ import java.util.Map;
         @JsonSubTypes.Type(value = UnknownIssue.class, name = "UNKNOWN"),
         @JsonSubTypes.Type(value = VulnerabilityIssue.class, name = "VULNERABILITY"),
         @JsonSubTypes.Type(value = WeaknessIssue.class, name = "WEAKNESS"),
-        @JsonSubTypes.Type(value = YaraMatchIssue.class, name = "YARAMATCH")
+        @JsonSubTypes.Type(value = YaraMatchIssue.class, name = "YARAMATCH"),
+        @JsonSubTypes.Type(value = PygrepIssue.class, name = "PYGREP")
 })
 public abstract class BaseIssue {
     public static Map<Class<? extends BaseIssue>, Type> TYPES = new HashMap<>();
@@ -43,6 +44,7 @@ public abstract class BaseIssue {
         TYPES.put(WeaknessIssue.class, Type.WEAKNESS);
         TYPES.put(VulnerabilityIssue.class, Type.VULNERABILITY);
         TYPES.put(YaraMatchIssue.class, Type.YARAMATCH);
+        TYPES.put(PygrepIssue.class, Type.PYGREP);
     }
 
     /**
@@ -64,7 +66,7 @@ public abstract class BaseIssue {
     protected String typeId;
 
     public enum Type {
-        VULNERABILITY, WEAKNESS, SCA, CONFIGURATION, BLACKBOX, YARAMATCH, UNKNOWN
+        VULNERABILITY, WEAKNESS, SCA, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, UNKNOWN
     }
 
     public static String getIssueTypeKey(@NonNull final BaseIssue issue) {

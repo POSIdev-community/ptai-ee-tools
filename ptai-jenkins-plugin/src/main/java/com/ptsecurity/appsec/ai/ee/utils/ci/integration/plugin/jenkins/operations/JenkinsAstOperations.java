@@ -71,6 +71,7 @@ public class JenkinsAstOperations implements AstOperations {
     @Override
     public void scanCompleteCallback(@NonNull ScanBrief scanBrief, @NonNull final ScanBriefDetailed.Performance performance) throws GenericException {
         ScanBriefDetailed scanBriefDetailed;
+        // somewhere here
         if (scanBrief.getUseAsyncScan())
             scanBriefDetailed = ScanBriefDetailed.create(scanBrief, performance);
         else {
