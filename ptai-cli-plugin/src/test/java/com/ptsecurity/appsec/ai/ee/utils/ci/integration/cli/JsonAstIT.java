@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli;
 
 import com.contrastsecurity.sarif.SarifSchema210;
+import com.ptsecurity.appsec.ai.ee.server.integration.rest.Environment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.SonarGiif;
 import com.ptsecurity.misc.tools.TempFile;
@@ -15,6 +16,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 
+import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ApiVersion.*;
 import static com.ptsecurity.appsec.ai.ee.server.integration.rest.Connection.CONNECTION;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID.JAVA_APP01;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID.PHP_SMOKE;
@@ -84,11 +86,17 @@ class JsonAstIT extends BaseCliIT {
         Assertions.assertEquals(FAILED.getCode(), res);
     }
 
+    /**
+     * Test launches scan for Java App01 project with dependencies download disabled.
+     * Older versions that use legacy Java engine will complain about missing dependencies
+     * while JSA won't, so we need to bypass this test using {@code disabledFor}
+     */
     @SneakyThrows
     @Test
     @Tag("scan")
     @Tag("integration")
     @DisplayName("Execute AST of new project with missing dependencies")
+    @Environment(disabledFor = { V480 })
     public void failNewProjectScanWithMissingDependencies() {
         ProjectTemplate project = randomClone(JAVA_APP01);
         project.getSettings().setDownloadDependencies(false);
