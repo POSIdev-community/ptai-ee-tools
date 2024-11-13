@@ -31,6 +31,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Accessors
 public abstract class UnifiedAiProjScanSettings {
     private static final List<NonValidationKeyword> NON_VALIDATION_KEYS = Collections.singletonList(new NonValidationKeyword("javaType"));
+    @Deprecated
     protected final ObjectNode rootNode;
 
     public UnifiedAiProjScanSettings(@NonNull final JsonNode jsonNode) {
@@ -305,8 +306,7 @@ public abstract class UnifiedAiProjScanSettings {
     public abstract UnifiedAiProjScanSettings setProgrammingLanguage(@NonNull final ScanBrief.ScanSettings.Language language);
 
     @RequiredArgsConstructor
-    public
-    enum ScanModule {
+    public enum ScanModule {
         CONFIGURATION("Configuration"),
         COMPONENTS("Components"),
         BLACKBOX("BlackBox"),

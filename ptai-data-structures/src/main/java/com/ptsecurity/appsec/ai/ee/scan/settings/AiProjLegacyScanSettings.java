@@ -171,8 +171,20 @@ public class AiProjLegacyScanSettings extends UnifiedAiProjScanSettings {
         if (modules.contains(ScanModule.CONFIGURATION)) legacyModules.add(ScanAppType.CONFIGURATION.value());
         if (modules.contains(ScanModule.COMPONENTS)) legacyModules.add(ScanAppType.FINGERPRINT.value());
         if (modules.contains(ScanModule.BLACKBOX)) legacyModules.add(ScanAppType.BLACKBOX.value());
-        if (modules.contains(ScanModule.PATTERNMATCHING) || modules.contains(ScanModule.DATAFLOWANALYSIS))
+        // Quick fix for project scan setings. As ProjectTasks.setupFromJson uses AIPROJ version-dependent
+        // serialization and deserialization all the changes are to be reflected in internal JSON structure.
+        // This is to be fixed with future implementation of version-independent setupFromJson method that
+        // will use UnifiedAiProjScanSettings
+        if (modules.contains(ScanModule.PATTERNMATCHING)) {
             legacyModules.add(ScanAppType.PMTAINT.value());
+            rootNode.put("UsePmAnalysis", true);
+        } else
+            rootNode.put("UsePmAnalysis", false);
+        if (modules.contains(ScanModule.DATAFLOWANALYSIS)) {
+            legacyModules.add(ScanAppType.PMTAINT.value());
+            rootNode.put("UseTaintAnalysis", true);
+        } else
+            rootNode.put("UseTaintAnalysis", false);
         if (modules.contains(ScanModule.VULNERABLESOURCECODE) || modules.contains(ScanModule.STATICCODEANALYSIS)) {
             ScanBrief.ScanSettings.Language language = getProgrammingLanguage();
             if (ScanBrief.ScanSettings.Language.PHP == language)
