@@ -532,7 +532,49 @@ swaggerSources {
             library = 'okhttp-gson'
             additionalProperties = [
                     'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v480.notifications.model',
-                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v480W.notifications.api',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v480.notifications.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    auth481 {
+        inputFile = file('src/main/resources/api/v481/auth.yaml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v481.auth.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v481.auth.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    api481 {
+        inputFile = file('src/main/resources/api/v481/swagger.yaml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v481.api.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v481.api.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    notifications481 {
+        inputFile = file('src/main/resources/api/v481/notifications.yml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v481.notifications.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v481.notifications.api',
                     'dateLibrary': 'java8',
                     'hideGenerationTimestamp': 'true'
             ]
@@ -574,7 +616,10 @@ compileJava.dependsOn \
  swaggerSources.notifications472.code, \
  swaggerSources.auth480.code, \
  swaggerSources.api480.code, \
- swaggerSources.notifications480.code
+ swaggerSources.notifications480.code, \
+ swaggerSources.auth481.code, \
+ swaggerSources.api481.code, \
+ swaggerSources.notifications481.code
 
 sourceSets.main.java.srcDirs \
  "${swaggerSources.auth411.code.outputDir}/src/main/java", \
@@ -610,5 +655,8 @@ sourceSets.main.java.srcDirs \
  "${swaggerSources.notifications472.code.outputDir}/src/main/java", \
  "${swaggerSources.auth480.code.outputDir}/src/main/java", \
  "${swaggerSources.api480.code.outputDir}/src/main/java", \
- "${swaggerSources.notifications480.code.outputDir}/src/main/java"
+ "${swaggerSources.notifications480.code.outputDir}/src/main/java", \
+ "${swaggerSources.auth481.code.outputDir}/src/main/java", \
+ "${swaggerSources.api481.code.outputDir}/src/main/java", \
+ "${swaggerSources.notifications481.code.outputDir}/src/main/java"
 
