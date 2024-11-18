@@ -9,7 +9,7 @@ f.entry(
         title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_label(),
         field: 'fileName') {
     f.textbox(
-            default: 'sonar_giif_report_name.json')
+            default: 'sonar_giif_report.json')
 }
 
 f.advanced() {
