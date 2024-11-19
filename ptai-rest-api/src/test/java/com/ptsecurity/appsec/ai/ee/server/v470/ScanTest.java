@@ -7,6 +7,7 @@ import com.ptsecurity.appsec.ai.ee.server.integration.rest.Environment;
 import com.ptsecurity.appsec.ai.ee.server.v470.AbstractTest;
 import com.ptsecurity.appsec.ai.ee.server.v470.api.model.*;
 import com.ptsecurity.appsec.ai.ee.server.v470.helpers.ApiHelper;
+import com.ptsecurity.appsec.ai.ee.server.v480.api.model.LegacyProgrammingLanguageGroup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -122,7 +123,7 @@ public class ScanTest extends com.ptsecurity.appsec.ai.ee.server.v470.AbstractTe
         ScanResultModel scanResult = checkApiCall(() -> PROJECTS.apiProjectsProjectIdScanResultsScanResultIdGet(PROJECT_ID, SCAN_RESULT_ID));
         ScanSettingsModel scanSettings = checkApiCall(() -> PROJECTS.apiProjectsProjectIdScanSettingsScanSettingsIdGet(PROJECT_ID, scanResult.getSettingsId()));
         assert scanSettings.getProgrammingLanguages() != null;
-        assertEquals(scanSettings.getProgrammingLanguages().iterator().next(), ScanBrief.ScanSettings.Language.PHP);
+        assertEquals(scanSettings.getProgrammingLanguages().iterator().next(), LegacyProgrammingLanguageGroup.PHP);
     }
 
     @Test

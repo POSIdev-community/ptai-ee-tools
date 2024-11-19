@@ -10,5 +10,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @ExtendWith(EnvironmentExecutionCondition.class)
 @Retention(RUNTIME)
 public @interface Environment {
-    ScanBrief.ApiVersion[] enabledFor();
+    ScanBrief.ApiVersion[] enabledFor() default {};
+    ScanBrief.ApiVersion[] disabledFor() default {};
 }
