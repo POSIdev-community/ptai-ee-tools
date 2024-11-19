@@ -5,7 +5,9 @@ import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
+import org.jvnet.localizer.LocaleProvider;
 
+import java.util.Locale;
 import java.util.Map;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.TRUE;
@@ -47,5 +49,19 @@ public class ReportsHelper {
             res.append(ReportUtils.validateJsonReports(data.get(REPORTING_JSON_SETTINGS)));
 
         return res;
+    }
+
+    public static String getDefaultTemplate() {
+        return Reports.Locale.RU == getDefaultLocale()
+                ? "Отчет по результатам сканирования"
+                : "Scan results report";
+    }
+
+    private static com.ptsecurity.appsec.ai.ee.scan.reports.Reports.Locale getDefaultLocale() {
+        Locale locale = LocaleProvider.getLocale();
+        if (locale.getLanguage().equalsIgnoreCase(Reports.Locale.RU.name()))
+            return Reports.Locale.RU;
+        else
+            return Reports.Locale.EN;
     }
 }

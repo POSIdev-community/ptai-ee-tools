@@ -144,7 +144,7 @@ public class Defaults {
     /**
      * See {@link Params#REPORTING_REPORT_FILE}
      */
-    public static final String REPORTING_REPORT_FILE = EMPTY;
+    public static final String REPORTING_REPORT_FILE = "report.html";
 
     /**
      * See {@link Params#REPORTING_REPORT_TEMPLATE}
@@ -159,7 +159,7 @@ public class Defaults {
     /**
      * See {@link Params#REPORTING_RAWDATA_FILE}
      */
-    public static final String REPORTING_RAWDATA_FILE = EMPTY;
+    public static final String REPORTING_RAWDATA_FILE = "report.json";
 
     /**
      * See {@link Params#REPORTING_RAWDATA_FILTER}
@@ -169,7 +169,7 @@ public class Defaults {
     /**
      * See {@link Params#REPORTING_SARIF_FILE}
      */
-    public static final String REPORTING_SARIF_FILE = EMPTY;
+    public static final String REPORTING_SARIF_FILE = "sarif_report.json";
 
     /**
      * See {@link Params#REPORTING_SARIF_FILTER}
@@ -179,7 +179,7 @@ public class Defaults {
     /**
      * See {@link Params#REPORTING_SONARGIIF_FILE}
      */
-    public static final String REPORTING_SONARGIIF_FILE = EMPTY;
+    public static final String REPORTING_SONARGIIF_FILE = "sonar_giif_report.json";
 
     /**
      * See {@link Params#REPORTING_SONARGIIF_FILTER}

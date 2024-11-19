@@ -2,6 +2,8 @@
 <%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Hints" %>
 <%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Labels" %>
 <%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params" %>
+<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Defaults" %>
+<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.ReportsHelper" %>
 
 <c:set var="SERVER_SETTINGS_GLOBAL_URL" value="<%=Params.URL%>"/>
 <c:set var="LABEL_SERVER_SETTINGS_GLOBAL_URL" value="<%=Labels.URL%>"/>
@@ -99,10 +101,12 @@
 <c:set var="REPORTING_REPORT_FILE" value="<%=Params.REPORTING_REPORT_FILE%>"/>
 <c:set var="LABEL_REPORTING_REPORT_FILE" value="<%=Labels.REPORTING_REPORT_FILE%>"/>
 <c:set var="HINT_REPORTING_REPORT_FILE" value="<%=Hints.REPORTING_REPORT_FILE%>"/>
+<c:set var="DEFAULT_REPORTING_REPORT_FILE" value="<%=Defaults.REPORTING_REPORT_FILE%>"/>
 
 <c:set var="REPORTING_REPORT_TEMPLATE" value="<%=Params.REPORTING_REPORT_TEMPLATE%>"/>
 <c:set var="LABEL_REPORTING_REPORT_TEMPLATE" value="<%=Labels.REPORTING_REPORT_TEMPLATE%>"/>
 <c:set var="HINT_REPORTING_REPORT_TEMPLATE" value="<%=Hints.REPORTING_REPORT_TEMPLATE%>"/>
+<c:set var="DEFAULT_REPORTING_REPORT_TEMPLATE" value="<%=ReportsHelper.getDefaultTemplate()%>"/>
 
 <%-- Valid locale values and labels --%>
 <c:set var="REPORTING_LOCALE_ENGLISH" value="<%=Constants.REPORTING_LOCALE_ENGLISH%>"/>
@@ -122,6 +126,7 @@
 <c:set var="REPORTING_RAWDATA_FILE" value="<%=Params.REPORTING_RAWDATA_FILE%>"/>
 <c:set var="LABEL_REPORTING_RAWDATA_FILE" value="<%=Labels.REPORTING_RAWDATA_FILE%>"/>
 <c:set var="HINT_REPORTING_RAWDATA_FILE" value="<%=Hints.REPORTING_RAWDATA_FILE%>"/>
+<c:set var="DEFAULT_REPORTING_RAWDATA_FILE" value="<%=Defaults.REPORTING_RAWDATA_FILE%>"/>
 
 <c:set var="REPORTING_RAWDATA_FILTER" value="<%=Params.REPORTING_RAWDATA_FILTER%>"/>
 <c:set var="LABEL_REPORTING_RAWDATA_FILTER" value="<%=Labels.REPORTING_RAWDATA_FILTER%>"/>
@@ -135,6 +140,7 @@
 <c:set var="REPORTING_SARIF_FILE" value="<%=Params.REPORTING_SARIF_FILE%>"/>
 <c:set var="LABEL_REPORTING_SARIF_FILE" value="<%=Labels.REPORTING_SARIF_FILE%>"/>
 <c:set var="HINT_REPORTING_SARIF_FILE" value="<%=Hints.REPORTING_SARIF_FILE%>"/>
+<c:set var="DEFAULT_REPORTING_SARIF_FILE" value="<%=Defaults.REPORTING_SARIF_FILE%>"/>
 
 <c:set var="REPORTING_SARIF_FILTER" value="<%=Params.REPORTING_SARIF_FILTER%>"/>
 <c:set var="LABEL_REPORTING_SARIF_FILTER" value="<%=Labels.REPORTING_SARIF_FILTER%>"/>
@@ -148,6 +154,7 @@
 <c:set var="REPORTING_SONARGIIF_FILE" value="<%=Params.REPORTING_SONARGIIF_FILE%>"/>
 <c:set var="LABEL_REPORTING_SONARGIIF_FILE" value="<%=Labels.REPORTING_SONARGIIF_FILE%>"/>
 <c:set var="HINT_REPORTING_SONARGIIF_FILE" value="<%=Hints.REPORTING_SONARGIIF_FILE%>"/>
+<c:set var="DEFAULT_REPORTING_SONARGIIF_FILE" value="<%=Defaults.REPORTING_SONARGIIF_FILE%>"/>
 
 <c:set var="REPORTING_SONARGIIF_FILTER" value="<%=Params.REPORTING_SONARGIIF_FILTER%>"/>
 <c:set var="LABEL_REPORTING_SONARGIIF_FILTER" value="<%=Labels.REPORTING_SONARGIIF_FILTER%>"/>
@@ -198,3 +205,4 @@
 <c:set var="ADMIN_CONTROLLER_PATH" value="<%=Constants.ADMIN_CONTROLLER_PATH%>"/>
 <c:set var="TEST_CONTROLLER_PATH" value="<%=Constants.AST_CONTROLLER_PATH%>"/>
 
+<c:set var="FALSE" value="<%=Constants.FALSE%>"/>
