@@ -96,7 +96,7 @@ class JsonAstIT extends BaseCliIT {
     @Tag("scan")
     @Tag("integration")
     @DisplayName("Execute AST of new project with missing dependencies")
-    @Environment(disabledFor = { V480 })
+    @Environment(disabledFor = { V480, V481 })
     public void failNewProjectScanWithMissingDependencies() {
         ProjectTemplate project = randomClone(JAVA_APP01);
         project.getSettings().setDownloadDependencies(false);
