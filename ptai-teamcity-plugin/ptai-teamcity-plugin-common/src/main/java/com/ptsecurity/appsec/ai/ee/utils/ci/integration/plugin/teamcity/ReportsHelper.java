@@ -56,7 +56,7 @@ public class ReportsHelper {
                 : "Scan results report";
     }
 
-    private static com.ptsecurity.appsec.ai.ee.scan.reports.Reports.Locale getDefaultLocale() {
+    private static Reports.Locale getDefaultLocale() {
         String country = System.getProperty("user.country");
         String language = System.getProperty("user.language");
         Locale locale = new Locale(language, country);
