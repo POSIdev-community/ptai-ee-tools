@@ -378,7 +378,14 @@
             <label for="${REPORTING_REPORT_FILE}">${LABEL_REPORTING_REPORT_FILE}<l:star/></label>
         </th>
         <td class="noBorder dense">
-            <props:textProperty name="${REPORTING_REPORT_FILE}" className="longField"/>
+            <props:textProperty
+                    name="${REPORTING_REPORT_FILE}"
+                    value="${
+                        propertiesBean.properties[REPORTING_REPORT] == FALSE
+                        ? DEFAULT_REPORTING_REPORT_FILE
+                        : propertiesBean.properties[REPORTING_REPORT_FILE]
+                    }"
+                    className="longField"/>
             <span class="smallNote">${HINT_REPORTING_REPORT_FILE}</span>
         </td>
     </tr>
@@ -387,7 +394,14 @@
             <label for="${REPORTING_REPORT_TEMPLATE}">${LABEL_REPORTING_REPORT_TEMPLATE}<l:star/></label>
         </th>
         <td class="noBorder dense">
-            <props:textProperty name="${REPORTING_REPORT_TEMPLATE}" className="longField"/>
+            <props:textProperty
+                    name="${REPORTING_REPORT_TEMPLATE}"
+                    value="${
+                        propertiesBean.properties[REPORTING_REPORT] == FALSE
+                        ? DEFAULT_REPORTING_REPORT_TEMPLATE
+                        : propertiesBean.properties[REPORTING_REPORT_TEMPLATE]
+                    }"
+                    className="longField"/>
             <span class="smallNote">${HINT_REPORTING_REPORT_TEMPLATE}</span>
         </td>
     </tr>
@@ -422,7 +436,14 @@
             <label for="${REPORTING_RAWDATA_FILE}">${LABEL_REPORTING_RAWDATA_FILE}<l:star/></label>
         </th>
         <td class="noBorder dense">
-            <props:textProperty name="${REPORTING_RAWDATA_FILE}" className="longField"/>
+            <props:textProperty
+                    name="${REPORTING_RAWDATA_FILE}"
+                    value="${
+                        propertiesBean.properties[REPORTING_RAWDATA] == FALSE
+                        ? DEFAULT_REPORTING_RAWDATA_FILE
+                        : propertiesBean.properties[REPORTING_RAWDATA_FILE]
+                    }"
+                    className="longField"/>
             <span class="smallNote">${HINT_REPORTING_RAWDATA_FILE}</span>
         </td>
     </tr>
@@ -457,7 +478,14 @@
             <label for="${REPORTING_SARIF_FILE}">${LABEL_REPORTING_SARIF_FILE}<l:star/></label>
         </th>
         <td class="noBorder dense">
-            <props:textProperty name="${REPORTING_SARIF_FILE}" className="longField"/>
+            <props:textProperty
+                    name="${REPORTING_SARIF_FILE}"
+                    value="${
+                        propertiesBean.properties[REPORTING_SARIF] == FALSE
+                        ? DEFAULT_REPORTING_SARIF_FILE
+                        : propertiesBean.properties[REPORTING_SARIF_FILE]
+                    }"
+                    className="longField"/>
             <span class="smallNote">${HINT_REPORTING_SARIF_FILE}</span>
         </td>
     </tr>
@@ -493,7 +521,14 @@
             <label for="${REPORTING_SONARGIIF_FILE}">${LABEL_REPORTING_SONARGIIF_FILE}<l:star/></label>
         </th>
         <td class="noBorder dense">
-            <props:textProperty name="${REPORTING_SONARGIIF_FILE}" className="longField"/>
+            <props:textProperty
+                    name="${REPORTING_SONARGIIF_FILE}"
+                    value="${
+                        propertiesBean.properties[REPORTING_SONARGIIF] == FALSE
+                        ? DEFAULT_REPORTING_SONARGIIF_FILE
+                        : propertiesBean.properties[REPORTING_SONARGIIF_FILE]
+                    }"
+                    className="longField"/>
             <span class="smallNote">${HINT_REPORTING_SONARGIIF_FILE}</span>
         </td>
     </tr>
@@ -656,4 +691,3 @@
     </tr>
     </tbody>
 </l:settingsGroup>
-

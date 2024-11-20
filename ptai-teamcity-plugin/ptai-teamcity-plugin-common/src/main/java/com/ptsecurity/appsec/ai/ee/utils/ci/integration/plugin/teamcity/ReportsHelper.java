@@ -6,6 +6,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Locale;
 import java.util.Map;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.TRUE;
@@ -47,5 +48,21 @@ public class ReportsHelper {
             res.append(ReportUtils.validateJsonReports(data.get(REPORTING_JSON_SETTINGS)));
 
         return res;
+    }
+
+    public static String getDefaultTemplate() {
+        return Reports.Locale.RU == getDefaultLocale()
+                ? "Отчет по результатам сканирования"
+                : "Scan results report";
+    }
+
+    private static Reports.Locale getDefaultLocale() {
+        String country = System.getProperty("user.country");
+        String language = System.getProperty("user.language");
+        Locale locale = new Locale(language, country);
+        if (locale.getLanguage().equalsIgnoreCase(Reports.Locale.RU.name()))
+            return Reports.Locale.RU;
+        else
+            return Reports.Locale.EN;
     }
 }
