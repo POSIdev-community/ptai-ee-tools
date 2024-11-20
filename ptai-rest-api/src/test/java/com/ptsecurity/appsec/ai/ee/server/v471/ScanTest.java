@@ -120,7 +120,7 @@ public class ScanTest extends AbstractTest {
         ScanResultModel scanResult = checkApiCall(() -> PROJECTS.apiProjectsProjectIdScanResultsScanResultIdGet(PROJECT_ID, SCAN_RESULT_ID));
         ScanSettingsModel scanSettings = checkApiCall(() -> PROJECTS.apiProjectsProjectIdScanSettingsScanSettingsIdGet(PROJECT_ID, scanResult.getSettingsId()));
         assert scanSettings.getProgrammingLanguages() != null;
-        assertEquals(scanSettings.getProgrammingLanguages().iterator().next(), ScanBrief.ScanSettings.Language.PHP);
+        assertEquals(scanSettings.getProgrammingLanguages().iterator().next(), LegacyProgrammingLanguageGroup.PHP);
     }
 
     @Test

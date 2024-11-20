@@ -38,12 +38,15 @@ public interface ProjectTasks {
      * Setup new or existing project on PT AI server. Currently (2022.08.12) C# solution-based
      * projects require sources to be uploaded before solution file set so we need to pass
      * uploader lambda that will be executed between project creation and setting scan parameters
+     * This method marked {@code Deprecated} as it requires multiple AIPROJ version-dependent
+     * serialization and deserialization
      * @param jsonSettings
      * @param jsonPolicy
      * @param uploader
      * @return
      * @throws GenericException
      */
+    @Deprecated
     JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, @NonNull final Consumer<UUID> uploader) throws GenericException;
 
     void deleteProject(@NonNull final UUID id) throws GenericException;
