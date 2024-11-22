@@ -9,7 +9,7 @@ f.entry(
         title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_file_label(),
         field: 'fileName') {
     f.textbox(
-            default: 'sarif_report_name.json')
+            default: 'sarif_report.json')
 }
 
 f.advanced() {

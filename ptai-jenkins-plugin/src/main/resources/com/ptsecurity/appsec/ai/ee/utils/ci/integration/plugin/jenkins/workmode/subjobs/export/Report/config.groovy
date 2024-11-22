@@ -9,7 +9,7 @@ f.entry(
         title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_file_label(),
         field: 'fileName') {
     f.textbox(
-            default: 'report_name.html')
+            default: 'report.html')
 }
 
 f.entry(
