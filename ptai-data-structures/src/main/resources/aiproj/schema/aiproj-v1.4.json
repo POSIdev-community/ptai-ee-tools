@@ -646,6 +646,22 @@
         }
       }
     },
+    "ScaSettings": {
+      "type": ["object", "null"],
+      "title": "SCA scan options",
+      "additionalProperties": false,
+      "properties": {
+        "CustomParameters": {
+          "title": "Custom parameters",
+          "description": "Custom SCA kernel startup parameters",
+          "type": ["null", "string"]
+        },
+        "BuildDependenciesGraph": {
+          "title": "Build bependencies graph",
+          "type": ["null", "boolean"]
+        }
+      }
+    },
     "ProgrammingLanguages": {
       "title": "Active scanning languages",
       "type": "array",
@@ -686,7 +702,8 @@
           "Components",
           "BlackBox",
           "PatternMatching",
-          "StaticCodeAnalysis"
+          "StaticCodeAnalysis",
+          "SoftwareCompositionAnalysis"
         ]
       }
     },

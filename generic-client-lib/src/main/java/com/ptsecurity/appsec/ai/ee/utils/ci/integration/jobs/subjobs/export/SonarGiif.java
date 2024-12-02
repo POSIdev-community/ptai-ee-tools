@@ -217,12 +217,12 @@ public class SonarGiif extends Export {
             String message = scanResult.getI18n().get(issue.getIssueTypeKey()).get(EN).getTitle();
             SonarGiifReport.Issue.PrimaryLocation primaryLocation;
             BaseIssue.Type clazz = issue.getClazz();
-            if (BaseIssue.Type.SCA == clazz) {
-                ScaIssue scaIssue = (ScaIssue) issue;
+            if (BaseIssue.Type.FINGERPRINT == clazz) {
+                FingerprintIssue fingerprintIssue = (FingerprintIssue) issue;
                 // Set SCA issue location. That location is file-scope only and
                 // doesn't contain line and column numbers
                 primaryLocation = SonarGiifReport.Issue.PrimaryLocation.builder()
-                        .filePath(fixUri(scaIssue.getFile()))
+                        .filePath(fixUri(fingerprintIssue.getFile()))
                         .message(message)
                         .build();
             } else if (BaseIssue.Type.CONFIGURATION == clazz) {

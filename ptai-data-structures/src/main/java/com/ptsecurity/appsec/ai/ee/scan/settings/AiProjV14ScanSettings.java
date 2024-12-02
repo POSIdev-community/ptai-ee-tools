@@ -21,6 +21,7 @@ import java.util.*;
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule_.SOFTWARE_COMPOSITION_ANALYSIS;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -60,6 +61,7 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
         SCAN_MODULE_MAP.put(BLACK_BOX.value(), ScanModule.BLACKBOX);
         SCAN_MODULE_MAP.put(PATTERN_MATCHING.value(), ScanModule.PATTERNMATCHING);
         SCAN_MODULE_MAP.put(STATIC_CODE_ANALYSIS.value(), ScanModule.STATICCODEANALYSIS);
+        SCAN_MODULE_MAP.put(SOFTWARE_COMPOSITION_ANALYSIS.value(), ScanModule.SOFTWARECOMPOSITIONANALYSIS);
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.NONE.value(), DotNetSettings.ProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.SOLUTION.value(), DotNetSettings.ProjectType.SOLUTION);
@@ -292,6 +294,15 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
         return RubySettings.builder()
                 .usePublicAnalysisMethod(B("RubySettings.UsePublicAnalysisMethod"))
                 .customParameters(S("RubySettings.CustomParameters"))
+                .build();
+    }
+
+    @Override
+    public ScaSettings getScaSettings() {
+        if (N("ScaSettings").isMissingNode()) return null;
+        return ScaSettings.builder()
+                .customParameters(S("ScaSettings.CustomParameters"))
+                .buildDependenciesGraph(B("ScaSettings.BuildDependenciesGraph"))
                 .build();
     }
 

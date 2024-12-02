@@ -95,10 +95,13 @@ public class AiProjConverter {
         if (model == null) {
             model = new WhiteBoxSettingsModel();
         }
-        model.setStaticCodeAnalysisEnabled(settings.getScanModules().contains(UnifiedAiProjScanSettings.ScanModule.STATICCODEANALYSIS));
-        model.setPatternMatchingEnabled(settings.getScanModules().contains(UnifiedAiProjScanSettings.ScanModule.PATTERNMATCHING));
-        model.setSearchForConfigurationFlawsEnabled(settings.getScanModules().contains(UnifiedAiProjScanSettings.ScanModule.CONFIGURATION));
-        model.setSearchForVulnerableComponentsEnabled(settings.getScanModules().contains(UnifiedAiProjScanSettings.ScanModule.COMPONENTS));
+
+        Set<UnifiedAiProjScanSettings.ScanModule> scanModules = settings.getScanModules();
+        model.setStaticCodeAnalysisEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.STATICCODEANALYSIS));
+        model.setPatternMatchingEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.PATTERNMATCHING));
+        model.setSearchForConfigurationFlawsEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.CONFIGURATION));
+        model.setSearchForVulnerableComponentsEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.COMPONENTS));
+        model.setSearchWithScaEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.SOFTWARECOMPOSITIONANALYSIS));
 
         return model;
     }
@@ -327,6 +330,21 @@ public class AiProjConverter {
     }
 
     @SneakyThrows
+    public static ScaSettingsModel apply(
+            @NonNull final UnifiedAiProjScanSettings settings,
+            ScaSettingsModel model) {
+        if (model == null) {
+            model = new ScaSettingsModel();
+        }
+        if (null == settings.getScaSettings()) return model;
+        UnifiedAiProjScanSettings.ScaSettings scaSettings = settings.getScaSettings();
+
+        model.setLaunchParameters(scaSettings.getCustomParameters());
+        model.setBuildDependenciesGraph(scaSettings.getBuildDependenciesGraph());
+        return model;
+    }
+
+    @SneakyThrows
     public static MailingProjectSettingsModel apply(
             @NonNull final UnifiedAiProjScanSettings settings,
             MailingProjectSettingsModel model,
@@ -398,6 +416,7 @@ public class AiProjConverter {
         model.setRubySettings(apply(settings, model.getRubySettings()));
         model.setPmTaintSettings(apply(settings, model.getPmTaintSettings()));
         model.setPygrepSettings(apply(settings, model.getPygrepSettings()));
+        model.setScaSettings(apply(settings, model.getScaSettings()));
         model.setReportAfterScan(apply(settings, model.getReportAfterScan(), client));
 
         return model;

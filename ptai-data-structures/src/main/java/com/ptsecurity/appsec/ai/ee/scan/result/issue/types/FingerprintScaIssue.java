@@ -10,9 +10,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class ScaIssue extends BaseIssue {
-    protected String file;
-
+public class FingerprintScaIssue extends BaseIssue {
     @JsonProperty("licenses")
     private String[] licenses;
 

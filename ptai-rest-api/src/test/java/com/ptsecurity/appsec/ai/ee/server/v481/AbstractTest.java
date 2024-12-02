@@ -49,7 +49,8 @@ public abstract class AbstractTest extends BaseTest {
                         .searchForVulnerableComponentsEnabled(false)
                         .patternMatchingEnabled(false)
                         .staticCodeAnalysisEnabled(false)
-                        .searchForConfigurationFlawsEnabled(true))
+                        .searchForConfigurationFlawsEnabled(true)
+                        .searchWithScaEnabled(false))
                 .projectUrl(defaultProjectSettings.getProjectUrl())
                 .blackBox(defaultProjectSettings.getBlackBox())
                 .blackBoxEnabled(defaultProjectSettings.getBlackBoxEnabled());

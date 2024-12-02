@@ -62,4 +62,21 @@ class AiProjV14ScanSettingsTest {
 
         assertEquals("/somePath", pygrepSettings.rulesDirPath);
     }
+
+    @Test
+    @DisplayName("Load Sca scan settings")
+    public void ScaSettings() {
+        String data = getResourceString("json/scan/settings/v14/sca-settings.json");
+        @NonNull UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(data);
+        UnifiedAiProjScanSettings.ScaSettings scaSettings = settings.getScaSettings();
+
+        assertEquals(V14, settings.getVersion());
+        assertEquals("Sca", settings.getProjectName());
+        assertTrue(settings.getProgrammingLanguages().contains(PYTHON));
+
+        assertTrue(settings.getScanModules().contains(SOFTWARECOMPOSITIONANALYSIS));
+
+        assertEquals("-l python --log-level debug  --scan-all-files", scaSettings.customParameters);
+        assertEquals(true, scaSettings.buildDependenciesGraph);
+    }
 }

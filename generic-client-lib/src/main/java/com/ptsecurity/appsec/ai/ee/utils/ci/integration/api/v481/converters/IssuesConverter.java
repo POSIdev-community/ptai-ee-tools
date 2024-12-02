@@ -47,10 +47,12 @@ public class IssuesConverter {
         ISSUE_TYPE_MAP.put(IssueType.VULNERABILITY.name(), BaseIssue.Type.VULNERABILITY);
         ISSUE_TYPE_MAP.put(IssueType.WEAKNESS.name(), BaseIssue.Type.WEAKNESS);
         ISSUE_TYPE_MAP.put(IssueType.CONFIGURATION.name(), BaseIssue.Type.CONFIGURATION);
-        ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.SCA);
+        ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.FINGERPRINT);
         ISSUE_TYPE_MAP.put(IssueType.BLACKBOX.name(), BaseIssue.Type.BLACKBOX);
         ISSUE_TYPE_MAP.put(IssueType.YARAMATCH.name(), BaseIssue.Type.YARAMATCH);
         ISSUE_TYPE_MAP.put(IssueType.PYGREP.name(), BaseIssue.Type.PYGREP);
+        ISSUE_TYPE_MAP.put(IssueType.SCA.name(), BaseIssue.Type.SCA);
+        ISSUE_TYPE_MAP.put(IssueType.FINGERPRINTSCA.name(), BaseIssue.Type.FINGERPRINT_SCA);
 
         ISSUE_LEVEL_MAP.put(IssueLevel.NONE, BaseIssue.Level.NONE);
         ISSUE_LEVEL_MAP.put(IssueLevel.POTENTIAL, BaseIssue.Level.POTENTIAL);
@@ -244,7 +246,7 @@ public class IssuesConverter {
         destination.setSuspected(source.getIsSuspected());
         destination.setIsNew(source.getIsNew());
         // Do not set SCA issue type Id as there's "IssueDetected" in source type field
-        if (destination instanceof ScaIssue) return;
+        if (destination instanceof FingerprintIssue) return;
         destination.setTypeId(source.getType());
     }
 
@@ -309,17 +311,17 @@ public class IssuesConverter {
                             .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
                             .build());
         } else if (IssueType.FINGERPRINT == issueType) {
-            ScaIssue scaIssue = new ScaIssue();
+            FingerprintIssue fingerprintIssue = new FingerprintIssue();
             Objects.requireNonNull(issue.getVulnerableComponent(), "Empty vulnerable component for SCA issue");
-            scaIssue.setComponentName(issue.getVulnerableComponent().getComponent());
-            scaIssue.setComponentVersion(issue.getVulnerableComponent().getVersion());
-            scaIssue.setFile(issue.getSourceFile());
-            String fingerprintId = Objects.requireNonNull(scaIssue.getComponentName());
-            if (StringUtils.isNotEmpty(scaIssue.getComponentVersion()))
-                fingerprintId += " " + scaIssue.getComponentVersion();
-            scaIssue.setFingerprintId(fingerprintId);
-            scaIssue.setTypeId(fingerprintId);
-            baseIssue = scaIssue;
+            fingerprintIssue.setComponentName(issue.getVulnerableComponent().getComponent());
+            fingerprintIssue.setComponentVersion(issue.getVulnerableComponent().getVersion());
+            fingerprintIssue.setFile(issue.getSourceFile());
+            String fingerprintId = Objects.requireNonNull(fingerprintIssue.getComponentName());
+            if (StringUtils.isNotEmpty(fingerprintIssue.getComponentVersion()))
+                fingerprintId += " " + fingerprintIssue.getComponentVersion();
+            fingerprintIssue.setFingerprintId(fingerprintId);
+            fingerprintIssue.setTypeId(fingerprintId);
+            baseIssue = fingerprintIssue;
         } else if (IssueType.UNKNOWN == issueType) {
             baseIssue = new UnknownIssue();
         } else if (IssueType.VULNERABILITY == issueType) {
@@ -368,9 +370,13 @@ public class IssuesConverter {
         else if (IssueType.PYGREP == issueType) {
             // can't get info from  VulnerabilityModel and idk if it needs
             baseIssue = new PygrepIssue();
-        }
-
-        else {
+        } else if (IssueType.SCA == issueType) {
+            ScaIssue scaIssue = new ScaIssue();
+            scaIssue.setFile(issue.getSourceFile());
+            baseIssue = scaIssue;
+        } else if (IssueType.FINGERPRINTSCA == issueType) {
+            baseIssue = new FingerprintScaIssue();
+        } else {
             log.warn("Issue {} conversion failed", issue);
             return;
         }

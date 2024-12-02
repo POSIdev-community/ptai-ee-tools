@@ -35,12 +35,14 @@ public class BaseJsonChartDataModel {
 
         TYPE_COLORS.put(BaseIssue.Type.BLACKBOX, 0x5c86af);
         TYPE_COLORS.put(BaseIssue.Type.CONFIGURATION, LEVEL_COLORS.get(BaseIssue.Level.LOW));
-        TYPE_COLORS.put(BaseIssue.Type.SCA, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
+        TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
         TYPE_COLORS.put(BaseIssue.Type.UNKNOWN, LEVEL_COLORS.get(BaseIssue.Level.NONE));
         TYPE_COLORS.put(BaseIssue.Type.VULNERABILITY, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
         TYPE_COLORS.put(BaseIssue.Type.WEAKNESS, LEVEL_COLORS.get(BaseIssue.Level.POTENTIAL));
         TYPE_COLORS.put(BaseIssue.Type.YARAMATCH, 0xd89011);
         TYPE_COLORS.put(BaseIssue.Type.PYGREP, 0x810fc2);
+        TYPE_COLORS.put(BaseIssue.Type.SCA, 0x0fc0c2);
+        TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT_SCA, 0x190fc2);
 
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.AUTO_APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));

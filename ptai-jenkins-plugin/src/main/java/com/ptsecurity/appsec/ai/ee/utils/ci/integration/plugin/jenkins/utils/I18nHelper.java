@@ -32,12 +32,14 @@ public class I18nHelper {
 
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.BLACKBOX, Resources::i18n_misc_enums_vulnerability_clazz_blackbox);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.CONFIGURATION, Resources::i18n_misc_enums_vulnerability_clazz_configuration);
-        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.SCA, Resources::i18n_misc_enums_vulnerability_clazz_sca);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.FINGERPRINT, Resources::i18n_misc_enums_vulnerability_clazz_fingerprint);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.UNKNOWN, Resources::i18n_misc_enums_vulnerability_clazz_unknown);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.VULNERABILITY, Resources::i18n_misc_enums_vulnerability_clazz_vulnerability);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.WEAKNESS, Resources::i18n_misc_enums_vulnerability_clazz_weakness);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.YARAMATCH, Resources::i18n_misc_enums_vulnerability_clazz_yaramatch);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.PYGREP, Resources::i18n_misc_enums_vulnerability_clazz_pygrep);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.SCA, Resources::i18n_misc_enums_vulnerability_clazz_sca);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.FINGERPRINT_SCA, Resources::i18n_misc_enums_vulnerability_clazz_fingerprintsca);
 
         APPROVAL_STATE_SUPPLIER_MAP.put(BaseIssue.ApprovalState.APPROVAL, Resources::i18n_misc_enums_vulnerability_approval_confirmed);
         APPROVAL_STATE_SUPPLIER_MAP.put(BaseIssue.ApprovalState.AUTO_APPROVAL, Resources::i18n_misc_enums_vulnerability_approval_auto);

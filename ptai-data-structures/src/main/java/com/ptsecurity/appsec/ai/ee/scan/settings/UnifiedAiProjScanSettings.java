@@ -315,6 +315,7 @@ public abstract class UnifiedAiProjScanSettings {
         BLACKBOX("BlackBox"),
         PATTERNMATCHING("PatternMatching"),
         STATICCODEANALYSIS("StaticCodeAnalysis"),
+        SOFTWARECOMPOSITIONANALYSIS("SoftwareCompositionAnalysis"),
         @Deprecated
         DATAFLOWANALYSIS("DataFlowAnalysis"),
         @Deprecated
@@ -484,6 +485,19 @@ public abstract class UnifiedAiProjScanSettings {
     }
 
     public RubySettings getRubySettings() {
+        return null;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class ScaSettings {
+        protected String customParameters;
+        protected Boolean buildDependenciesGraph;
+    }
+
+    public ScaSettings getScaSettings() {
         return null;
     }
 
