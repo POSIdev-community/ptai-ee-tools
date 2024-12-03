@@ -36,7 +36,7 @@ public class ScanBriefDetailedTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Convert PT AI 4.1.1, 4.2.0, 4.3.0, 4.4.1, 4.5.0, 4.6.0, 4.7.0, 4.7.1, 4.7.2, 4.8.0, 4.8.1 scan results")
+    @DisplayName("Convert PT AI 4.1.1, 4.2.0, 4.3.0, 4.4.1, 4.5.0, 4.6.0, 4.7.0, 4.7.1, 4.7.2, 4.8.0, 4.8.1, 4.9.0 scan results")
     @SneakyThrows
     public void generateScanResults() {
         try (TempFile temp = TempFile.createFolder()) {
@@ -56,7 +56,7 @@ public class ScanBriefDetailedTest extends BaseTest {
                     // if want to fix need change resources generator generateRestApiDataStructures based on this versions
                     if (version == ScanBrief.ApiVersion.V470 || version == ScanBrief.ApiVersion.V471 ||
                             version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
-                            version == ScanBrief.ApiVersion.V481) {
+                            version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490) {
                         continue;
                     }
                     if (JAVA_OWASP_BENCHMARK == templateId) {
