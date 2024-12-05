@@ -234,6 +234,12 @@ public class SonarGiif extends Export {
             } else if (BaseIssue.Type.WEAKNESS == clazz) {
                 WeaknessIssue weaknessIssue = (WeaknessIssue) issue;
                 primaryLocation = pl(message, weaknessIssue.getVulnerableExpression());
+            } else if (BaseIssue.Type.SCA == clazz) {
+                ScaIssue scaIssue = (ScaIssue) issue;
+                primaryLocation = SonarGiifReport.Issue.PrimaryLocation.builder()
+                        .filePath(fixUri(scaIssue.getFile()))
+                        .message(message)
+                        .build();
             } else continue;
             result.getIssues().add(SonarGiifReport.Issue.builder()
                     .engineId("PTAI")

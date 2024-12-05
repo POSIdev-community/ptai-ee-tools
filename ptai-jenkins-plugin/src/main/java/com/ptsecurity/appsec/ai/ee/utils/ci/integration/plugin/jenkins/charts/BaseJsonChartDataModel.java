@@ -41,8 +41,8 @@ public class BaseJsonChartDataModel {
         TYPE_COLORS.put(BaseIssue.Type.WEAKNESS, LEVEL_COLORS.get(BaseIssue.Level.POTENTIAL));
         TYPE_COLORS.put(BaseIssue.Type.YARAMATCH, 0xd89011);
         TYPE_COLORS.put(BaseIssue.Type.PYGREP, 0x810fc2);
-        TYPE_COLORS.put(BaseIssue.Type.SCA, 0x0fc0c2);
-        TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT_SCA, 0x190fc2);
+        TYPE_COLORS.put(BaseIssue.Type.SCA, 0xa7ffd7);
+        TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT_SCA, 0xffb8ff);
 
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.AUTO_APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
