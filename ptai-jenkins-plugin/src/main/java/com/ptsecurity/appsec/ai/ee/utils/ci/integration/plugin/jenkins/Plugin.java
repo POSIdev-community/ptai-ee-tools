@@ -10,6 +10,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor.PluginDescriptor;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.exceptions.SettingsMustBeSetUpException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalconfig.Config;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
@@ -163,6 +164,11 @@ public class Plugin extends Builder implements SimpleBuildStep {
             if (FormValidation.Kind.ERROR == check.kind)
                 throw new AbortException(check.getMessage());
             UnifiedAiProjScanSettings settings = parseResult.getSettings();
+
+            if (settings == null) {
+                throw new SettingsMustBeSetUpException("The scanning settings of the PT AI plug-in must be set");
+            }
+
             log.trace("JSON-defined project settings before macro replacement is {}", settings.toJson());
             jsonSettings = BaseJsonHelper.replaceMacro(jsonSettings, (s -> Util.replaceMacro(s, buildInfo.getEnvVars())));
             log.trace("JSON-defined project settings after macro replacement is {}", jsonSettings);
