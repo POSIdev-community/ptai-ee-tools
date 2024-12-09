@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins;
 
+import com.ptsecurity.appsec.ai.ee.scan.errors.SettingsMustBeSetUpException;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
@@ -48,6 +49,7 @@ import java.util.*;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.ERROR;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.WARNING;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_empty;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @Slf4j
@@ -163,6 +165,11 @@ public class Plugin extends Builder implements SimpleBuildStep {
             if (FormValidation.Kind.ERROR == check.kind)
                 throw new AbortException(check.getMessage());
             UnifiedAiProjScanSettings settings = parseResult.getSettings();
+
+            if (settings == null) {
+                throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
+            }
+
             log.trace("JSON-defined project settings before macro replacement is {}", settings.toJson());
             jsonSettings = BaseJsonHelper.replaceMacro(jsonSettings, (s -> Util.replaceMacro(s, buildInfo.getEnvVars())));
             log.trace("JSON-defined project settings after macro replacement is {}", jsonSettings);
