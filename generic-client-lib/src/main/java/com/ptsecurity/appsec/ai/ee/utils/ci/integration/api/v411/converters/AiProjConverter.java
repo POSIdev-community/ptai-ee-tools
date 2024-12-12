@@ -79,7 +79,9 @@ public class AiProjConverter {
 
     protected static WhiteBoxSettingsModel apply(@NonNull final UnifiedAiProjScanSettings settings, @NonNull WhiteBoxSettingsModel model) {
         log.trace("Set base project whitebox settings");
-        model.setSearchForVulnerableSourceCodeEnabled(settings.getScanModules().contains(VULNERABLESOURCECODE));
+        model.setSearchForVulnerableSourceCodeEnabled(
+                settings.getScanModules().contains(UnifiedAiProjScanSettings.ScanModule.VULNERABLESOURCECODE)
+                        || settings.getScanModules().contains(UnifiedAiProjScanSettings.ScanModule.STATICCODEANALYSIS));
         model.setDataFlowAnalysisEnabled(settings.getScanModules().contains(DATAFLOWANALYSIS));
         model.setPatternMatchingEnabled(settings.getScanModules().contains(PATTERNMATCHING));
         model.setSearchForConfigurationFlawsEnabled(settings.getScanModules().contains(CONFIGURATION));

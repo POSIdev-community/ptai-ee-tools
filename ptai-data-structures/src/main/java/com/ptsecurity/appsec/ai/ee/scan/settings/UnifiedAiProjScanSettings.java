@@ -32,6 +32,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Accessors
 public abstract class UnifiedAiProjScanSettings {
     private static final List<NonValidationKeyword> NON_VALIDATION_KEYS = Collections.singletonList(new NonValidationKeyword("javaType"));
+
+    @Deprecated
     protected final ObjectNode rootNode;
 
     public UnifiedAiProjScanSettings(@NonNull final JsonNode jsonNode) {
@@ -39,14 +41,17 @@ public abstract class UnifiedAiProjScanSettings {
     }
 
     @SneakyThrows
+    @Deprecated
     public String toJson() {
         return createObjectMapper().writeValueAsString(rootNode);
     }
 
+    @Deprecated
     public Path serializeToFile() throws GenericException {
         return serializeToFile(TempFile.createFile().toPath());
     }
 
+    @Deprecated
     public Path serializeToFile(@NonNull final Path file) throws GenericException {
         CallHelper.call(() -> {
             String data = this.toJson();
@@ -57,6 +62,7 @@ public abstract class UnifiedAiProjScanSettings {
 
     @AllArgsConstructor
     @Getter
+    @Deprecated
     public static class JavaParametersParseResult {
         protected String prefixes;
         protected String other;
@@ -222,6 +228,14 @@ public abstract class UnifiedAiProjScanSettings {
         return result.getSettings();
     }
 
+    /**
+     * Method checks if specified JSON object does exist in settings. Method marked as deprecated
+     * as according to OOP's incapsulation paradigm there must be no opportunity to directly
+     * access object internals. Especially for data with different schema
+     * @param path Path to nested JSON object
+     * @return {@code True} if object exist
+     */
+    @Deprecated
     public Boolean hasPath(@NonNull final String path) {
         return !N(path).isMissingNode();
     }
@@ -308,8 +322,7 @@ public abstract class UnifiedAiProjScanSettings {
     public abstract UnifiedAiProjScanSettings setProgrammingLanguage(@NonNull final ScanBrief.ScanSettings.Language language);
 
     @RequiredArgsConstructor
-    public
-    enum ScanModule {
+    public enum ScanModule {
         CONFIGURATION("Configuration"),
         COMPONENTS("Components"),
         BLACKBOX("BlackBox"),
@@ -429,8 +442,18 @@ public abstract class UnifiedAiProjScanSettings {
         protected String customParameters;
     }
 
+    /**
+     * As there's no language-specific settings in legacy AIPROJ (except Java and C# ones) we need
+     * to synthesize those for PHP to make {@AiProjConverter} calls more uniform
+     * @return PhpSettings instance generated from language-agnostic settings
+     */
     public PhpSettings getPhpSettings() {
-        return null;
+        if (!getProgrammingLanguages().contains(ScanBrief.ScanSettings.Language.PHP)) return null;
+        return PhpSettings.builder()
+                .usePublicAnalysisMethod(isUsePublicAnalysisMethod())
+                .downloadDependencies(isDownloadDependencies())
+                .customParameters(getCustomParameters())
+                .build();
     }
 
     @Getter
