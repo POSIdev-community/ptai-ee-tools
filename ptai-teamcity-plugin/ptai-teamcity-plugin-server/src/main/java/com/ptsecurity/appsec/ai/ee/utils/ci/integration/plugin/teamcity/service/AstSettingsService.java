@@ -9,6 +9,8 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Defaults;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Labels;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
@@ -23,13 +25,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -334,6 +335,7 @@ public class AstSettingsService {
                 results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
             }
             // Check reporting settings
+            checkVulnerabilityFilterSettings(bean, results);
             Reports reports = bean.convert();
             reports = ReportUtils.validate(reports);
             new Factory().reportsTasks(client).check(reports);
@@ -341,5 +343,27 @@ public class AstSettingsService {
             log.warn(e.getDetailedMessage(), e);
             results.add(e);
         }
+    }
+
+    private static void checkVulnerabilityFilterSettings(
+            @NonNull final PropertiesBean bean,
+            @NonNull final VerificationResults results
+    ) {
+        Map<String, String> reportingFilters = new HashMap<>();
+        reportingFilters.put(REPORTING_REPORT, REPORTING_REPORT_FILTER);
+        reportingFilters.put(REPORTING_RAWDATA, REPORTING_RAWDATA_FILTER);
+        reportingFilters.put(REPORTING_SARIF, REPORTING_SARIF_FILTER);
+        reportingFilters.put(REPORTING_SONARGIIF, REPORTING_SONARGIIF_FILTER);
+
+        for (Map.Entry<String, String> entry : reportingFilters.entrySet()) {
+            if (TRUE.equals(bean.getProperties().get(entry.getKey()))) {
+                String filter = bean.getProperties().get(entry.getValue());
+                if (StringUtils.isNotEmpty(filter)) {
+                    ReportUtils.validateJsonFilter(filter);
+                }
+            }
+        }
+
+        results.add("JSON vulnerability filter settings are verified");
     }
 }

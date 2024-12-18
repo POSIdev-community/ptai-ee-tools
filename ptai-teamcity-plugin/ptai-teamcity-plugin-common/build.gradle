@@ -12,5 +12,6 @@ dependencies {
 }
 
 teamcity {
+    defaultRepositories = false
     version = teamcityVersion
 }
