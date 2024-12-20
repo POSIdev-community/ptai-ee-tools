@@ -36,7 +36,8 @@ public class ScanResultTest extends BaseTest {
             // if want to fix need change resources generator generateRestApiDataStructures based on this versions
             if (version == ScanBrief.ApiVersion.V470 || version == ScanBrief.ApiVersion.V471 ||
                     version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
-                    version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490) {
+                    version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490
+                    || version == ApiVersion.V491) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_OWASP_BRICKS);
@@ -66,7 +67,8 @@ public class ScanResultTest extends BaseTest {
             // if want to fix need change resources generator generateRestApiDataStructures based on this versions
             if (version == ScanBrief.ApiVersion.V470 || version == ScanBrief.ApiVersion.V471 ||
                     version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
-                    version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490) {
+                    version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490
+                    || version == ScanBrief.ApiVersion.V491) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_SMOKE);
