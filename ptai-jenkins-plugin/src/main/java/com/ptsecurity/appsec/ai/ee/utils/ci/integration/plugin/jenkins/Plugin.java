@@ -7,6 +7,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
@@ -217,6 +218,13 @@ public class Plugin extends Builder implements SimpleBuildStep {
             throw new AbortException(check.getMessage());
         // TODO: Implement scan node support when PT AI will be able to
         // String node = StringUtils.isEmpty(nodeName) ? Base.DEFAULT_PTAI_NODE_NAME : nodeName;
+
+        String ptAiToken = Optional.ofNullable(credentials.getToken())
+                .orElseThrow(() -> new PTAIClientTokenIsEmptyException(
+                        Resources.i18n_ast_settings_server_token_message_empty()))
+                .getPlainText();
+
+
         JenkinsAstJob job = JenkinsAstJob.builder()
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .settings(selectedScanSettingsUi ? null : jsonSettings)
@@ -226,7 +234,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .prefix(CONSOLE_PREFIX)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(serverUrl)
-                        .credentials(TokenCredentials.builder().token(credentials.getToken().getPlainText()).build())
+                        .credentials(TokenCredentials.builder().token(ptAiToken).build())
                         .caCertsPem(credentials.getServerCaCertificates())
                         .insecure(serverInsecure)
                         .build())
