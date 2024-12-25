@@ -155,7 +155,7 @@ public class Factory {
                 }
                 return client;
             } catch (CertificateException e) {
-                log.trace("No need to continue iterate through API client versions as there's certificate problem");
+                log.error("No need to continue iterate through API client versions as there's certificate problem");
                 throw new SSLCertificateTrustException(Resources.i18n_ast_settings_server_check_message_sslhandshakefailed());
             } catch (GenericException e) {
                 log.trace("PT AI server connection exception", e);
@@ -179,7 +179,7 @@ public class Factory {
                 } else if (e2 instanceof SSLHandshakeException) {
                     log.trace("No need to continue iterate through API client versions as there's SSL handshake problem");
                     throw GenericException.raise(
-                            Resources.i18n_ast_settings_server_check_message_sslhandshakefailed(), e2); //
+                            Resources.i18n_ast_settings_server_check_message_sslhandshakefailed(), e2);
                 } else if (HttpStatus.SC_NOT_FOUND == e.getCode()) {
                     log.trace("Continue iterate through API client versions as 404 response");
                 } else if (HttpStatus.SC_UNAUTHORIZED == e.getCode()) {
