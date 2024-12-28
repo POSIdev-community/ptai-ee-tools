@@ -94,6 +94,16 @@ public class Hints {
     public static final String REPORTING_REPORT_TEMPLATE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_template_hint();
 
     /**
+     * See {@link Params#REPORTING_REPORT_DATAFLOW}
+     */
+    public static final String REPORTING_REPORT_DATAFLOW = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_includedfd_hint();
+
+    /**
+     * See {@link Params#REPORTING_REPORT_SUMMARY}
+     */
+    public static final String REPORTING_REPORT_SUMMARY = Resources.i18n_ast_settings_mode_synchronous_subjob_export_jsonxml_includeglossary_hint();
+
+    /**
      * See {@link Params#REPORTING_REPORT_FILTER}
      */
     public static final String REPORTING_REPORT_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_hint();

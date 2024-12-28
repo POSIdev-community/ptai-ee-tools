@@ -153,6 +153,8 @@ public class AstSettingsService {
         res.fill(REPORTING_REPORT, request)
                 .fill(REPORTING_REPORT_FILE, request)
                 .fill(REPORTING_REPORT_TEMPLATE, request)
+                .fill(REPORTING_REPORT_DATAFLOW, request)
+                .fill(REPORTING_REPORT_SUMMARY, request)
                 .fill(REPORTING_REPORT_FILTER, request);
         res.fill(REPORTING_RAWDATA, request)
                 .fill(REPORTING_RAWDATA_FILE, request)

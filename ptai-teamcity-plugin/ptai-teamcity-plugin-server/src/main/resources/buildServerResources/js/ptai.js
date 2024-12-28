@@ -262,6 +262,14 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiReportingReportTemplate", elem);
             },
 
+            onPtaiReportingReportDataflowError: function (elem) {
+                this.handle("ptaiReportingReportDataflow", elem);
+            },
+
+            onPtaiReportingReportSummaryError: function (elem) {
+                this.handle("ptaiReportingReportSummary", elem);
+            },
+
             onPtaiReportingReportFilterError: function (elem) {
                 this.handle("ptaiReportingReportFilter", elem);
             },
