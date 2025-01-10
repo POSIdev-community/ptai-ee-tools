@@ -3,6 +3,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateTrustException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.VersionUnsupportedException;
@@ -23,10 +24,7 @@ import java.net.*;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -114,8 +112,12 @@ public class Factory {
 
             ClientCreateStage stage = ClientCreateStage.INIT;
             try {
-                if (!connectionSettings.isInsecure())
-                    CertificateHelper.readPem(connectionSettings.getCaCertsPem());
+                if (!connectionSettings.isInsecure()) {
+                    String caCertificate = Optional.ofNullable(connectionSettings.getCaCertsPem())
+                            .orElseThrow(() -> new SSLCertificateEmptyException(
+                                    Resources.i18n_ast_settings_server_ca_pem_message_parse_empty()));
+                    CertificateHelper.readPem(caCertificate);
+                }
 
                 AbstractApiClient client = onClass(clazz).create(connectionSettings.validate(), advancedSettings).get();
                 // Initialize all API clients with URL, timeouts, SSL settings etc.
