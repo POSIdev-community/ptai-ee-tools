@@ -114,7 +114,8 @@ public class Factory {
 
             ClientCreateStage stage = ClientCreateStage.INIT;
             try {
-                CertificateHelper.readPem(connectionSettings.getCaCertsPem());
+                if (!connectionSettings.isInsecure())
+                    CertificateHelper.readPem(connectionSettings.getCaCertsPem());
 
                 AbstractApiClient client = onClass(clazz).create(connectionSettings.validate(), advancedSettings).get();
                 // Initialize all API clients with URL, timeouts, SSL settings etc.

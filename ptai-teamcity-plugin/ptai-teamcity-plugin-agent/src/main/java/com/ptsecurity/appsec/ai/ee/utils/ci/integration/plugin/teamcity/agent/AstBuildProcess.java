@@ -163,7 +163,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
     @Override
     public void interrupt() {
         if (null != job)
-        job.stop();
+            job.stop();
         future.cancel(true);
     }
 

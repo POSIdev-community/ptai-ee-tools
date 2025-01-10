@@ -12,8 +12,6 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 
-import java.security.cert.CertificateException;
-
 @Getter
 @Setter
 @SuperBuilder
