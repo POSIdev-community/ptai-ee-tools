@@ -94,6 +94,16 @@ public class Params {
     public static final String REPORTING_REPORT = PARAM("ReportingReport");
 
     /**
+     * If this field value equals to {@link Constants#TRUE} a data flow diagram will be added to the HTML report
+     */
+    public static final String REPORTING_REPORT_DATAFLOW = PARAM("ReportingReportDataflow");
+
+    /**
+     * If this field value equals to {@link Constants#TRUE} a vulnerability summary will be added to the HTML report
+     */
+    public static final String REPORTING_REPORT_SUMMARY = PARAM("ReportingReportSummary");
+
+    /**
      * If this field value equals to {@link Constants#TRUE} then raw vulnerabilities data will be exported as
      * JSON file. User also need to provide output file name
      */
