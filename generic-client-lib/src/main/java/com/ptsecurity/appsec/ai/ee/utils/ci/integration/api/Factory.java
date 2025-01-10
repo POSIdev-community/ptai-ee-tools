@@ -113,9 +113,11 @@ public class Factory {
             ClientCreateStage stage = ClientCreateStage.INIT;
             try {
                 if (!connectionSettings.isInsecure()) {
-                    String caCertificate = Optional.ofNullable(connectionSettings.getCaCertsPem())
-                            .orElseThrow(() -> new SSLCertificateEmptyException(
-                                    Resources.i18n_ast_settings_server_ca_pem_message_parse_empty()));
+                    String caCertificate = connectionSettings.getCaCertsPem();
+                    if (caCertificate == null || caCertificate.isEmpty()) {
+                        throw new SSLCertificateEmptyException(
+                                Resources.i18n_ast_settings_server_ca_pem_message_parse_empty());
+                    }
                     CertificateHelper.readPem(caCertificate);
                 }
 
