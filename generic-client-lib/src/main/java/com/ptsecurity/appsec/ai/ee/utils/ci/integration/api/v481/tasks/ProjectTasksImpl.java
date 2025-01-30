@@ -185,7 +185,6 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
                 .pmTaintSettings(projectSettingsModel.getPmTaintSettings())
                 .pygrepSettings(projectSettingsModel.getPygrepSettings())
                 .pythonSettings(projectSettingsModel.getPythonSettings())
-                .scaSettings(projectSettingsModel.getScaSettings())
                 .rubySettings(projectSettingsModel.getRubySettings())
                 .reportAfterScan(projectSettingsModel.getReportAfterScan())
                 .skipGitIgnoreFiles(projectSettingsModel.getSkipGitIgnoreFiles())

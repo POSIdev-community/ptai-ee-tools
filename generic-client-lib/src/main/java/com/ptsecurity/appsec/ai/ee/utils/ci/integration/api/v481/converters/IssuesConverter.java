@@ -5,7 +5,6 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.server.v481.notifications.model.ProgrammingLanguageGroup;
 import com.ptsecurity.appsec.ai.ee.server.v481.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ServerVersionTasks;
 import lombok.NonNull;
@@ -50,9 +49,6 @@ public class IssuesConverter {
         ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.FINGERPRINT);
         ISSUE_TYPE_MAP.put(IssueType.BLACKBOX.name(), BaseIssue.Type.BLACKBOX);
         ISSUE_TYPE_MAP.put(IssueType.YARAMATCH.name(), BaseIssue.Type.YARAMATCH);
-        ISSUE_TYPE_MAP.put(IssueType.PYGREP.name(), BaseIssue.Type.PYGREP);
-        ISSUE_TYPE_MAP.put(IssueType.SCA.name(), BaseIssue.Type.SCA);
-        ISSUE_TYPE_MAP.put(IssueType.FINGERPRINTSCA.name(), BaseIssue.Type.FINGERPRINT_SCA);
 
         ISSUE_LEVEL_MAP.put(IssueLevel.NONE, BaseIssue.Level.NONE);
         ISSUE_LEVEL_MAP.put(IssueLevel.POTENTIAL, BaseIssue.Level.POTENTIAL);
@@ -367,16 +363,7 @@ public class IssuesConverter {
 
         } else if (IssueType.YARAMATCH == issueType)
             baseIssue = new YaraMatchIssue();
-        else if (IssueType.PYGREP == issueType) {
-            // can't get info from  VulnerabilityModel and idk if it needs
-            baseIssue = new PygrepIssue();
-        } else if (IssueType.SCA == issueType) {
-            ScaIssue scaIssue = new ScaIssue();
-            scaIssue.setFile(issue.getSourceFile());
-            baseIssue = scaIssue;
-        } else if (IssueType.FINGERPRINTSCA == issueType) {
-            baseIssue = new FingerprintScaIssue();
-        } else {
+        else {
             log.warn("Issue {} conversion failed", issue);
             return;
         }

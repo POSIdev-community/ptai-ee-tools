@@ -222,10 +222,23 @@ public class ReportsConverter {
         Reports.IssuesFilter.SourceType scanModule = uniqModel.getSourceType();
         if (scanModule != null) {
             if (scanModule.equals(Reports.IssuesFilter.SourceType.ALL)) {
-                scanModules.addAll(Arrays.asList(STATICCODEANALYSIS, BLACKBOX, CONFIGURATION, COMPONENTS, PATTERNMATCHING));
+                scanModules.addAll(Arrays.asList(
+                        STATICCODEANALYSIS,
+                        BLACKBOX,
+                        CONFIGURATION,
+                        COMPONENTS,
+                        PATTERNMATCHING,
+                        SOFTWARECOMPOSITIONANALYSIS
+                ));
             }
             if (scanModule.equals(Reports.IssuesFilter.SourceType.STATIC)) {
-                scanModules.addAll(Arrays.asList(STATICCODEANALYSIS, CONFIGURATION, COMPONENTS, PATTERNMATCHING));
+                scanModules.addAll(Arrays.asList(
+                        STATICCODEANALYSIS,
+                        CONFIGURATION,
+                        COMPONENTS,
+                        PATTERNMATCHING,
+                        SOFTWARECOMPOSITIONANALYSIS
+                ));
             }
             if (scanModule.equals(Reports.IssuesFilter.SourceType.BLACKBOX)) {
                 scanModules.add(BLACKBOX);
@@ -240,10 +253,23 @@ public class ReportsConverter {
             return;
         }
         if (sourceTypes.contains(Reports.IssuesFilter.SourceType.ALL)) {
-            scanModules.addAll(Arrays.asList(STATICCODEANALYSIS, BLACKBOX, CONFIGURATION, COMPONENTS, PATTERNMATCHING));
+            scanModules.addAll(Arrays.asList(
+                    STATICCODEANALYSIS,
+                    BLACKBOX,
+                    CONFIGURATION,
+                    COMPONENTS,
+                    PATTERNMATCHING,
+                    SOFTWARECOMPOSITIONANALYSIS
+            ));
         }
         if (sourceTypes.contains(Reports.IssuesFilter.SourceType.STATIC)) {
-            scanModules.addAll(Arrays.asList(STATICCODEANALYSIS, CONFIGURATION, COMPONENTS, PATTERNMATCHING));
+            scanModules.addAll(Arrays.asList(
+                    STATICCODEANALYSIS,
+                    CONFIGURATION,
+                    COMPONENTS,
+                    PATTERNMATCHING,
+                    SOFTWARECOMPOSITIONANALYSIS
+            ));
         }
         if (sourceTypes.contains(Reports.IssuesFilter.SourceType.BLACKBOX)) {
             scanModules.add(BLACKBOX);
@@ -280,7 +306,14 @@ public class ReportsConverter {
         defaultFilters.setLevelLow(true);
         defaultFilters.setLevelPotential(true);
 
-        defaultFilters.setScanModules(Arrays.asList(STATICCODEANALYSIS, BLACKBOX, PATTERNMATCHING, COMPONENTS, CONFIGURATION));
+        defaultFilters.setScanModules(Arrays.asList(
+                STATICCODEANALYSIS,
+                BLACKBOX,
+                PATTERNMATCHING,
+                COMPONENTS,
+                CONFIGURATION,
+                SOFTWARECOMPOSITIONANALYSIS
+        ));
         defaultFilters.setLanguages(new ArrayList<>());
 
         defaultFilters.setStatusConfirmed(true);

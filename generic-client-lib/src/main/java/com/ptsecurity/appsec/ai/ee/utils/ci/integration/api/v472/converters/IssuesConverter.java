@@ -5,7 +5,6 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.server.v470.notifications.model.ProgrammingLanguageLicence;
 import com.ptsecurity.appsec.ai.ee.server.v472.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ServerVersionTasks;
 import lombok.NonNull;
@@ -32,7 +31,7 @@ public class IssuesConverter {
     private static final Map<ScanMode, VulnerabilityIssue.ScanMode> SCAN_MODE_MAP = new HashMap<>();
     private static final Map<PolicyState, Policy.State> POLICY_STATE_MAP = new HashMap<>();
     private static final Map<LegacyProgrammingLanguageGroup, ScanResult.ScanSettings.Language> LANGUAGE_MAP = new HashMap<>();
-    private static final Map<ProgrammingLanguageLicence, ScanBrief.ScanSettings.Language> LANGUAGE_LICENSE_MAP = new HashMap<>();
+    private static final Map<ProgrammingLanguageGroup, ScanBrief.ScanSettings.Language> LANGUAGE_LICENSE_MAP = new HashMap<>();
     private static final Map<Stage, ScanResult.State> STATE_MAP = new HashMap<>();
     private static final Map<ScanModuleType, ScanBrief.ScanSettings.Engine> SCAN_MODULE_MAP = new HashMap<>();
 
@@ -83,19 +82,19 @@ public class IssuesConverter {
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.RUBY, ScanResult.ScanSettings.Language.RUBY);
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
 
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.JAVA, ScanResult.ScanSettings.Language.JAVA);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.PHP, ScanResult.ScanSettings.Language.PHP);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.CSHARP, ScanResult.ScanSettings.Language.CSHARP);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.VB, ScanResult.ScanSettings.Language.VB);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.GO, ScanResult.ScanSettings.Language.GO);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.CANDCPLUSPLUS, ScanResult.ScanSettings.Language.CPP);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.PYTHON, ScanResult.ScanSettings.Language.PYTHON);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.SQL, ScanResult.ScanSettings.Language.SQL);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.JAVASCRIPT, ScanResult.ScanSettings.Language.JAVASCRIPT);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.KOTLIN, ScanResult.ScanSettings.Language.KOTLIN);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.SWIFT, ScanResult.ScanSettings.Language.SWIFT);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.RUBY, ScanResult.ScanSettings.Language.RUBY);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.JAVA, ScanResult.ScanSettings.Language.JAVA);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.PHP, ScanResult.ScanSettings.Language.PHP);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.CSHARP, ScanResult.ScanSettings.Language.CSHARP);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.VB, ScanResult.ScanSettings.Language.VB);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.GO, ScanResult.ScanSettings.Language.GO);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.CANDCPLUSPLUS, ScanResult.ScanSettings.Language.CPP);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.PYTHON, ScanResult.ScanSettings.Language.PYTHON);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.SQL, ScanResult.ScanSettings.Language.SQL);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.JAVASCRIPT, ScanResult.ScanSettings.Language.JAVASCRIPT);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.KOTLIN, ScanResult.ScanSettings.Language.KOTLIN);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.SWIFT, ScanResult.ScanSettings.Language.SWIFT);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.RUBY, ScanResult.ScanSettings.Language.RUBY);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
 
         STATE_MAP.put(Stage.ABORTED, ScanResult.State.ABORTED);
         STATE_MAP.put(Stage.FAILED, ScanResult.State.FAILED);

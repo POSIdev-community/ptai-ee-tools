@@ -20,8 +20,7 @@ import java.util.*;
 
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule_.SOFTWARE_COMPOSITION_ANALYSIS;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule_.*;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
