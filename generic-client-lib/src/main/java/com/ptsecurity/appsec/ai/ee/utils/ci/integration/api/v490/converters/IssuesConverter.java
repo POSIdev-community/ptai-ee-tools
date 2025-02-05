@@ -49,6 +49,7 @@ public class IssuesConverter {
         ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.FINGERPRINT);
         ISSUE_TYPE_MAP.put(IssueType.BLACKBOX.name(), BaseIssue.Type.BLACKBOX);
         ISSUE_TYPE_MAP.put(IssueType.YARAMATCH.name(), BaseIssue.Type.YARAMATCH);
+        ISSUE_TYPE_MAP.put(IssueType.PYGREP.name(), BaseIssue.Type.PYGREP);
 
         ISSUE_LEVEL_MAP.put(IssueLevel.NONE, BaseIssue.Level.NONE);
         ISSUE_LEVEL_MAP.put(IssueLevel.POTENTIAL, BaseIssue.Level.POTENTIAL);
@@ -362,7 +363,10 @@ public class IssuesConverter {
 
         } else if (IssueType.YARAMATCH == issueType)
             baseIssue = new YaraMatchIssue();
-        else {
+        else if (IssueType.PYGREP == issueType) {
+            // can't get info from  VulnerabilityModel and idk if it needs
+            baseIssue = new PygrepIssue();
+        } else {
             log.warn("Issue {} conversion failed", issue);
             return;
         }
