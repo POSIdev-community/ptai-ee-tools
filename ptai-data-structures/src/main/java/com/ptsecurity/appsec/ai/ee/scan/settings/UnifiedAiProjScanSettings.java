@@ -487,6 +487,30 @@ public abstract class UnifiedAiProjScanSettings {
         return null;
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class Tags {
+        protected List<TagEntity> tags;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class TagEntity {
+        @RequiredArgsConstructor
+        public enum TagType {
+            OPERATINGSYSTEM,
+            REPO,
+            BRANCH,
+        }
+
+        protected TagType type;
+        protected String value;
+    }
+
     @NonNull
     public abstract Boolean isSkipGitIgnoreFiles();
     @NonNull

@@ -103,7 +103,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         ScanResultModel result = scanResults.stream()
                 .filter(r -> null != r.getProgress())
                 .filter(r -> Stage.DONE.equals(r.getProgress().getStage()))
-                .sorted(Comparator.comparing(r -> LocalDateTime.parse(((ScanResultModel) r).getScanDate(), formatter)).reversed())
+                .sorted(Comparator.comparing(r -> LocalDateTime.parse(((ScanResultModel) r).getScanDate().toString(), formatter)).reversed())
                 .findAny()
                 .orElseThrow(() -> GenericException.raise("Project finished scan results are not found", new IllegalArgumentException(id.toString())));
         assert result.getId() != null;
