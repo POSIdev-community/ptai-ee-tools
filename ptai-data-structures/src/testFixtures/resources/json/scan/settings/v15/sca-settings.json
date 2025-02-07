@@ -1,6 +1,6 @@
 {
-  "$schema": "https://json.schemastore.org/aiproj-1.4.json",
-  "Version": "1.4",
+  "$schema": "https://json.schemastore.org/aiproj-1.5.json",
+  "Version": "1.5",
   "ProjectName": "Sca",
   "ProgrammingLanguages": ["Python"],
   "ScanModules": [

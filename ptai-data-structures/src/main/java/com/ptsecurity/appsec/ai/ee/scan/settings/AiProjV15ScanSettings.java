@@ -1,5 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.networknt.schema.ValidationMessage;
@@ -12,7 +14,6 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
 import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,13 +21,13 @@ import java.util.*;
 
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule__.*;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Slf4j
-public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
+public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
     private static final Map<String, ScanBrief.ScanSettings.Language> PROGRAMMING_LANGUAGE_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
     private static final Map<String, ScanModule> SCAN_MODULE_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
     private static final Map<String, DotNetSettings.ProjectType> DOTNET_PROJECT_TYPE_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
@@ -60,6 +61,7 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
         SCAN_MODULE_MAP.put(BLACK_BOX.value(), ScanModule.BLACKBOX);
         SCAN_MODULE_MAP.put(PATTERN_MATCHING.value(), ScanModule.PATTERNMATCHING);
         SCAN_MODULE_MAP.put(STATIC_CODE_ANALYSIS.value(), ScanModule.STATICCODEANALYSIS);
+        SCAN_MODULE_MAP.put(SOFTWARE_COMPOSITION_ANALYSIS.value(), ScanModule.SOFTWARECOMPOSITIONANALYSIS);
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.NONE.value(), DotNetSettings.ProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.SOLUTION.value(), DotNetSettings.ProjectType.SOLUTION);
@@ -95,13 +97,13 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
         BLACKBOX_FORM_AUTH_DETECTION_MAP.put(AuthFormDetectionType.MANUAL.value(), DetectionType.MANUAL);
     }
 
-    public AiProjV14ScanSettings(@NonNull final JsonNode rootNode) {
+    public AiProjV15ScanSettings(@NonNull final JsonNode rootNode) {
         super(rootNode);
     }
 
     @Override
     public @NonNull String getJsonSchema() {
-        return ResourcesHelper.getResourceString("aiproj/schema/aiproj-v1.4.json");
+        return ResourcesHelper.getResourceString("aiproj/schema/aiproj-v1.5.json");
     }
 
     @Override
@@ -122,7 +124,7 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public Version getVersion() {
-        return Version.V14;
+        return Version.V15;
     }
 
     @Override
@@ -132,7 +134,7 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull ScanBrief.ScanSettings.Language getProgrammingLanguage() {
-        log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.4");
+        log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.5");
         return this.getProgrammingLanguages().iterator().next();
     }
 
@@ -182,13 +184,13 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public String getCustomParameters() {
-        log.trace("No common CustomParameters flag support for AIPROJ schema v.1.4");
+        log.trace("No common CustomParameters flag support for AIPROJ schema v.1.5");
         return null;
     }
 
     @Override
     public UnifiedAiProjScanSettings setCustomParameters(String parameters) {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.4");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.5");
         return this;
     }
 
@@ -296,6 +298,15 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    public ScaSettings getScaSettings() {
+        if (N("ScaSettings").isMissingNode()) return null;
+        return ScaSettings.builder()
+                .customParameters(S("ScaSettings.CustomParameters"))
+                .buildDependenciesGraph(B("ScaSettings.BuildDependenciesGraph"))
+                .build();
+    }
+
+    @Override
     public PygrepSettings getPyGrepSettings() {
         if (N("PygrepSettings").isMissingNode()) return null;
         return PygrepSettings.builder()
@@ -311,13 +322,13 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUsePublicAnalysisMethod() {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.4");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.5");
         return false;
     }
 
     @Override
     public UnifiedAiProjScanSettings setUsePublicAnalysisMethod(@NonNull Boolean value) {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.4");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.5");
         return this;
     }
 
@@ -333,7 +344,7 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUseCustomYaraRules() {
-        log.trace("No custom SAST rules support for AIPROJ schema v.1.4");
+        log.trace("No custom SAST rules support for AIPROJ schema v.1.5");
         return false;
     }
 
@@ -344,13 +355,13 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isDownloadDependencies() {
-        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.4");
+        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.5");
         return false;
     }
 
     @Override
     public UnifiedAiProjScanSettings setDownloadDependencies(@NonNull Boolean value) {
-        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.4");
+        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.5");
         return this;
     }
 
