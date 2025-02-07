@@ -1050,6 +1050,7 @@ components:
         - SCAN_TYPE_IS_NOT_FULL
         - ISSUE_TRACKER_CONNECTION_NOT_FOUND
         - ISSUE_TRACKER_CONNECTION_SETTINGS_NOT_SET
+        - ISSUE_TRACKER_CONNECTION_FAILED
         - ISSUE_TRACKER_SETTINGS_ID_NOT_SET
         - ISSUE_TRACKER_CREDENTIALS_NOT_SET
         - ISSUE_TRACKER_HOST_IS_INCORRECT
@@ -1267,6 +1268,8 @@ components:
         - BlackBox
         - YaraMatch
         - Pygrep
+        - Sca
+        - FingerprintSca
         - Slither
       type: string
     IssueUpdatedInfoModel:
@@ -1378,6 +1381,7 @@ components:
         - Go
         - Pygrep
         - Slither
+        - Sca
       type: string
     ScanProgressModel:
       type: object

@@ -2913,7 +2913,7 @@ paths:
       summary: Get projects with high vulnerabilities statistic
       responses:
         '200':
-          description: Returns projects with high vulnerabilities statistic
+          description: OK
           content:
             application/json:
               schema:
@@ -2941,7 +2941,7 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Returns project with high vulnerabilities statistic
+          description: OK
           content:
             application/json:
               schema:
@@ -6167,6 +6167,42 @@ paths:
                 $ref: '#/components/schemas/ApiErrorModel'
         '401':
           description: Unauthorized
+  '/api/store/{projectId}/graphs/{scanResultId}':
+    get:
+      tags:
+        - Store
+      summary: Download scan graph
+      parameters:
+        - name: projectId
+          in: path
+          description: Project id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: scanResultId
+          in: path
+          description: Scan result id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
   '/api/store/{projectId}/logs/{scanResultId}':
     get:
       tags:
@@ -6671,6 +6707,7 @@ components:
         - SCAN_TYPE_IS_NOT_FULL
         - ISSUE_TRACKER_CONNECTION_NOT_FOUND
         - ISSUE_TRACKER_CONNECTION_SETTINGS_NOT_SET
+        - ISSUE_TRACKER_CONNECTION_FAILED
         - ISSUE_TRACKER_SETTINGS_ID_NOT_SET
         - ISSUE_TRACKER_CREDENTIALS_NOT_SET
         - ISSUE_TRACKER_HOST_IS_INCORRECT
@@ -7290,6 +7327,11 @@ components:
         baseScore:
           type: string
           nullable: true
+        version:
+          type: string
+          nullable: true
+        severity:
+          $ref: '#/components/schemas/IssueLevel'
       additionalProperties: false
     DataFormat:
       enum:
@@ -7372,6 +7414,8 @@ components:
           $ref: '#/components/schemas/GoSettingsModel'
         pygrepSettings:
           $ref: '#/components/schemas/PygrepSettingsModel'
+        scaSettings:
+          $ref: '#/components/schemas/ScaSettingsModel'
         id:
           type: string
           format: uuid
@@ -7949,6 +7993,8 @@ components:
         - BlackBox
         - YaraMatch
         - Pygrep
+        - Sca
+        - FingerprintSca
         - Slither
       type: string
     JavaScriptSettingsModel:
@@ -8838,6 +8884,8 @@ components:
           $ref: '#/components/schemas/RubySettingsModel'
         pygrepSettings:
           $ref: '#/components/schemas/PygrepSettingsModel'
+        scaSettings:
+          $ref: '#/components/schemas/ScaSettingsModel'
         reportAfterScan:
           $ref: '#/components/schemas/MailingProjectSettingsModel'
         skipGitIgnoreFiles:
@@ -8884,6 +8932,8 @@ components:
           $ref: '#/components/schemas/RubySettingsModel'
         pygrepSettings:
           $ref: '#/components/schemas/PygrepSettingsModel'
+        scaSettings:
+          $ref: '#/components/schemas/ScaSettingsModel'
         reportAfterScan:
           $ref: '#/components/schemas/MailingProjectSettingsModel'
         skipGitIgnoreFiles:
@@ -9067,6 +9117,35 @@ components:
         - Socks4
         - Socks5
       type: string
+    PtOsvModel:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        sources:
+          type: array
+          items:
+            type: string
+          nullable: true
+        cwes:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+        cvssItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CvssModel'
+          nullable: true
+        descriptionMarkdown:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+      additionalProperties: false
     PygrepSettingsModel:
       type: object
       properties:
@@ -9452,6 +9531,7 @@ components:
         - Go
         - Pygrep
         - Slither
+        - Sca
       type: string
     ScanEnvironmentModel:
       type: object
@@ -9498,6 +9578,7 @@ components:
         - Configuration
         - BlackBox
         - StaticCodeAnalysis
+        - SoftwareCompositionAnalysis
       type: string
     ScanProgressModel:
       type: object
@@ -9584,6 +9665,8 @@ components:
           nullable: true
         scanAgentInfo:
           $ref: '#/components/schemas/ScanAgentInfoModel'
+        hasDependencyGraph:
+          type: boolean
       additionalProperties: false
     ScanScope:
       enum:
@@ -9697,6 +9780,8 @@ components:
           $ref: '#/components/schemas/RubySettingsModel'
         pygrepSettings:
           $ref: '#/components/schemas/PygrepSettingsModel'
+        scaSettings:
+          $ref: '#/components/schemas/ScaSettingsModel'
         sourceSettings:
           $ref: '#/components/schemas/SourceScanSettingsModel'
         emailRecipients:
@@ -9767,6 +9852,15 @@ components:
         - Full
         - Incremental
       type: string
+    ScaSettingsModel:
+      type: object
+      properties:
+        launchParameters:
+          type: string
+          nullable: true
+        buildDependenciesGraph:
+          type: boolean
+      additionalProperties: false
     SecurityPoliciesModel:
       type: object
       properties:
@@ -10272,6 +10366,8 @@ components:
           $ref: '#/components/schemas/VulnerableConfigurationModel'
         vulnerableComponent:
           $ref: '#/components/schemas/VulnerableComponentFullModel'
+        vulnerableScaComponent:
+          $ref: '#/components/schemas/VulnerableScaComponentModel'
         yaraMatch:
           $ref: '#/components/schemas/YaraMatchModel'
         blackBox:
@@ -10363,6 +10459,8 @@ components:
           nullable: true
         vulnerableComponent:
           $ref: '#/components/schemas/VulnerableComponentModel'
+        vulnerableScaComponent:
+          $ref: '#/components/schemas/VulnerableComponentModel'
         hasAdditionalConditions:
           type: boolean
         language:
@@ -10428,6 +10526,26 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    VulnerableScaComponentModel:
+      type: object
+      properties:
+        licenses:
+          type: array
+          items:
+            type: string
+          nullable: true
+        ptOsvs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PtOsvModel'
+          nullable: true
+        component:
+          type: string
+          nullable: true
+        version:
+          type: string
+          nullable: true
+      additionalProperties: false
     WafPatchGenerateModel:
       type: object
       properties:
@@ -10454,6 +10572,8 @@ components:
         searchForVulnerableComponentsEnabled:
           type: boolean
         searchForConfigurationFlawsEnabled:
+          type: boolean
+        searchWithScaEnabled:
           type: boolean
       additionalProperties: false
     YaraMatchModel:

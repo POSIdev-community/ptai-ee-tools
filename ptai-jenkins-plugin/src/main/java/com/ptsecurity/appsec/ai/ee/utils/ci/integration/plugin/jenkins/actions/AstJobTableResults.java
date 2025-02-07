@@ -1,5 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue;
@@ -51,9 +53,21 @@ public class AstJobTableResults implements Action {
                 scanBriefDetailed = ScanDataPacked.unpackData(scanDataPacked.getData(), ScanBriefDetailed.class);
             } while (false);
 
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+            ScanBriefDetailed scanBriefDetailedCopy = objectMapper.copy().convertValue(scanBriefDetailed, ScanBriefDetailed.class);
+
+            for (ScanBriefDetailed.Details.ChartData.BaseIssueCount issue
+                    : scanBriefDetailedCopy.getDetails().getChartData().getBaseIssueDistributionData()) {
+                if (issue.getClazz() == BaseIssue.Type.FINGERPRINT_SCA) {
+                    issue.setClazz(BaseIssue.Type.FINGERPRINT);
+                }
+            }
+
             scanResults.add(AstJobMultipleResults.BuildScanBriefDetailed.builder()
                     .buildNumber(build.getNumber())
-                    .scanBriefDetailed(scanBriefDetailed)
+                    .scanBriefDetailed(scanBriefDetailedCopy)
                     .build());
             // Only chart the last N builds (max)
             count++;

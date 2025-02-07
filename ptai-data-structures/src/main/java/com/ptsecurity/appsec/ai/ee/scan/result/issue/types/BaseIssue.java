@@ -26,12 +26,14 @@ import java.util.Map;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = BlackBoxIssue.class, name = "BLACKBOX"),
         @JsonSubTypes.Type(value = ConfigurationIssue.class, name = "CONFIGURATION"),
-        @JsonSubTypes.Type(value = ScaIssue.class, name = "SCA"),
+        @JsonSubTypes.Type(value = FingerprintIssue.class, name = "FINGERPRINT"),
         @JsonSubTypes.Type(value = UnknownIssue.class, name = "UNKNOWN"),
         @JsonSubTypes.Type(value = VulnerabilityIssue.class, name = "VULNERABILITY"),
         @JsonSubTypes.Type(value = WeaknessIssue.class, name = "WEAKNESS"),
         @JsonSubTypes.Type(value = YaraMatchIssue.class, name = "YARAMATCH"),
-        @JsonSubTypes.Type(value = PygrepIssue.class, name = "PYGREP")
+        @JsonSubTypes.Type(value = PygrepIssue.class, name = "PYGREP"),
+        @JsonSubTypes.Type(value = ScaIssue.class, name = "SCA"),
+        @JsonSubTypes.Type(value = FingerprintScaIssue.class, name = "FINGERPRINT_SCA")
 })
 public abstract class BaseIssue {
     public static Map<Class<? extends BaseIssue>, Type> TYPES = new HashMap<>();
@@ -40,11 +42,13 @@ public abstract class BaseIssue {
         TYPES.put(UnknownIssue.class, Type.UNKNOWN);
         TYPES.put(BlackBoxIssue.class, Type.BLACKBOX);
         TYPES.put(ConfigurationIssue.class, Type.CONFIGURATION);
-        TYPES.put(ScaIssue.class, Type.SCA);
+        TYPES.put(FingerprintIssue.class, Type.FINGERPRINT);
         TYPES.put(WeaknessIssue.class, Type.WEAKNESS);
         TYPES.put(VulnerabilityIssue.class, Type.VULNERABILITY);
         TYPES.put(YaraMatchIssue.class, Type.YARAMATCH);
         TYPES.put(PygrepIssue.class, Type.PYGREP);
+        TYPES.put(ScaIssue.class, Type.SCA);
+        TYPES.put(FingerprintScaIssue.class, Type.FINGERPRINT_SCA);
     }
 
     /**
@@ -66,7 +70,7 @@ public abstract class BaseIssue {
     protected String typeId;
 
     public enum Type {
-        VULNERABILITY, WEAKNESS, SCA, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, UNKNOWN
+        VULNERABILITY, WEAKNESS, FINGERPRINT, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, SCA, FINGERPRINT_SCA, UNKNOWN
     }
 
     public static String getIssueTypeKey(@NonNull final BaseIssue issue) {
