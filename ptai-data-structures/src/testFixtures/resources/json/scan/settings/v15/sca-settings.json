@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.5.json",
+  "Version": "1.5",
+  "ProjectName": "Sca",
+  "ProgrammingLanguages": ["Python"],
+  "ScanModules": [
+    "SoftwareCompositionAnalysis"
+  ],
+  "ScaSettings": {
+    "CustomParameters": "-l python --log-level debug  --scan-all-files",
+    "BuildDependenciesGraph": true
+  }
+}

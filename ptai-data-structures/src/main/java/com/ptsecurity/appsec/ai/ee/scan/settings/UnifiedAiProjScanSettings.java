@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV13.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV14.Version._1_4;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV15.Version._1_5;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_invalid;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
@@ -131,6 +132,8 @@ public abstract class UnifiedAiProjScanSettings {
                 settings = (root.path("ScanModules").isMissingNode())
                         ? new AiProjLegacyScanSettings(root)
                         : new AiProjV10ScanSettings(root);
+            else if (_1_5.value().equals(versionNode.textValue()))
+                settings = new AiProjV15ScanSettings(root);
             else if (_1_4.value().equals(versionNode.textValue()))
                 settings = new AiProjV14ScanSettings(root);
             else if (_1_3.value().equals(versionNode.textValue()))
@@ -280,7 +283,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15 }
     public abstract Version getVersion();
 
     /**
@@ -315,6 +318,7 @@ public abstract class UnifiedAiProjScanSettings {
         BLACKBOX("BlackBox"),
         PATTERNMATCHING("PatternMatching"),
         STATICCODEANALYSIS("StaticCodeAnalysis"),
+        SOFTWARECOMPOSITIONANALYSIS("SoftwareCompositionAnalysis"),
         @Deprecated
         DATAFLOWANALYSIS("DataFlowAnalysis"),
         @Deprecated
@@ -484,6 +488,19 @@ public abstract class UnifiedAiProjScanSettings {
     }
 
     public RubySettings getRubySettings() {
+        return null;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class ScaSettings {
+        protected String customParameters;
+        protected Boolean buildDependenciesGraph;
+    }
+
+    public ScaSettings getScaSettings() {
         return null;
     }
 
