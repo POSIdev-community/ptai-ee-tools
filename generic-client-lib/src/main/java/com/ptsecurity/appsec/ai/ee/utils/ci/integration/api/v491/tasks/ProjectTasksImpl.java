@@ -2,6 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v491.tasks;
 
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
+import com.ptsecurity.appsec.ai.ee.server.v491.api.ApiCallback;
 import com.ptsecurity.appsec.ai.ee.server.v491.api.ApiException;
 import com.ptsecurity.appsec.ai.ee.server.v491.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
@@ -12,16 +13,20 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHel
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Call;
+import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.server.v491.api.model.LegacyProgrammingLanguageGroup.*;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -168,6 +173,8 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
             }
         }
 
+        updateTags(projectId, settings);
+
         log.trace("Apply AIPROJ-defined project generic settings");
         AiProjConverter.apply(settings, projectSettingsModel, client);
         log.trace("Save modified settings");
@@ -226,6 +233,69 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
                 .projectName(settings.getProjectName())
                 .incremental(true)
                 .build();
+    }
+
+    private void updateTags(UUID projectId, UnifiedAiProjScanSettings unifiedAiProjScanSettings) {
+        if (projectId == null || unifiedAiProjScanSettings == null)
+            return;
+
+        UnifiedAiProjScanSettings.Tags tagsSettings = unifiedAiProjScanSettings.getTags();
+
+        if (tagsSettings == null)
+            return;
+
+        List<UnifiedAiProjScanSettings.TagEntity> tagEntities = tagsSettings.getTags();
+        List<TagModel> tagModels = tagEntities.stream()
+                .map(tagEntity -> new TagModel()
+                        .type(TagType.valueOf(tagEntity.getType().toString()))
+                        .value(tagEntity.getValue()))
+                .collect(Collectors.toList());
+
+        call(() -> {
+            Call apiCall = client.getProjectsApi().apiProjectsProjectIdTagsPutCall(
+                    Objects.requireNonNull(projectId),
+                    tagModels,
+                    new ApiCallback<Void>() {
+                        @Override
+                        public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+                            log.error("API call to update project tags failed. Status: {}. Error: {}", statusCode, e.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result, int statusCode, Map<String, List<String>> responseHeaders) {
+                            log.info("Successfully updated project tags. Status: {}", statusCode);
+                        }
+
+                        @Override
+                        public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
+                            log.trace("Upload progress: {}/{} bytes. Completed: {}", bytesWritten, contentLength, done);
+                        }
+
+                        @Override
+                        public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
+                            log.trace("Download progress: {}/{} bytes. Completed: {}", bytesRead, contentLength, done);
+                        }
+                    }
+            );
+
+            apiCall.enqueue(new okhttp3.Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    log.error("Tags asynchronous call failed", e);
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (!response.isSuccessful()) {
+                        log.error("Unexpected code: {}", response);
+                    } else {
+                        log.info("Tags successfully updated.");
+                    }
+                    response.close();
+                }
+            });
+            return null;
+        }, "API call to update project tags failed");
     }
 
     @Override

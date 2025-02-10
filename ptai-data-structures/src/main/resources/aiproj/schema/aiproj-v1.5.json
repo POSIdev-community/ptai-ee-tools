@@ -8,7 +8,7 @@
     },
     "Version": {
       "type": "string",
-      "enum": ["1.0", "1.1", "1.2", "1.3", "1.4"]
+      "enum": ["1.0", "1.1", "1.2", "1.3", "1.4", "1.5"]
     },
     "BlackBoxSettings": {
       "type": ["object", "null"],
@@ -688,6 +688,24 @@
           "PatternMatching",
           "StaticCodeAnalysis"
         ]
+      }
+    },
+    "Tags" : {
+      "title": "Project tags",
+      "type": ["array", "null"],
+      "uniqueItems": true,
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "Type": {
+            "type": "string",
+            "enum": ["Repo", "Branch"]
+          },
+          "Value": {
+            "type": "string"
+          }
+        }
       }
     },
     "SkipGitIgnoreFiles": {
