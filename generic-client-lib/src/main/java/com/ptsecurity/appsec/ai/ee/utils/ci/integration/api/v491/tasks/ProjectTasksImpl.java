@@ -173,6 +173,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
             }
         }
 
+        // TODO: ASINT-2377 - move to 4.10.0
         updateTags(projectId, settings);
 
         log.trace("Apply AIPROJ-defined project generic settings");
@@ -236,13 +237,15 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
     }
 
     private void updateTags(UUID projectId, UnifiedAiProjScanSettings unifiedAiProjScanSettings) {
-        if (projectId == null || unifiedAiProjScanSettings == null)
+        if (projectId == null || unifiedAiProjScanSettings == null) {
             return;
+        }
 
         UnifiedAiProjScanSettings.Tags tagsSettings = unifiedAiProjScanSettings.getTags();
 
-        if (tagsSettings == null)
+        if (tagsSettings == null) {
             return;
+        }
 
         List<UnifiedAiProjScanSettings.TagEntity> tagEntities = tagsSettings.getTags();
         List<TagModel> tagModels = tagEntities.stream()

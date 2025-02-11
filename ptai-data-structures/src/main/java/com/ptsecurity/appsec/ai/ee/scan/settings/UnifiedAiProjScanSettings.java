@@ -506,7 +506,6 @@ public abstract class UnifiedAiProjScanSettings {
         @Getter
         @RequiredArgsConstructor
         public enum TagType {
-            OPERATINGSYSTEM("OperatingSystem"),
             REPO("Repo"),
             BRANCH("Branch");
 
