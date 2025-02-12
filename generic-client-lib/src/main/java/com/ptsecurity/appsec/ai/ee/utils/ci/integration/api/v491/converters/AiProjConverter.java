@@ -373,6 +373,31 @@ public class AiProjConverter {
                 .sastRules(new SastRulesBaseModel().useRules(settings.isUseSastRules()));
     }
 
+    @SneakyThrows
+    public static List<TagModel> apply(
+            @NonNull final UnifiedAiProjScanSettings settings,
+            TagModel model) {
+        if (model == null) {
+            model = new TagModel();
+        }
+        if (null == settings.getTags()) return Collections.singletonList(model);
+        UnifiedAiProjScanSettings.Tags tags = settings.getTags();
+
+        List<TagModel> tagModelList = new ArrayList<>();
+
+        tags.getTags().forEach(tag -> {
+            String tagTypeValue = tag.getType().getValue();
+            TagType convertedTagType = TagType.valueOf(tagTypeValue.toUpperCase());
+            String tagValue = tag.getValue();
+            TagModel tagModel = new TagModel();
+            tagModel.setType(convertedTagType);
+            tagModel.setValue(tagValue);
+            tagModelList.add(tagModel);
+        });
+
+        return tagModelList;
+    }
+
     /**
      * Method sets project settings attributes using AIPROJ-defined ones
      */

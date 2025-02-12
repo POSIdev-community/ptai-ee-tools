@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
-  title: Current API v11
-  description: 'API path is case sensitive. To specify the API version in your request, add v{version} after api/ in the address. For example, api/v11/auth.'
-  version: '11'
+  title: Current API v12
+  description: 'API path is case sensitive. To specify the API version in your request, add v{version} after api/ in the address. For example, api/v12/auth.'
+  version: '12'
 paths:
   '/api/history/projects/{projectId}':
     get:
@@ -458,6 +458,56 @@ paths:
           application/*+json:
             schema:
               $ref: '#/components/schemas/PmRuleCreateUpdateModel'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        '401':
+          description: Unauthorized
+  /api/configs/sync:
+    get:
+      tags:
+        - Configs
+      summary: Get project sync settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsSyncSettingsModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsSyncSettingsModel'
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - Configs
+      summary: Update project sync settings
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/ProjectsSyncSettingsModel'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectsSyncSettingsModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ProjectsSyncSettingsModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ProjectsSyncSettingsModel'
       responses:
         '200':
           description: OK
@@ -3993,6 +4043,55 @@ paths:
                 $ref: '#/components/schemas/ApiErrorModel'
         '401':
           description: Unauthorized
+  '/api/projects/{projectId}/issues/{issueId}/comment':
+    put:
+      tags:
+        - Projects
+      summary: Add comment for single issue
+      parameters:
+        - name: projectId
+          in: path
+          description: Project id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: issueId
+          in: path
+          description: Vulnerability id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Details of changing favorite status
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/ChangeIssueCommentModel'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeIssueCommentModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ChangeIssueCommentModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ChangeIssueCommentModel'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        '401':
+          description: Unauthorized
   '/api/projects/{projectId}/issues/state':
     put:
       tags:
@@ -4382,6 +4481,130 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        '401':
+          description: Unauthorized
+  /api/projects/byTags:
+    get:
+      tags:
+        - Projects
+      summary: Get ids of projects compliant with tags. Available tag types are 'Repo' and 'Branch'
+      parameters:
+        - name: tags
+          in: path
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TagModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+            text/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        '401':
+          description: Unauthorized
+  '/api/projects/{projectId}/tags':
+    get:
+      tags:
+        - Projects
+      summary: Get project tags
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagModel'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - Projects
+      summary: Set project tags. Available tag types are 'Repo' and 'Branch'
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TagModel'
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TagModel'
+          text/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TagModel'
+          application/*+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TagModel'
       responses:
         '200':
           description: OK
@@ -6669,8 +6892,11 @@ components:
         - INVALID_PROJECT_TYPE
         - WRONG_PROJECT_ID
         - SCAN_TYPE_IS_NOT_FULL
+        - INCORRECT_TAG
+        - REPEATING_TAG_TYPE
         - ISSUE_TRACKER_CONNECTION_NOT_FOUND
         - ISSUE_TRACKER_CONNECTION_SETTINGS_NOT_SET
+        - ISSUE_TRACKER_CONNECTION_FAILED
         - ISSUE_TRACKER_SETTINGS_ID_NOT_SET
         - ISSUE_TRACKER_CREDENTIALS_NOT_SET
         - ISSUE_TRACKER_HOST_IS_INCORRECT
@@ -6730,7 +6956,6 @@ components:
         - SCAN_AGENT_NUMBER_EXCEED
         - NO_SCAN_MODULES
         - ONLY_BLACKBOX_IS_NOT_ALLOWED
-        - INCORRECT_AGENT_OS_TAG
         - SCAN_IS_PROCESSING
         - SERVER_CERTIFICATE_NOT_FOUND
         - FILESYSTEM_ERROR_ACCESS_DENIED
@@ -7131,6 +7356,13 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    ChangeIssueCommentModel:
+      type: object
+      properties:
+        comment:
+          type: string
+          nullable: true
+      additionalProperties: false
     ChangeIssueIsFavoriteModel:
       type: object
       properties:
@@ -7143,10 +7375,13 @@ components:
     ChangeIssuesApprovalStateModel:
       type: object
       properties:
-        issuesStates:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/IssueApprovalState'
+        state:
+          $ref: '#/components/schemas/IssueApprovalState'
+        issueIds:
+          type: array
+          items:
+            type: string
+            format: uuid
           nullable: true
         comment:
           type: string
@@ -8428,6 +8663,9 @@ components:
         - ManageRoles
         - ReadRoles
         - CreateDisposableProject
+        - ManageProjectsSync
+        - ViewProjectsSync
+        - ManageProjectTags
         - ViewProject
         - ChangeVulnStatus
         - DeleteScanResult
@@ -8437,6 +8675,7 @@ components:
         - ManageProjectMembership
         - DeleteIssueTrackerTicket
         - CreateIssueTrackerTicket
+        - ChangeVulnStatusWithoutComment
         - WorkWithScanScheduler
       type: string
     PhpSettingsModel:
@@ -8668,6 +8907,8 @@ components:
           additionalProperties:
             $ref: '#/components/schemas/ChangeHistoryDetailModel'
           nullable: true
+        syncInfo:
+          $ref: '#/components/schemas/SyncInfoModel'
       additionalProperties: false
     ProjectInfoModel:
       type: object
@@ -8906,6 +9147,14 @@ components:
         updaterInfo:
           $ref: '#/components/schemas/UpdaterInfoModel'
       additionalProperties: false
+    ProjectsSyncSettingsModel:
+      type: object
+      properties:
+        enableIssuesStateSync:
+          type: boolean
+        enableFilesExclusionsSync:
+          type: boolean
+      additionalProperties: false
     ProjectType:
       enum:
         - Permanent
@@ -9025,6 +9274,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PermissionType'
+          nullable: true
+        lastSyncDate:
+          type: string
+          format: date-time
+          nullable: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagModel'
           nullable: true
         id:
           type: string
@@ -9561,6 +9819,7 @@ components:
           format: uuid
         scanDate:
           type: string
+          format: date-time
         progress:
           $ref: '#/components/schemas/ScanProgressModel'
         statistic:
@@ -9908,6 +10167,18 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    SyncInfoModel:
+      type: object
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        projectName:
+          type: string
+          nullable: true
+        tag:
+          $ref: '#/components/schemas/TagModel'
+      additionalProperties: false
     SyslogFormat:
       enum:
         - Plain
@@ -9930,6 +10201,21 @@ components:
         logLevel:
           $ref: '#/components/schemas/LogLevel'
       additionalProperties: false
+    TagModel:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/TagType'
+        value:
+          type: string
+          nullable: true
+      additionalProperties: false
+    TagType:
+      enum:
+        - OperatingSystem
+        - Repo
+        - Branch
+      type: string
     TemplateValidationResult:
       type: object
       properties:

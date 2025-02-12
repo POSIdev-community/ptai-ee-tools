@@ -204,7 +204,7 @@ public class IssuesConverter {
         if (null == statistic) return null;
 
         // PT AI REST API uses UTC date / time representation, but without "Z" letter at the end of ISO 8601 representation
-        String scanDateString = Objects.requireNonNull(scanResult.getScanDate(), "Scan result date is null");
+        String scanDateString = Objects.requireNonNull(scanResult.getScanDate().toString(), "Scan result date is null");
         if (!StringUtils.endsWith(scanDateString, "Z")) {
             scanDateString = scanDateString + "Z";
         }
