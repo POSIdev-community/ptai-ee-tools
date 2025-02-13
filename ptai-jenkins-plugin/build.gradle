@@ -7,6 +7,8 @@ group = "${rootGroup}"
 description = 'This plugin used to implement AST using PT Application Inspector'
 version = "${version}"
 
+def pluginName = 'ptai-jenkins-plugin'
+
 repositories {
     maven { url jenkinsPublicRepoUrl }
     maven { url jenkinsIncrementalRepoUrl }
@@ -17,7 +19,7 @@ jenkinsPlugin {
     jenkinsVersion = findProperty('jenkinsVersion')
 
     // ID of the plugin, defaults to the project name without trailing '-plugin'
-    shortName = 'ptai-jenkins-plugin'
+    shortName = pluginName
 
     // human-readable name of plugin
     displayName = 'PT Application Inspector Plugin'
@@ -216,6 +218,14 @@ tasks.getByName('jpi') {
 
 clean {
     delete 'src/main/webapp/webjars'
+}
+
+tasks.register('deleteJar', Delete) {
+    delete file("build/libs/${pluginName}-${version}.jar")
+}
+
+tasks.named('build') {
+    finalizedBy 'deleteJar'
 }
 
 jar {

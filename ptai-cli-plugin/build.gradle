@@ -40,9 +40,7 @@ dependencies {
 }
 
 jar {
-    manifest {
-        attributes 'Implementation-Title': 'PT Application Inspector CLI plugin'
-    }
+    enabled = false
 }
 
 shadowJar {
