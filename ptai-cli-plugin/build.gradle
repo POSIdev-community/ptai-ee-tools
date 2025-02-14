@@ -7,6 +7,8 @@ group = "${rootGroup}"
 
 mainClassName = 'com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.Plugin'
 
+def pluginName = 'ptai-cli-plugin'
+
 dependencies {
     implementation project(':generic-client-lib')
 
@@ -40,7 +42,17 @@ dependencies {
 }
 
 jar {
-    enabled = false
+    manifest {
+        attributes 'Implementation-Title': 'PT Application Inspector CLI plugin'
+    }
+}
+
+tasks.register('deleteJar', Delete) {
+    delete file("build/libs/${pluginName}-${version}.jar")
+}
+
+tasks.named('build') {
+    finalizedBy 'deleteJar'
 }
 
 shadowJar {
