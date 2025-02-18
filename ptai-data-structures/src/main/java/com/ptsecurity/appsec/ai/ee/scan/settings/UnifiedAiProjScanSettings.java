@@ -24,7 +24,6 @@ import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV13.Version
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV14.Version._1_4;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV15.Version._1_5;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_invalid;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -108,10 +107,7 @@ public abstract class UnifiedAiProjScanSettings {
         //noinspection ConstantConditions
         do {
             if (isEmpty(data)) {
-                result.getMessages().add(ParseResult.Message.builder()
-                        .type(ParseResult.Message.Type.ERROR)
-                        .text(i18n_ast_settings_type_manual_json_settings_message_empty())
-                        .build());
+                addErrorMessageToResult(result, i18n_ast_settings_type_manual_json_settings_message_empty());
                 break;
             }
             final JsonNode root;
@@ -145,10 +141,7 @@ public abstract class UnifiedAiProjScanSettings {
             else if (_1_0.value().equals(versionNode.textValue()))
                 settings = new AiProjV10ScanSettings(root);
             else {
-                result.getMessages().add(ParseResult.Message.builder()
-                        .type(ParseResult.Message.Type.ERROR)
-                        .text(i18n_ast_settings_type_manual_json_settings_message_version_unknown())
-                        .build());
+                addErrorMessageToResult(result, i18n_ast_settings_type_manual_json_settings_message_version_unknown());
                 break;
             }
 
@@ -165,19 +158,26 @@ public abstract class UnifiedAiProjScanSettings {
             log.trace("Validate Tags attribute");
             JsonNode tagsNode = root.path("Tags");
             if (!tagsNode.isMissingNode() && tagsNode.isArray()) {
+                Set<String> tagTypes = new HashSet<>();
                 for (JsonNode tag : tagsNode) {
                     JsonNode typeNode = tag.path("Type");
                     JsonNode valueNode = tag.path("Value");
+
+                    String typeTextValue = typeNode.textValue();
+
+                    if(tagTypes.contains(typeTextValue)) {
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_type_sametype(typeTextValue);
+                        log.error(errorMessage);
+                        addErrorMessageToResult(result, errorMessage);
+                    }
+
+                    tagTypes.add(typeTextValue);
+
                     int maxValueLength = 512;
                     if (valueNode.isTextual() && valueNode.asText().length() > maxValueLength) {
-                        String type = typeNode.textValue();
-                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(type);
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(typeTextValue);
                         log.error(errorMessage);
-
-                        result.getMessages().add(ParseResult.Message.builder()
-                                .type(ParseResult.Message.Type.ERROR)
-                                .text(errorMessage)
-                                .build());
+                        addErrorMessageToResult(result, errorMessage);
                     }
                 }
             }
@@ -191,6 +191,13 @@ public abstract class UnifiedAiProjScanSettings {
             result.setSettings(settings);
         } while (false);
         return result;
+    }
+
+    private static void addErrorMessageToResult(ParseResult result, String errorMessage) {
+        result.getMessages().add(ParseResult.Message.builder()
+                .type(ParseResult.Message.Type.ERROR)
+                .text(errorMessage)
+                .build());
     }
 
     private static ParseResult.Message getDetectedSettingsMessage(String projectName,Set<ScanBrief.ScanSettings.Language> languages) {
