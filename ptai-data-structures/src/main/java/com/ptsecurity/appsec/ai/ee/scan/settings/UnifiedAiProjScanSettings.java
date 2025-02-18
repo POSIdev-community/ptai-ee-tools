@@ -161,6 +161,27 @@ public abstract class UnifiedAiProjScanSettings {
             log.trace("Validate JSON for AIPROJ schema compliance");
             JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
             Set<ValidationMessage> errors = jsonSchema.validate(root);
+
+            log.trace("Validate Tags attribute");
+            JsonNode tagsNode = root.path("Tags");
+            if (!tagsNode.isMissingNode() && tagsNode.isArray()) {
+                for (JsonNode tag : tagsNode) {
+                    JsonNode typeNode = tag.path("Type");
+                    JsonNode valueNode = tag.path("Value");
+                    int maxValueLength = 512;
+                    if (valueNode.isTextual() && valueNode.asText().length() > maxValueLength) {
+                        String type = typeNode.textValue();
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(type);
+                        log.error(errorMessage);
+
+                        result.getMessages().add(ParseResult.Message.builder()
+                                .type(ParseResult.Message.Type.ERROR)
+                                .text(errorMessage)
+                                .build());
+                    }
+                }
+            }
+
             result.getMessages().addAll(settings.processErrorMessages(errors));
             if (result.getMessages().stream().noneMatch((m) -> m.getType().equals(ParseResult.Message.Type.ERROR))) {
                 result.getMessages().add(
