@@ -152,15 +152,26 @@ public abstract class UnifiedAiProjScanSettings {
                 break;
             }
 
-            log.trace("Check Tags attribute");
+            log.trace("Check AIPROJ for schema compliance");
+            JsonSchemaFactory factory = JsonSchemaFactory
+                    .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
+                    .addMetaSchema(JsonMetaSchema
+                            .builder(JsonMetaSchema.getV4().getUri(), JsonMetaSchema.getV4())
+                            .addKeywords(NON_VALIDATION_KEYS).build()).build();
+            log.trace("Validate JSON for AIPROJ schema compliance");
+            JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
+            Set<ValidationMessage> errors = jsonSchema.validate(root);
+
+            log.trace("Validate Tags attribute");
             JsonNode tagsNode = root.path("Tags");
             if (!tagsNode.isMissingNode() && tagsNode.isArray()) {
                 for (JsonNode tag : tagsNode) {
+                    JsonNode typeNode = tag.path("Type");
                     JsonNode valueNode = tag.path("Value");
                     int maxValueLength = 512;
                     if (valueNode.isTextual() && valueNode.asText().length() > maxValueLength) {
-                        String value = valueNode.textValue();
-                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(value);
+                        String type = typeNode.textValue();
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(type);
                         log.error(errorMessage);
 
                         result.getMessages().add(ParseResult.Message.builder()
@@ -171,15 +182,6 @@ public abstract class UnifiedAiProjScanSettings {
                 }
             }
 
-            log.trace("Check AIPROJ for schema compliance");
-            JsonSchemaFactory factory = JsonSchemaFactory
-                    .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                    .addMetaSchema(JsonMetaSchema
-                            .builder(JsonMetaSchema.getV4().getUri(), JsonMetaSchema.getV4())
-                            .addKeywords(NON_VALIDATION_KEYS).build()).build();
-            log.trace("Validate JSON for AIPROJ schema compliance");
-            JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
-            Set<ValidationMessage> errors = jsonSchema.validate(root);
             result.getMessages().addAll(settings.processErrorMessages(errors));
             if (result.getMessages().stream().noneMatch((m) -> m.getType().equals(ParseResult.Message.Type.ERROR))) {
                 result.getMessages().add(
