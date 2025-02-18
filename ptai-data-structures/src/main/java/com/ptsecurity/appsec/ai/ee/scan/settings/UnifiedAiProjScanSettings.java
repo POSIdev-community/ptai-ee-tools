@@ -152,6 +152,26 @@ public abstract class UnifiedAiProjScanSettings {
                 break;
             }
 
+            log.trace("Check Tags attribute");
+            JsonNode tagsNode = root.path("Tags");
+            if (!tagsNode.isMissingNode() && tagsNode.isArray()) {
+                for (JsonNode tag : tagsNode) {
+                    JsonNode valueNode = tag.path("Value");
+                    int maxValueLength = 512;
+                    if (valueNode.isTextual() && valueNode.asText().length() > maxValueLength) {
+                        String value = valueNode.textValue();
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(value);
+                        log.error(errorMessage);
+
+                        result.getMessages().add(ParseResult.Message.builder()
+                                .type(ParseResult.Message.Type.ERROR)
+                                .text(errorMessage)
+                                .build());
+                    }
+                }
+            }
+
+
             log.trace("Check AIPROJ for schema compliance");
             JsonSchemaFactory factory = JsonSchemaFactory
                     .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
