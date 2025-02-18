@@ -171,7 +171,6 @@ public abstract class UnifiedAiProjScanSettings {
                 }
             }
 
-
             log.trace("Check AIPROJ for schema compliance");
             JsonSchemaFactory factory = JsonSchemaFactory
                     .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
