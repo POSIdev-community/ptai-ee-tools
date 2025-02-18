@@ -380,8 +380,11 @@ public class AiProjConverter {
         if (model == null) {
             model = new TagModel();
         }
-        if (null == settings.getTags()) return Collections.singletonList(model);
+
         UnifiedAiProjScanSettings.Tags tags = settings.getTags();
+        if (tags == null) {
+            return Collections.singletonList(model);
+        }
 
         List<TagModel> tagModelList = new ArrayList<>();
 

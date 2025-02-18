@@ -217,11 +217,16 @@ public abstract class UnifiedAiProjScanSettings {
         if (null != result.getCause())
             throw result.getCause();
         List<ParseResult.Message> errors = result.getMessages().stream().filter((m) -> m.getType().equals(ParseResult.Message.Type.ERROR)).collect(Collectors.toList());
-        if (!errors.isEmpty())
+        if (!errors.isEmpty()) {
+            String errorMessages = errors.stream()
+                    .map(ParseResult.Message::getText)
+                    .collect(Collectors.joining("\n"));
+
             throw GenericException.raise(
-                    i18n_ast_settings_type_manual_json_settings_message_invalid(),
+                    i18n_ast_settings_type_manual_json_settings_message_invalid() + "\n" + errorMessages,
                     new IllegalArgumentException()
             );
+        }
         return result.getSettings();
     }
 
