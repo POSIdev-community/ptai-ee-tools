@@ -58,10 +58,12 @@ public class AstJobTableResults implements Action {
 
             ScanBriefDetailed scanBriefDetailedCopy = objectMapper.copy().convertValue(scanBriefDetailed, ScanBriefDetailed.class);
 
-            for (ScanBriefDetailed.Details.ChartData.BaseIssueCount issue
-                    : scanBriefDetailedCopy.getDetails().getChartData().getBaseIssueDistributionData()) {
-                if (issue.getClazz() == BaseIssue.Type.FINGERPRINT_SCA) {
-                    issue.setClazz(BaseIssue.Type.FINGERPRINT);
+            if (scanBriefDetailedCopy != null) {
+                for (ScanBriefDetailed.Details.ChartData.BaseIssueCount issue
+                        : scanBriefDetailedCopy.getDetails().getChartData().getBaseIssueDistributionData()) {
+                    if (issue.getClazz() == BaseIssue.Type.FINGERPRINT_SCA) {
+                        issue.setClazz(BaseIssue.Type.FINGERPRINT);
+                    }
                 }
             }
 
