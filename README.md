@@ -7,10 +7,11 @@ To build plugins bundle using Gradle you need to execute ```build``` Gradle task
 ```
 $ ./gradlew build
 ```
-Jenkins and Teamcity plugins will be built for CI versions defined in ```gradle.properties``` file but may be redefined using ```-P``` option:
+Jenkins and Teamcity plugins will be built for CI versions defined in ```gradle.properties```, but the Teamcity version can be redefined using the ```-P``` option:
 ```
-$ ./gradlew build -P jenkinsVersion=2.150.2 -P teamcityVersion=2020.1
+$ ./gradlew build -P teamcityVersion=2020.1
 ```
+Jenkins plugin will be built for the minimum supported version 2.300.
 
 You can override maven repositories used during the build:
 ```
