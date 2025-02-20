@@ -11,7 +11,8 @@ Jenkins and Teamcity plugins will be built for CI versions defined in ```gradle.
 ```
 $ ./gradlew build -P teamcityVersion=2020.1
 ```
-Jenkins plugin will be built for the minimum supported version 2.300.
+Jenkins plugin will be built for the minimum supported version `2.300`. The plugin for Jenkins will work for
+jenkins `2.300` and any newer version.
 
 You can override maven repositories used during the build:
 ```
