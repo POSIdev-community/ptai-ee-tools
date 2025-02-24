@@ -8229,7 +8229,6 @@ components:
         - Pygrep
         - Sca
         - FingerprintSca
-        - Slither
       type: string
     JavaScriptSettingsModel:
       type: object
@@ -9788,7 +9787,6 @@ components:
         - JsaNet
         - Go
         - Pygrep
-        - Slither
         - Sca
       type: string
     ScanEnvironmentModel:
