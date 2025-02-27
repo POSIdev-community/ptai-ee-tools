@@ -7,7 +7,7 @@ def st = namespace("jelly:stapler")
 f.entry(
         title: _('token'),
         field: 'token') {
-    f.password()
+    f.password(checkMethod: 'post', onkeyup: "this.onchange()")
 }
 
 f.entry(
