@@ -262,6 +262,14 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiReportingReportTemplate", elem);
             },
 
+            onPtaiReportingReportDataflowError: function (elem) {
+                this.handle("ptaiReportingReportDataflow", elem);
+            },
+
+            onPtaiReportingReportSummaryError: function (elem) {
+                this.handle("ptaiReportingReportSummary", elem);
+            },
+
             onPtaiReportingReportFilterError: function (elem) {
                 this.handle("ptaiReportingReportFilter", elem);
             },
@@ -276,6 +284,18 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
 
             onPtaiReportingRawDataFileError: function (elem) {
                 this.handle("ptaiReportingRawDataFile", elem);
+            },
+
+            onPtaiReportingRawDataFilterError: function (elem) {
+                this.handle("ptaiReportingRawDataFilter", elem);
+            },
+
+            onPtaiReportingSarifFilterError: function (elem) {
+                this.handle("ptaiReportingSarifFilter", elem)
+            },
+
+            onPtaiReportingSonarGiifFilterError: function (elem) {
+                this.handle("ptaiReportingSonarGiifFilter", elem)
             },
 
             onPtaiReportingJsonSettingsError: function (elem) {
@@ -296,4 +316,3 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
         return this.url;
     }
 });
-

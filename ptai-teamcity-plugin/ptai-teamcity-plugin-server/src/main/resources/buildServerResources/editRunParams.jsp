@@ -75,6 +75,8 @@
         var ptaiReportingReportFieldRows = [
             'row_${REPORTING_REPORT_FILE}',
             'row_${REPORTING_REPORT_TEMPLATE}',
+            'row_${REPORTING_REPORT_DATAFLOW}',
+            'row_${REPORTING_REPORT_SUMMARY}',
             'row_${REPORTING_REPORT_FILTER}' ];
 
         ptaiReportingReportShowHide = function (show) {
@@ -403,6 +405,24 @@
                     }"
                     className="longField"/>
             <span class="smallNote">${HINT_REPORTING_REPORT_TEMPLATE}</span>
+        </td>
+    </tr>
+    <tr id="row_${REPORTING_REPORT_DATAFLOW}">
+        <th class="noBorder dense">
+            <label for="${REPORTING_REPORT_DATAFLOW}">${LABEL_REPORTING_REPORT_DATAFLOW}</label>
+        </th>
+        <td class="noBorder dense">
+            <props:checkboxProperty name="${REPORTING_REPORT_DATAFLOW}"/>
+            <span class="smallNote">${HINT_REPORTING_REPORT_DATAFLOW}</span>
+        </td>
+    </tr>
+    <tr id="row_${REPORTING_REPORT_SUMMARY}">
+        <th class="noBorder dense">
+            <label for="${REPORTING_REPORT_SUMMARY}">${LABEL_REPORTING_REPORT_SUMMARY}</label>
+        </th>
+        <td class="noBorder dense">
+            <props:checkboxProperty name="${REPORTING_REPORT_SUMMARY}"/>
+            <span class="smallNote">${HINT_REPORTING_REPORT_SUMMARY}</span>
         </td>
     </tr>
     <tr id="row_${REPORTING_REPORT_FILTER}">

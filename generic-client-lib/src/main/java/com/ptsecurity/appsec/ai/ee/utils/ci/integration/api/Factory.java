@@ -3,10 +3,13 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateEmptyException;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateTrustException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.VersionUnsupportedException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.*;
+import com.ptsecurity.misc.tools.helpers.CertificateHelper;
 import com.ptsecurity.misc.tools.helpers.VersionHelper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +24,7 @@ import java.net.*;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -112,6 +112,15 @@ public class Factory {
 
             ClientCreateStage stage = ClientCreateStage.INIT;
             try {
+                if (!connectionSettings.isInsecure()) {
+                    String caCertificate = connectionSettings.getCaCertsPem();
+                    if (caCertificate == null || caCertificate.isEmpty()) {
+                        throw new SSLCertificateEmptyException(
+                                Resources.i18n_ast_settings_server_ca_pem_message_parse_empty());
+                    }
+                    CertificateHelper.readPem(caCertificate);
+                }
+
                 AbstractApiClient client = onClass(clazz).create(connectionSettings.validate(), advancedSettings).get();
                 // Initialize all API clients with URL, timeouts, SSL settings etc.
                 client.init();
@@ -150,6 +159,9 @@ public class Factory {
                     continue;
                 }
                 return client;
+            } catch (CertificateException e) {
+                log.error("No need to continue iterate through API client versions as there's certificate problem");
+                throw new SSLCertificateTrustException(Resources.i18n_ast_settings_server_check_message_sslhandshakefailed());
             } catch (GenericException e) {
                 log.trace("PT AI server connection exception", e);
                 // As getCause for GenericException may return non-null ApiException the root
@@ -157,11 +169,7 @@ public class Factory {
                 Throwable e1 = e.getCause();
                 Throwable e2 = null == e1 ? null : e1.getCause();
 
-                if (e2 instanceof CertificateException) {
-                    log.trace("No need to continue iterate through API client versions as there's certificate problem");
-                    throw GenericException.raise(
-                            Resources.i18n_ast_settings_server_ca_pem_message_parse_failed_details(), e.getCause());
-                } else if (e2 instanceof UnknownHostException) {
+                if (e2 instanceof UnknownHostException) {
                     log.trace("No need to continue iterate through API client versions as there's no known {} host", connectionSettings.getUrl());
                     throw GenericException.raise(
                             Resources.i18n_ast_settings_server_check_message_connectionfailed(), e2);

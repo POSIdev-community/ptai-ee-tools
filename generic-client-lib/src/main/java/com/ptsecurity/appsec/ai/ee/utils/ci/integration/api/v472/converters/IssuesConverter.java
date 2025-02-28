@@ -32,7 +32,7 @@ public class IssuesConverter {
     private static final Map<ScanMode, VulnerabilityIssue.ScanMode> SCAN_MODE_MAP = new HashMap<>();
     private static final Map<PolicyState, Policy.State> POLICY_STATE_MAP = new HashMap<>();
     private static final Map<LegacyProgrammingLanguageGroup, ScanResult.ScanSettings.Language> LANGUAGE_MAP = new HashMap<>();
-    private static final Map<ProgrammingLanguageLicence, ScanBrief.ScanSettings.Language> LANGUAGE_LICENSE_MAP = new HashMap<>();
+    private static final Map<ProgrammingLanguageGroup, ScanBrief.ScanSettings.Language> LANGUAGE_LICENSE_MAP = new HashMap<>();
     private static final Map<Stage, ScanResult.State> STATE_MAP = new HashMap<>();
     private static final Map<ScanModuleType, ScanBrief.ScanSettings.Engine> SCAN_MODULE_MAP = new HashMap<>();
 
@@ -47,7 +47,7 @@ public class IssuesConverter {
         ISSUE_TYPE_MAP.put(IssueType.VULNERABILITY.name(), BaseIssue.Type.VULNERABILITY);
         ISSUE_TYPE_MAP.put(IssueType.WEAKNESS.name(), BaseIssue.Type.WEAKNESS);
         ISSUE_TYPE_MAP.put(IssueType.CONFIGURATION.name(), BaseIssue.Type.CONFIGURATION);
-        ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.SCA);
+        ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.FINGERPRINT);
         ISSUE_TYPE_MAP.put(IssueType.BLACKBOX.name(), BaseIssue.Type.BLACKBOX);
         ISSUE_TYPE_MAP.put(IssueType.YARAMATCH.name(), BaseIssue.Type.YARAMATCH);
 
@@ -83,19 +83,19 @@ public class IssuesConverter {
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.RUBY, ScanResult.ScanSettings.Language.RUBY);
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
 
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.JAVA, ScanResult.ScanSettings.Language.JAVA);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.PHP, ScanResult.ScanSettings.Language.PHP);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.CSHARP, ScanResult.ScanSettings.Language.CSHARP);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.VB, ScanResult.ScanSettings.Language.VB);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.GO, ScanResult.ScanSettings.Language.GO);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.CANDCPLUSPLUS, ScanResult.ScanSettings.Language.CPP);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.PYTHON, ScanResult.ScanSettings.Language.PYTHON);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.SQL, ScanResult.ScanSettings.Language.SQL);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.JAVASCRIPT, ScanResult.ScanSettings.Language.JAVASCRIPT);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.KOTLIN, ScanResult.ScanSettings.Language.KOTLIN);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.SWIFT, ScanResult.ScanSettings.Language.SWIFT);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.RUBY, ScanResult.ScanSettings.Language.RUBY);
-        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageLicence.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.JAVA, ScanResult.ScanSettings.Language.JAVA);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.PHP, ScanResult.ScanSettings.Language.PHP);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.CSHARP, ScanResult.ScanSettings.Language.CSHARP);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.VB, ScanResult.ScanSettings.Language.VB);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.GO, ScanResult.ScanSettings.Language.GO);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.CANDCPLUSPLUS, ScanResult.ScanSettings.Language.CPP);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.PYTHON, ScanResult.ScanSettings.Language.PYTHON);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.SQL, ScanResult.ScanSettings.Language.SQL);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.JAVASCRIPT, ScanResult.ScanSettings.Language.JAVASCRIPT);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.KOTLIN, ScanResult.ScanSettings.Language.KOTLIN);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.SWIFT, ScanResult.ScanSettings.Language.SWIFT);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.RUBY, ScanResult.ScanSettings.Language.RUBY);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
 
         STATE_MAP.put(Stage.ABORTED, ScanResult.State.ABORTED);
         STATE_MAP.put(Stage.FAILED, ScanResult.State.FAILED);
@@ -241,7 +241,7 @@ public class IssuesConverter {
         destination.setSuspected(source.getIsSuspected());
         destination.setIsNew(source.getIsNew());
         // Do not set SCA issue type Id as there's "IssueDetected" in source type field
-        if (destination instanceof ScaIssue) return;
+        if (destination instanceof FingerprintIssue) return;
         destination.setTypeId(source.getType());
     }
 
@@ -306,17 +306,17 @@ public class IssuesConverter {
                             .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
                             .build());
         } else if (IssueType.FINGERPRINT == issueType) {
-            ScaIssue scaIssue = new ScaIssue();
+            FingerprintIssue fingerprintIssue = new FingerprintIssue();
             Objects.requireNonNull(issue.getVulnerableComponent(), "Empty vulnerable component for SCA issue");
-            scaIssue.setComponentName(issue.getVulnerableComponent().getComponent());
-            scaIssue.setComponentVersion(issue.getVulnerableComponent().getVersion());
-            scaIssue.setFile(issue.getSourceFile());
-            String fingerprintId = Objects.requireNonNull(scaIssue.getComponentName());
-            if (StringUtils.isNotEmpty(scaIssue.getComponentVersion()))
-                fingerprintId += " " + scaIssue.getComponentVersion();
-            scaIssue.setFingerprintId(fingerprintId);
-            scaIssue.setTypeId(fingerprintId);
-            baseIssue = scaIssue;
+            fingerprintIssue.setComponentName(issue.getVulnerableComponent().getComponent());
+            fingerprintIssue.setComponentVersion(issue.getVulnerableComponent().getVersion());
+            fingerprintIssue.setFile(issue.getSourceFile());
+            String fingerprintId = Objects.requireNonNull(fingerprintIssue.getComponentName());
+            if (StringUtils.isNotEmpty(fingerprintIssue.getComponentVersion()))
+                fingerprintId += " " + fingerprintIssue.getComponentVersion();
+            fingerprintIssue.setFingerprintId(fingerprintId);
+            fingerprintIssue.setTypeId(fingerprintId);
+            baseIssue = fingerprintIssue;
         } else if (IssueType.UNKNOWN == issueType) {
             baseIssue = new UnknownIssue();
         } else if (IssueType.VULNERABILITY == issueType) {

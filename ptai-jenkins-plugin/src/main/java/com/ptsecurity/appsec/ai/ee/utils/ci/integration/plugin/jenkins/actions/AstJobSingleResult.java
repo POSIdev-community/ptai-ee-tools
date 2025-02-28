@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed.Details.ChartData.BaseIssueCount;
@@ -187,8 +188,20 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
                 .build();
         List<BaseIssueCount> baseIssues = scanBriefDetailed.getDetails().getChartData().getBaseIssueDistributionData();
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<BaseIssueCount> baseIssuesCopy = objectMapper.readValue(
+                objectMapper.writeValueAsString(baseIssues),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, BaseIssueCount.class)
+        );
+
+        for (BaseIssueCount issue : baseIssuesCopy) {
+            if (issue.getClazz() == BaseIssue.Type.FINGERPRINT_SCA) {
+                issue.setClazz(BaseIssue.Type.FINGERPRINT);
+            }
+        }
+
         for (BaseIssue.Type type : BaseIssue.Type.values()) {
-            long count = baseIssues.stream()
+            long count = baseIssuesCopy.stream()
                     .filter(issue -> type == issue.getClazz()).count();
             if (0 == count) continue;
             PieChartDataModel.Series.DataItem typeItem = PieChartDataModel.Series.DataItem.builder()

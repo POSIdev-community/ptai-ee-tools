@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.FALSE;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.TRUE;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.*;
 
@@ -19,6 +20,12 @@ public class ReportsHelper {
             Reports.Report report = new Reports.Report();
             report.setFileName(data.get(REPORTING_REPORT_FILE));
             report.setTemplate(data.get(REPORTING_REPORT_TEMPLATE));
+            if (FALSE.equals(data.getOrDefault(REPORTING_REPORT_DATAFLOW, Defaults.REPORTING_REPORT_DATAFLOW))) {
+                report.setIncludeDfd(false);
+            }
+            if (FALSE.equals(data.getOrDefault(REPORTING_REPORT_SUMMARY, Defaults.REPORTING_REPORT_SUMMARY))) {
+                report.setIncludeGlossary(false);
+            }
             if (StringUtils.isNotEmpty(data.get(REPORTING_REPORT_FILTER)))
                 report.setFilters(ReportUtils.validateJsonFilter(data.get(REPORTING_REPORT_FILTER)));
             res.getReport().add(report);

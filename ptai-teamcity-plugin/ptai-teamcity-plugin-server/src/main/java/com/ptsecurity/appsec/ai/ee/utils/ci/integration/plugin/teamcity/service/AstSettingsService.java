@@ -9,8 +9,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Defaults;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Labels;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
@@ -25,7 +23,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.servlet.http.HttpServletRequest;
@@ -156,9 +153,18 @@ public class AstSettingsService {
         res.fill(REPORTING_REPORT, request)
                 .fill(REPORTING_REPORT_FILE, request)
                 .fill(REPORTING_REPORT_TEMPLATE, request)
+                .fill(REPORTING_REPORT_DATAFLOW, request)
+                .fill(REPORTING_REPORT_SUMMARY, request)
                 .fill(REPORTING_REPORT_FILTER, request);
         res.fill(REPORTING_RAWDATA, request)
-                .fill(REPORTING_RAWDATA_FILE, request);
+                .fill(REPORTING_RAWDATA_FILE, request)
+                .fill(REPORTING_RAWDATA_FILTER, request);
+        res.fill(REPORTING_SARIF, request)
+                .fill(REPORTING_SARIF_FILE, request)
+                .fill(REPORTING_SARIF_FILTER, request);
+        res.fill(REPORTING_SONARGIIF, request)
+                .fill(REPORTING_SONARGIIF_FILE, request)
+                .fill(REPORTING_SONARGIIF_FILTER, request);
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
 
@@ -263,14 +269,35 @@ public class AstSettingsService {
             }
         }
 
-        if (bean.isTrue(REPORTING_RAWDATA) && bean.empty(REPORTING_RAWDATA_FILE))
-            results.add(REPORTING_RAWDATA_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_rawjson_file_message_empty());
+        if (bean.isTrue(REPORTING_RAWDATA)) {
+            if (bean.empty(REPORTING_RAWDATA_FILE))
+                results.add(REPORTING_RAWDATA_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_rawjson_file_message_empty());
+            if (!bean.empty(REPORTING_RAWDATA_FILTER)) {
+                Validator.Result result = Validator.validateJsonIssuesFilter(bean.get(REPORTING_RAWDATA_FILTER));
+                if (result.fail())
+                    results.add(REPORTING_RAWDATA_FILTER, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid_details(result.getDetails()));
+            }
+        }
 
-        if (bean.isTrue(REPORTING_SARIF) && bean.empty(REPORTING_SARIF_FILE))
-            results.add(REPORTING_SARIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_file_message_empty());
+        if (bean.isTrue(REPORTING_SARIF)) {
+            if (bean.empty(REPORTING_SARIF_FILE))
+                results.add(REPORTING_SARIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_file_message_empty());
+            if (!bean.empty(REPORTING_SARIF_FILTER)) {
+                Validator.Result result = Validator.validateJsonIssuesFilter(bean.get(REPORTING_SARIF_FILTER));
+                if (result.fail())
+                    results.add(REPORTING_SARIF_FILTER, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid_details(result.getDetails()));
+            }
+        }
 
-        if (bean.isTrue(REPORTING_SONARGIIF) && bean.empty(REPORTING_SONARGIIF_FILE))
-            results.add(REPORTING_SONARGIIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_message_empty());
+        if (bean.isTrue(REPORTING_SONARGIIF)) {
+            if (bean.empty(REPORTING_SONARGIIF_FILE))
+                results.add(REPORTING_SONARGIIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_message_empty());
+            if (!bean.empty(REPORTING_SONARGIIF_FILTER)) {
+                Validator.Result result = Validator.validateJsonIssuesFilter(bean.get(REPORTING_SONARGIIF_FILTER));
+                if (result.fail())
+                    results.add(REPORTING_SONARGIIF_FILTER, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid_details(result.getDetails()));
+            }
+        }
 
         if (bean.isTrue(REPORTING_JSON)) {
             if (bean.empty(REPORTING_JSON_SETTINGS))
@@ -335,7 +362,6 @@ public class AstSettingsService {
                 results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
             }
             // Check reporting settings
-            checkVulnerabilityFilterSettings(bean, results);
             Reports reports = bean.convert();
             reports = ReportUtils.validate(reports);
             new Factory().reportsTasks(client).check(reports);
@@ -343,27 +369,5 @@ public class AstSettingsService {
             log.warn(e.getDetailedMessage(), e);
             results.add(e);
         }
-    }
-
-    private static void checkVulnerabilityFilterSettings(
-            @NonNull final PropertiesBean bean,
-            @NonNull final VerificationResults results
-    ) {
-        Map<String, String> reportingFilters = new HashMap<>();
-        reportingFilters.put(REPORTING_REPORT, REPORTING_REPORT_FILTER);
-        reportingFilters.put(REPORTING_RAWDATA, REPORTING_RAWDATA_FILTER);
-        reportingFilters.put(REPORTING_SARIF, REPORTING_SARIF_FILTER);
-        reportingFilters.put(REPORTING_SONARGIIF, REPORTING_SONARGIIF_FILTER);
-
-        for (Map.Entry<String, String> entry : reportingFilters.entrySet()) {
-            if (TRUE.equals(bean.getProperties().get(entry.getKey()))) {
-                String filter = bean.getProperties().get(entry.getValue());
-                if (StringUtils.isNotEmpty(filter)) {
-                    ReportUtils.validateJsonFilter(filter);
-                }
-            }
-        }
-
-        results.add("JSON vulnerability filter settings are verified");
     }
 }

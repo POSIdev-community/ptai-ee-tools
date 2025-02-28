@@ -1,64 +1,27 @@
 package com.ptsecurity.appsec.ai.ee.scan.result.issue.types;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 public class ScaIssue extends BaseIssue {
-    /**
-     * Vulnerable file
-     */
-    @JsonProperty("file")
     protected String file;
 
-    /**
-     * Vulnerable component name
-     */
-    @JsonProperty("componentName")
-    protected String componentName;
+    @JsonProperty("licenses")
+    private String[] licenses;
 
-    /**
-     * Vulnerable component version
-     */
-    @JsonProperty("componentVersion")
-    protected String componentVersion;
+    @JsonProperty("ptOsvs")
+    private PtOsvModel[] ptOsvs;
 
-    /**
-     * Fingerprints that is immanent to this vulnerability
-     */
-    @JsonProperty("fingerprintId")
-    protected String fingerprintId;
+    @JsonProperty("component")
+    private String component;
 
-    @Getter
-    @Setter
-    @SuperBuilder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Cvss {
-        @JsonProperty("base")
-        protected String base;
-        @JsonProperty("baseScore")
-        protected String baseScore;
-        @JsonProperty("temp")
-        protected String temp;
-        @JsonProperty("tempScore")
-        protected String tempScore;
-    }
-
-    /**
-     * Unique vulnerability type identifier in the CVE classifier like CVE-2012-6708
-     */
-    @JsonProperty("cveId")
-    protected String cveId;
-
-    /**
-     * CVSS score assigned to  this vulnerability
-     */
-    @JsonProperty("cvss")
-    protected Cvss cvss;
+    @JsonProperty("version")
+    private String version;
 }

@@ -664,6 +664,48 @@ swaggerSources {
             ]
         }
     }
+
+    auth4100 {
+        inputFile = file('src/main/resources/api/v4100/auth.yaml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v4100.auth.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v4100.auth.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    api4100 {
+        inputFile = file('src/main/resources/api/v4100/swagger.yaml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v4100.api.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v4100.api.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    notifications4100 {
+        inputFile = file('src/main/resources/api/v4100/notifications.yml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v4100.notifications.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v4100.notifications.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
 }
 
 compileJava.dependsOn \
@@ -709,7 +751,10 @@ compileJava.dependsOn \
  swaggerSources.notifications490.code, \
  swaggerSources.auth491.code, \
  swaggerSources.api491.code, \
- swaggerSources.notifications491.code
+ swaggerSources.notifications491.code, \
+ swaggerSources.auth4100.code, \
+ swaggerSources.api4100.code, \
+ swaggerSources.notifications4100.code
 
 sourceSets.main.java.srcDirs \
  "${swaggerSources.auth411.code.outputDir}/src/main/java", \
@@ -754,4 +799,7 @@ sourceSets.main.java.srcDirs \
  "${swaggerSources.notifications490.code.outputDir}/src/main/java", \
  "${swaggerSources.auth491.code.outputDir}/src/main/java", \
  "${swaggerSources.api491.code.outputDir}/src/main/java", \
- "${swaggerSources.notifications491.code.outputDir}/src/main/java"
+ "${swaggerSources.notifications491.code.outputDir}/src/main/java", \
+ "${swaggerSources.auth4100.code.outputDir}/src/main/java", \
+ "${swaggerSources.api4100.code.outputDir}/src/main/java", \
+ "${swaggerSources.notifications4100.code.outputDir}/src/main/java"

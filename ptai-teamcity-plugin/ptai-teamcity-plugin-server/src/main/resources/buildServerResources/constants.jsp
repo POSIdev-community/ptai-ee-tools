@@ -108,6 +108,14 @@
 <c:set var="HINT_REPORTING_REPORT_TEMPLATE" value="<%=Hints.REPORTING_REPORT_TEMPLATE%>"/>
 <c:set var="DEFAULT_REPORTING_REPORT_TEMPLATE" value="<%=ReportsHelper.getDefaultTemplate()%>"/>
 
+<c:set var="REPORTING_REPORT_DATAFLOW" value="<%=Params.REPORTING_REPORT_DATAFLOW%>"/>
+<c:set var="LABEL_REPORTING_REPORT_DATAFLOW" value="<%=Labels.REPORTING_REPORT_DATAFLOW%>"/>
+<c:set var="HINT_REPORTING_REPORT_DATAFLOW" value="<%=Hints.REPORTING_REPORT_DATAFLOW%>"/>
+
+<c:set var="REPORTING_REPORT_SUMMARY" value="<%=Params.REPORTING_REPORT_SUMMARY%>"/>
+<c:set var="LABEL_REPORTING_REPORT_SUMMARY" value="<%=Labels.REPORTING_REPORT_SUMMARY%>"/>
+<c:set var="HINT_REPORTING_REPORT_SUMMARY" value="<%=Hints.REPORTING_REPORT_SUMMARY%>"/>
+
 <%-- Valid locale values and labels --%>
 <c:set var="REPORTING_LOCALE_ENGLISH" value="<%=Constants.REPORTING_LOCALE_ENGLISH%>"/>
 <c:set var="LABEL_REPORTING_LOCALE_ENGLISH" value="<%=Labels.REPORTING_LOCALE_ENGLISH%>"/>

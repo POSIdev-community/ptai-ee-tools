@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV13.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV14.Version._1_4;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV15.Version._1_5;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_invalid;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
@@ -107,10 +108,7 @@ public abstract class UnifiedAiProjScanSettings {
         //noinspection ConstantConditions
         do {
             if (isEmpty(data)) {
-                result.getMessages().add(ParseResult.Message.builder()
-                        .type(ParseResult.Message.Type.ERROR)
-                        .text(i18n_ast_settings_type_manual_json_settings_message_empty())
-                        .build());
+                addErrorMessageToResult(result, i18n_ast_settings_type_manual_json_settings_message_empty());
                 break;
             }
             final JsonNode root;
@@ -131,6 +129,8 @@ public abstract class UnifiedAiProjScanSettings {
                 settings = (root.path("ScanModules").isMissingNode())
                         ? new AiProjLegacyScanSettings(root)
                         : new AiProjV10ScanSettings(root);
+            else if (_1_5.value().equals(versionNode.textValue()))
+                settings = new AiProjV15ScanSettings(root);
             else if (_1_4.value().equals(versionNode.textValue()))
                 settings = new AiProjV14ScanSettings(root);
             else if (_1_3.value().equals(versionNode.textValue()))
@@ -142,10 +142,7 @@ public abstract class UnifiedAiProjScanSettings {
             else if (_1_0.value().equals(versionNode.textValue()))
                 settings = new AiProjV10ScanSettings(root);
             else {
-                result.getMessages().add(ParseResult.Message.builder()
-                        .type(ParseResult.Message.Type.ERROR)
-                        .text(i18n_ast_settings_type_manual_json_settings_message_version_unknown())
-                        .build());
+                addErrorMessageToResult(result, i18n_ast_settings_type_manual_json_settings_message_version_unknown());
                 break;
             }
 
@@ -158,6 +155,33 @@ public abstract class UnifiedAiProjScanSettings {
             log.trace("Validate JSON for AIPROJ schema compliance");
             JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
             Set<ValidationMessage> errors = jsonSchema.validate(root);
+
+            log.trace("Validate Tags attribute");
+            JsonNode tagsNode = root.path("Tags");
+            if (!tagsNode.isMissingNode() && tagsNode.isArray()) {
+                Set<String> tagTypes = new HashSet<>();
+                for (JsonNode tag : tagsNode) {
+                    JsonNode typeNode = tag.path("Type");
+                    JsonNode valueNode = tag.path("Value");
+
+                    String typeTextValue = typeNode.textValue();
+
+                    if(tagTypes.contains(typeTextValue)) {
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_type_sametype(typeTextValue);
+                        log.error(errorMessage);
+                        addErrorMessageToResult(result, errorMessage);
+                    }
+
+                    tagTypes.add(typeTextValue);
+
+                    int maxValueLength = 512;
+                    if (valueNode.isTextual() && valueNode.asText().length() > maxValueLength) {
+                        String errorMessage = i18n_ast_settings_type_manual_json_settings_message_tags_value_toolong(typeTextValue);
+                        log.error(errorMessage);
+                        addErrorMessageToResult(result, errorMessage);
+                    }
+                }
+            }
             result.getMessages().addAll(settings.processErrorMessages(errors));
             if (result.getMessages().stream().noneMatch((m) -> m.getType().equals(ParseResult.Message.Type.ERROR))) {
                 result.getMessages().add(
@@ -167,6 +191,13 @@ public abstract class UnifiedAiProjScanSettings {
             result.setSettings(settings);
         } while (false);
         return result;
+    }
+
+    private static void addErrorMessageToResult(ParseResult result, String errorMessage) {
+        result.getMessages().add(ParseResult.Message.builder()
+                .type(ParseResult.Message.Type.ERROR)
+                .text(errorMessage)
+                .build());
     }
 
     private static ParseResult.Message getDetectedSettingsMessage(String projectName,Set<ScanBrief.ScanSettings.Language> languages) {
@@ -214,11 +245,16 @@ public abstract class UnifiedAiProjScanSettings {
         if (null != result.getCause())
             throw result.getCause();
         List<ParseResult.Message> errors = result.getMessages().stream().filter((m) -> m.getType().equals(ParseResult.Message.Type.ERROR)).collect(Collectors.toList());
-        if (!errors.isEmpty())
+        if (!errors.isEmpty()) {
+            String errorMessages = errors.stream()
+                    .map(ParseResult.Message::getText)
+                    .collect(Collectors.joining("\n"));
+
             throw GenericException.raise(
-                    i18n_ast_settings_type_manual_json_settings_message_invalid(),
+                    i18n_ast_settings_type_manual_json_settings_message_invalid() + "\n" + errorMessages,
                     new IllegalArgumentException()
             );
+        }
         return result.getSettings();
     }
 
@@ -280,7 +316,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15 }
     public abstract Version getVersion();
 
     /**
@@ -315,6 +351,7 @@ public abstract class UnifiedAiProjScanSettings {
         BLACKBOX("BlackBox"),
         PATTERNMATCHING("PatternMatching"),
         STATICCODEANALYSIS("StaticCodeAnalysis"),
+        SOFTWARECOMPOSITIONANALYSIS("SoftwareCompositionAnalysis"),
         @Deprecated
         DATAFLOWANALYSIS("DataFlowAnalysis"),
         @Deprecated
@@ -487,6 +524,19 @@ public abstract class UnifiedAiProjScanSettings {
         return null;
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class ScaSettings {
+        protected String customParameters;
+        protected Boolean buildDependenciesGraph;
+    }
+
+    public ScaSettings getScaSettings() {
+        return null;
+    }
+
     @NonNull
     public abstract Boolean isSkipGitIgnoreFiles();
     @NonNull
@@ -525,6 +575,38 @@ public abstract class UnifiedAiProjScanSettings {
         protected List<String> emailRecipients = new ArrayList<>();
     }
     public abstract MailingProjectSettings getMailingProjectSettings();
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class Tags {
+        protected List<TagEntity> tags;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class TagEntity {
+        @Getter
+        @RequiredArgsConstructor
+        public enum TagType {
+            REPO("Repo"),
+            BRANCH("Branch");
+
+            private String value;
+
+            TagType(String value) {
+                this.value = value;
+            }
+        }
+
+        protected TagType type;
+        protected String value;
+    }
+
+    public Tags getTags() { return null; }
 
     @Getter
     @Setter

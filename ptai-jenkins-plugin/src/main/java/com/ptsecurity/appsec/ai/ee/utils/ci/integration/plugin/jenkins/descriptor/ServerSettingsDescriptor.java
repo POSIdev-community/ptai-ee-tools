@@ -10,6 +10,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.serversettings.ServerSettings;
@@ -29,6 +30,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 @Extension
@@ -66,13 +68,18 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
 
             Credentials credentials = CredentialsImpl.getCredentialsById(item, serverCredentialsId);
 
+            String ptAiToken = Optional.ofNullable(credentials.getToken())
+                    .orElseThrow(() -> new PTAIClientTokenIsEmptyException(
+                            Resources.i18n_ast_settings_server_token_message_empty()))
+                    .getPlainText();
+
             PluginDescriptor pluginDescriptor = Jenkins.get().getDescriptorByType(PluginDescriptor.class);
             AdvancedSettings advancedSettings = new AdvancedSettings();
             advancedSettings.apply(pluginDescriptor.getAdvancedSettings());
 
             AbstractApiClient client = Factory.client(ConnectionSettings.builder()
                     .url(serverUrl)
-                    .credentials(TokenCredentials.builder().token(credentials.getToken().getPlainText()).build())
+                    .credentials(TokenCredentials.builder().token(ptAiToken).build())
                     .insecure(serverInsecure)
                     .caCertsPem(credentials.getServerCaCertificates())
                     .build(), advancedSettings);
@@ -115,4 +122,3 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
                         CredentialsMatchers.always());
     }
 }
-

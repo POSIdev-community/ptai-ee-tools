@@ -122,6 +122,16 @@ public class Defaults {
     public static final String REPORTING_REPORT = FALSE;
 
     /**
+     * See {@link Params#REPORTING_REPORT_DATAFLOW}
+     */
+    public static final String REPORTING_REPORT_DATAFLOW = FALSE;
+
+    /**
+     * See {@link Params#REPORTING_REPORT_SUMMARY}
+     */
+    public static final String REPORTING_REPORT_SUMMARY = FALSE;
+
+    /**
      * See {@link Params#REPORTING_RAWDATA}
      */
     public static final String REPORTING_RAWDATA = FALSE;
