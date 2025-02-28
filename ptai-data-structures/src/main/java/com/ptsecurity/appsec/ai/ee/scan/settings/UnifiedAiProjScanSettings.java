@@ -1,5 +1,8 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.*;
@@ -115,8 +118,9 @@ public abstract class UnifiedAiProjScanSettings {
             try {
                 log.trace("Try to parse AIPROJ as generic JSON data");
                 root = call(
-                        () -> createObjectMapper().readTree(data),
-                        i18n_ast_settings_type_manual_json_settings_message_invalid());
+                        () -> parseRootNode(data),
+                        i18n_ast_settings_type_manual_json_settings_message_invalid()
+                );
             } catch (GenericException e) {
                 result.setCause(e);
                 break;
@@ -191,6 +195,15 @@ public abstract class UnifiedAiProjScanSettings {
             result.setSettings(settings);
         } while (false);
         return result;
+    }
+
+    private static JsonNode parseRootNode(final String data) throws JsonProcessingException {
+        JsonNode node = createObjectMapper().readTree(data);
+        if (node.isObject()) {
+            return node;
+        }
+
+        throw new JsonMappingException("Root must be a JSON object, but got: " + node.getNodeType());
     }
 
     private static void addErrorMessageToResult(ParseResult result, String errorMessage) {
