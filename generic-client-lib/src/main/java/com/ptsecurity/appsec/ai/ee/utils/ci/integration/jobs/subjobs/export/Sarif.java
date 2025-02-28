@@ -125,15 +125,15 @@ public class Sarif extends Export {
             if (NONE != issue.getApprovalState())
                 result.withKind(ISSUE_KIND_MAP.get(issue.getApprovalState()));
             tags.add(issue.getClazz().name());
-            if (BaseIssue.Type.SCA.equals(issue.getClazz())) {
-                ScaIssue scaIssue = (ScaIssue) issue;
+            if (BaseIssue.Type.FINGERPRINT.equals(issue.getClazz())) {
+                FingerprintIssue fingerprintIssue = (FingerprintIssue) issue;
                 // Set SCA issue location. That location is file-scope only and
                 // doesn't contain line and column numbers
                 location.withPhysicalLocation(
                         new PhysicalLocation()
                                 .withArtifactLocation(
                                         new ArtifactLocation()
-                                                .withUri(fixUri(scaIssue.getFile()))
+                                                .withUri(fixUri(fingerprintIssue.getFile()))
                                                 .withUriBaseId("SRCROOT")
                                 ));
             } else if (BaseIssue.Type.BLACKBOX.equals(issue.getClazz()))
@@ -180,8 +180,20 @@ public class Sarif extends Export {
             } else if (BaseIssue.Type.WEAKNESS.equals(issue.getClazz())) {
                 WeaknessIssue weaknessIssue = (WeaknessIssue) issue;
                 location.withPhysicalLocation(phl(weaknessIssue.getVulnerableExpression()));
-            } else if (BaseIssue.Type.YARAMATCH.equals(issue.getClazz()) || BaseIssue.Type.PYGREP.equals(issue.getClazz()))
+            } else if (BaseIssue.Type.YARAMATCH.equals(issue.getClazz()) ||
+                    BaseIssue.Type.PYGREP.equals(issue.getClazz()) ||
+                    BaseIssue.Type.FINGERPRINT_SCA.equals(issue.getClazz())) {
                 continue;
+            } else if (BaseIssue.Type.SCA.equals(issue.getClazz())) {
+                ScaIssue scaIssue = (ScaIssue) issue;
+                location.withPhysicalLocation(
+                        new PhysicalLocation()
+                                .withArtifactLocation(
+                                        new ArtifactLocation()
+                                                .withUri(fixUri(scaIssue.getFile()))
+                                                .withUriBaseId("SRCROOT")
+                                ));
+            }
 
             sarifRun.getResults().add(result);
         }
