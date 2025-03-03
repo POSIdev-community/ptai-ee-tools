@@ -180,7 +180,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         ServerVersionTasks serverVersionTasks = new com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v491.tasks.ServerVersionTasksImpl(client);
         Map<ServerVersionTasks.Component, String> versions = call(serverVersionTasks::current, "PT AI server API version read ailed");
 
-        return ScanBrief.builder()
+        ScanBrief.ScanBriefBuilder scanBriefBuilder = ScanBrief.builder()
                 .apiVersion(client.getApiVersion())
                 .ptaiServerUrl(client.getConnectionSettings().getUrl())
                 .ptaiServerVersion(versions.get(ServerVersionTasks.Component.AIE))
@@ -188,8 +188,14 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .id(scanResultId)
                 .projectId(projectId)
                 .projectName(projectName)
-                .scanSettings(convert(scanSettings))
-                .build();
+                .scanSettings(convert(scanSettings));
+
+        ScanAgentInfoModel scanAgentInfoModel = scanResult.getScanAgentInfo();
+        if (scanAgentInfoModel != null) {
+            scanBriefBuilder.ptaiAgentName(scanAgentInfoModel.getName());
+        }
+
+        return scanBriefBuilder.build();
     }
 
     /**

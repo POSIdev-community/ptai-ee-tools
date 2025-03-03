@@ -7,6 +7,7 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.server.v450.api.model.*;
+import com.ptsecurity.appsec.ai.ee.server.v460.api.model.ScanAgentInfoModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v450.ApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v450.converters.EnumsConverter;
@@ -180,7 +181,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         ServerVersionTasks serverVersionTasks = new ServerVersionTasksImpl(client);
         Map<ServerVersionTasks.Component, String> versions = call(serverVersionTasks::current, "PT AI server API version read ailed");
 
-        return ScanBrief.builder()
+        ScanBrief.ScanBriefBuilder scanBriefBuilder = ScanBrief.builder()
                 .apiVersion(client.getApiVersion())
                 .ptaiServerUrl(client.getConnectionSettings().getUrl())
                 .ptaiServerVersion(versions.get(ServerVersionTasks.Component.AIE))
@@ -188,8 +189,25 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .id(scanResultId)
                 .projectId(projectId)
                 .projectName(projectName)
-                .scanSettings(convert(scanSettings))
-                .build();
+                .scanSettings(convert(scanSettings));
+
+        List<ScanAgentModel> scanAgents = call(
+                () -> client.getScanAgentApi().apiScanAgentsGet(),
+                "Get scan agents list failed",
+                /* warningOnly =  */ true
+        );
+
+        if (scanAgents != null) {
+            scanAgents.stream()
+                    .filter(agent -> projectId == agent.getProjectId())
+                    .findFirst()
+                    .ifPresent(scanAgentModel ->
+                            scanBriefBuilder.ptaiAgentName(scanAgentModel.getAgentName())
+                    );
+
+        }
+
+        return scanBriefBuilder.build();
     }
 
     /**
