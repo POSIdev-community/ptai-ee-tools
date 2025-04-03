@@ -1,11 +1,11 @@
-package com.ptsecurity.appsec.ai.ee.server.v4100;
+package com.ptsecurity.appsec.ai.ee.server.v4110;
 
 import com.ptsecurity.appsec.ai.ee.server.integration.rest.Environment;
-import com.ptsecurity.appsec.ai.ee.server.v4100.auth.ApiClient;
-import com.ptsecurity.appsec.ai.ee.server.v4100.auth.ApiException;
-import com.ptsecurity.appsec.ai.ee.server.v4100.auth.api.AuthApi;
-import com.ptsecurity.appsec.ai.ee.server.v4100.auth.model.AuthResultModel;
-import com.ptsecurity.appsec.ai.ee.server.v4100.auth.model.AuthScope;
+import com.ptsecurity.appsec.ai.ee.server.v4110.auth.ApiClient;
+import com.ptsecurity.appsec.ai.ee.server.v4110.auth.ApiException;
+import com.ptsecurity.appsec.ai.ee.server.v4110.auth.api.AuthApi;
+import com.ptsecurity.appsec.ai.ee.server.v4110.auth.model.AuthResultModel;
+import com.ptsecurity.appsec.ai.ee.server.v4110.auth.model.AuthScope;
 import com.ptsecurity.misc.tools.BaseTest;
 import com.ptsecurity.misc.tools.helpers.CertificateHelper;
 import lombok.SneakyThrows;
@@ -28,15 +28,15 @@ import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.UUID;
 
-import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ApiVersion.V4100;
+import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ApiVersion.V4110;
 import static com.ptsecurity.appsec.ai.ee.server.integration.rest.Connection.CONNECTION;
 import static com.ptsecurity.misc.tools.helpers.CertificateHelper.createTrustManager;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @Tag("integration")
-@Environment(enabledFor = { V4100 })
-@DisplayName("Test PT AI 4.10.0 authentication calls")
+@Environment(enabledFor = { V4110 })
+@DisplayName("Test PT AI 4.11.0 authentication calls")
 public class AuthTest extends BaseTest {
     @SneakyThrows
     @Test

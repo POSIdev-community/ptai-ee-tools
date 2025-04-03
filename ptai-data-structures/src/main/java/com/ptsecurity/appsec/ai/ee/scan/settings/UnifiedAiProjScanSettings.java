@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV13.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV14.Version._1_4;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV15.Version._1_5;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV16.Version._1_6;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_invalid;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
@@ -133,6 +133,8 @@ public abstract class UnifiedAiProjScanSettings {
                 settings = (root.path("ScanModules").isMissingNode())
                         ? new AiProjLegacyScanSettings(root)
                         : new AiProjV10ScanSettings(root);
+            else if (_1_6.value().equals(versionNode.textValue()))
+                settings = new AiProjV16ScanSettings(root);
             else if (_1_5.value().equals(versionNode.textValue()))
                 settings = new AiProjV15ScanSettings(root);
             else if (_1_4.value().equals(versionNode.textValue()))
@@ -329,7 +331,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16 }
     public abstract Version getVersion();
 
     /**
@@ -443,7 +445,7 @@ public abstract class UnifiedAiProjScanSettings {
         protected Boolean unpackUserPackages = false;
         protected String userPackagePrefixes;
         public enum JavaVersion {
-            v1_8, v1_11, v1_17
+            v1_8, v1_11, v1_17, v1_21
         }
         protected UnifiedAiProjScanSettings.JavaSettings.JavaVersion javaVersion;
         protected Boolean usePublicAnalysisMethod;
