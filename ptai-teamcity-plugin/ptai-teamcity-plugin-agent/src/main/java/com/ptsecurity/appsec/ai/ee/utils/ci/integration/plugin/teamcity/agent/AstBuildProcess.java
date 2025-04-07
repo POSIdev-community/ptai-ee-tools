@@ -4,6 +4,7 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.RawData;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.LogConfigurator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
@@ -13,6 +14,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sari
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.SonarGiif;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.ReportsHelper;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
@@ -59,6 +61,12 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
     @Override
     public BuildFinishedStatus call() {
         AbstractJob.JobExecutionResult status = ast();
+        FileOperations fileOps = job.getFileOps();
+
+        if (LogConfigurator.logFile != null && fileOps != null) {
+            fileOps.saveArtifact("ptsecurity-ai.log", LogConfigurator.logFile);
+        }
+
         if (AbstractJob.JobExecutionResult.INTERRUPTED.equals(status))
             return BuildFinishedStatus.INTERRUPTED;
         else if (AbstractJob.JobExecutionResult.SUCCESS.equals(status))

@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent;
 
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.LogConfigurator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants;
 import jetbrains.buildServer.RunBuildException;
 import jetbrains.buildServer.agent.*;
@@ -9,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AstAgentBuildRunner implements AgentBuildRunner, AgentBuildRunnerInfo {
+    static {
+        LogConfigurator.redirectLogsToFile();
+    }
     /**
      * Can be used to notify agent artifacts publisher about new artifacts to be published during the build
      */
