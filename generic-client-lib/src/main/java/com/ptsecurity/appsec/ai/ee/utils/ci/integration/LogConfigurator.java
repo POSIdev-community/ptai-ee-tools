@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 public class LogConfigurator {
     private static ResourceBundle bundle;
     public static File logFile = null;
-    private static final String LOG_FILE_NAME = "ptsecurity-ai.log";
+    private static final String logFileName = "ptsecurity-ai.log";
 
     static {
         try {
@@ -37,7 +37,6 @@ public class LogConfigurator {
 
             final LoggerContext context = (LoggerContext) LogManager.getContext(false);
             final Configuration config = context.getConfiguration();
-            final String loggerName = "com.ptsecurity.appsec.ai.ee.utils.ci.integration";
 
             String tempDir = getSystemTempPath();
 
@@ -49,14 +48,14 @@ public class LogConfigurator {
             logFile = createLogFile(tempDir);
 
             Appender appender = FileAppender.newBuilder()
-                    .setName("ptai.log")
+                    .setName(logFileName)
                     .withFileName(logFile.getAbsolutePath())
                     .setLayout(createLayout(config))
                     .build();
 
             appender.start();
 
-            configureLogger(config, loggerName, appender);
+            configureLogger(config, appender);
 
             context.updateLoggers();
             System.out.println("Logging configured to: " + logFile.getAbsolutePath());
@@ -73,7 +72,7 @@ public class LogConfigurator {
 
     private static File createLogFile(String basePath) {
         try {
-            Path path = Paths.get(basePath, LOG_FILE_NAME);
+            Path path = Paths.get(basePath, logFileName);
 
             Files.createDirectories(path.getParent());
             Files.createFile(path);
@@ -97,7 +96,9 @@ public class LogConfigurator {
                 .build();
     }
 
-    private static void configureLogger(Configuration config, String loggerName, Appender appender) {
+    private static void configureLogger(Configuration config, Appender appender) {
+        final String loggerName = "com.ptsecurity.appsec.ai.ee.utils.ci.integration";
+
         config.addAppender(appender);
         LoggerConfig loggerConfig = config.getLoggerConfig(loggerName);
 
