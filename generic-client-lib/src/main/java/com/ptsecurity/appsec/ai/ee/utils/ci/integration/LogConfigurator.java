@@ -67,6 +67,9 @@ public class LogConfigurator {
         }
     }
 
+    public static boolean isDeleteTempLogsFile() {
+        return getBooleanProperty("deleteTempLogsFile");
+    }
 
     private static File createLogFile(String basePath) {
         try {
@@ -111,15 +114,18 @@ public class LogConfigurator {
         return System.getProperty("java.io.tmpdir");
     }
 
-
     private static boolean isRedirectLogs() {
+        return getBooleanProperty("redirectLogsToFile");
+    }
+
+    private static boolean getBooleanProperty(String property) {
         if (bundle == null) {
             return false;
         }
 
         try {
             return Boolean.parseBoolean(
-                    bundle.getString("redirectLogsToFile")
+                    bundle.getString(property)
             );
         } catch (Exception e) {
             return false;
