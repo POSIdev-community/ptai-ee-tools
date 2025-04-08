@@ -35,37 +35,43 @@ import static org.joor.Reflect.onClass;
 public class Factory {
     public CheckServerTasks checkServerTasks(@NonNull final AbstractApiClient client) throws GenericException {
         String className = client.getClass().getPackage().getName() + "." + "tasks.CheckServerTasksImpl";
+        log.debug("Creating CheckServerTasks instance using class: {}", className);
         return onClass(className).create(client).get();
     }
 
     public ServerVersionTasks serverVersionTasks(@NonNull final AbstractApiClient client) throws GenericException {
         String className = client.getClass().getPackage().getName() + "." + "tasks.ServerVersionTasksImpl";
+        log.debug("Creating ServerVersionTasks instance using class: {}", className);
         return onClass(className).create(client).get();
     }
 
     public ReportsTasks reportsTasks(@NonNull final AbstractApiClient client) throws GenericException {
         String className = client.getClass().getPackage().getName() + "." + "tasks.ReportsTasksImpl";
+        log.debug("Creating ReportsTasks instance using class: {}", className);
         return onClass(className).create(client).get();
     }
 
     public ProjectTasks projectTasks(@NonNull final AbstractApiClient client) throws GenericException {
         String className = client.getClass().getPackage().getName() + "." + "tasks.ProjectTasksImpl";
+        log.debug("Creating ProjectTasks instance using class: {}", className);
         return onClass(className).create(client).get();
     }
 
     public GenericAstTasks genericAstTasks(@NonNull final AbstractApiClient client) throws GenericException {
         String className = client.getClass().getPackage().getName() + "." + "tasks.GenericAstTasksImpl";
+        log.debug("Creating GenericAstTasks instance using class: {}", className);
         return onClass(className).create(client).get();
     }
 
     public static List<Class<?>> getAllClientImplementations() {
         // Search for available VersionRange-annotated non-abstract descendants of AbstractApiClient
-        log.debug("Scan PT AI server API client implementations");
+        log.debug("Initiating scan for PT AI server API client implementations");
         Instant start = Instant.now();
         Reflections reflections = new Reflections("com.ptsecurity.appsec.ai.ee.utils.ci.integration.api");
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(VersionRange.class);
         Duration classScanDuration = Duration.between(start, Instant.now());
-        log.debug("Scan took {} ns, {} client implementations found", classScanDuration.toNanos(), classes.size());
+        log.debug("Scan completed in {} ns. Found {} client implementations.", classScanDuration.toNanos(), classes.size());
+        log.debug("List of found implementations: {}", classes);
         return new ArrayList<>(classes);
     }
 
@@ -107,51 +113,57 @@ public class Factory {
         List<Class<?>> clients = getAllClientImplementations();
         for (Class<?> clazz : clients) {
             log.debug("Checking {} class", clazz.getCanonicalName());
+            log.debug("Modifiers for {}: {}", clazz.getCanonicalName(), clazz.getModifiers());
             if (!AbstractApiClient.class.isAssignableFrom(clazz)) continue;
             if (Modifier.isAbstract(clazz.getModifiers())) continue;
 
             ClientCreateStage stage = ClientCreateStage.INIT;
             try {
+                log.debug("Stage {}: Preparing to create instance for {}", stage, clazz.getCanonicalName());
                 AbstractApiClient client = onClass(clazz).create(connectionSettings.validate(), advancedSettings).get();
                 // Initialize all API clients with URL, timeouts, SSL settings etc.
                 client.init();
                 log.debug("Class {} instance created", clazz.getCanonicalName());
 
                 stage = ClientCreateStage.AUTH;
+                log.debug("Stage {}: Starting authentication for {}", stage, clazz.getCanonicalName());
                 call(client::authenticate, "Authentication failed");
-                log.debug("Client authenticated");
+                log.debug("Stage {}: Client authenticated for {}", stage, clazz.getCanonicalName());
 
                 stage = ClientCreateStage.VERSION;
+                log.debug("Stage {}: Retrieving PT AI API version for {}", stage, clazz.getCanonicalName());
                 String versionString = call(client::getCurrentApiVersion, "PT AI API version read failed")
                         .get(ServerVersionTasks.Component.AIE);
                 if (StringUtils.isEmpty(versionString)) {
-                    log.debug("Empty PT AI API version");
+                    log.debug("Empty PT AI API version for {}", clazz.getCanonicalName());
                     continue;
                 }
-                log.debug("PT AI API version string: {}", versionString);
+                log.debug("PT AI API version string for {}: {}", clazz.getCanonicalName(), versionString);
                 List<Integer> version = call(
                         () -> Arrays.stream(versionString.split("\\.")).map(Integer::valueOf).collect(Collectors.toList()),
                         "Version string parse failed");
-                log.debug("PT AI API version parse complete");
+                log.debug("PT AI API version parse complete for {}", clazz.getCanonicalName());
                 // Client authenticated, but it doesn't mean anything: need to check if version from server lays in VersionRange
                 VersionRange versionRange = clazz.getAnnotation(VersionRange.class);
                 // Check if PT AI server API version greater than minimum
                 List<Integer> minimumVersion = new ArrayList<>();
                 for (int i : versionRange.min()) minimumVersion.add(i);
                 if (0 != versionRange.min().length && 1 == VersionHelper.compare(minimumVersion, version)) {
-                    log.debug("PT AI server API minimum version constraint violated");
+                    log.debug("PT AI server API minimum version constraint violated for {}: expected at least {}, got {}",
+                            clazz.getCanonicalName(), minimumVersion, version);
                     continue;
                 }
                 // Check if PT AI server API version less than maximum
                 List<Integer> maximumVersion = new ArrayList<>();
                 for (int i : versionRange.max()) maximumVersion.add(i);
                 if (0 != versionRange.max().length && 1 == VersionHelper.compare(version, maximumVersion)) {
-                    log.debug("PT AI server API maximum version constraint violated");
+                    log.debug("PT AI server API maximum version constraint violated for {}: maximum {}, got {}",
+                            clazz.getCanonicalName(), maximumVersion, version);
                     continue;
                 }
                 return client;
             } catch (GenericException e) {
-                log.trace("PT AI server connection exception", e);
+                log.trace("PT AI server connection exception in stage {} for {}: {}", stage, clazz.getCanonicalName(), e.getMessage());
                 // As getCause for GenericException may return non-null ApiException the root
                 // reason may reside deeper. Let's get them
                 Throwable e1 = e.getCause();
@@ -178,14 +190,14 @@ public class Factory {
                     throw GenericException.raise(
                             Resources.i18n_ast_settings_server_check_message_sslhandshakefailed(), e2);
                 } else if (HttpStatus.SC_NOT_FOUND == e.getCode()) {
-                    log.trace("Continue iterate through API client versions as 404 response");
+                    log.trace("Continue iterate through API client versions as 404 response for {}", clazz.getCanonicalName());
                 } else if (HttpStatus.SC_UNAUTHORIZED == e.getCode()) {
-                    log.trace("No need to continue iterate through API client versions as authentication failed");
+                    log.trace("No need to continue iterate through API client versions as authentication failed for {}", clazz.getCanonicalName());
                     throw GenericException.raise(
                             Resources.i18n_ast_settings_server_check_message_unauthorized(), e.getCause());
                 } else {
-                    log.debug("PT AI server API check failed: {}", e.getDetailedMessage());
-                    log.trace("Exception details:", e);
+                    log.debug("PT AI server API check failed for {}: {}", clazz.getCanonicalName(), e.getDetailedMessage());
+                    log.trace("Exception details for {}:", clazz.getCanonicalName(), e);
                 }
             }
         }
@@ -194,13 +206,18 @@ public class Factory {
 
     @NonNull
     public static AbstractApiClient client(@NonNull final ConnectionSettings connectionSettings) throws GenericException {
-        return client(connectionSettings, AdvancedSettings.getDefault());
+        log.debug("Creating client with ConnectionSettings: {}", connectionSettings);
+        AbstractApiClient apiClient = client(connectionSettings, AdvancedSettings.getDefault());
+        log.debug("Client created with default AdvancedSettings: {}", apiClient);
+        return apiClient;
     }
 
     @NonNull
     public static AbstractApiClient client(@NonNull final AbstractJob job) throws GenericException {
+        log.debug("Creating client from AbstractJob: {}", job);
         AbstractApiClient result = client(job.getConnectionSettings(), job.getAdvancedSettings());
         result.setConsole(job);
+        log.debug("Client created from job {} and console set", job);
         return result;
     }
 }

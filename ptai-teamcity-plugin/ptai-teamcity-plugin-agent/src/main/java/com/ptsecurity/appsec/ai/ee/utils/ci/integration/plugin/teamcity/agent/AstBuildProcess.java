@@ -4,6 +4,7 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.RawData;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.LogConfigurator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
@@ -13,6 +14,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sari
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.SonarGiif;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.ReportsHelper;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
@@ -24,9 +26,11 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -56,9 +60,23 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
 
     private TeamcityAstJob job = null;
 
+    @SneakyThrows
     @Override
     public BuildFinishedStatus call() {
+        if (!LogConfigurator.logFile.exists()) {
+            LogConfigurator.redirectLogsToFile();
+        }
         AbstractJob.JobExecutionResult status = ast();
+        FileOperations fileOps = job.getFileOps();
+
+        if (LogConfigurator.logFile != null && fileOps != null && LogConfigurator.logFile.exists()) {
+            fileOps.saveArtifact("ptsecurity-ai.log", LogConfigurator.logFile);
+
+            if (LogConfigurator.isDeleteTempLogsFile()) {
+                Files.deleteIfExists(LogConfigurator.logFile.toPath());
+            }
+        }
+
         if (AbstractJob.JobExecutionResult.INTERRUPTED.equals(status))
             return BuildFinishedStatus.INTERRUPTED;
         else if (AbstractJob.JobExecutionResult.SUCCESS.equals(status))

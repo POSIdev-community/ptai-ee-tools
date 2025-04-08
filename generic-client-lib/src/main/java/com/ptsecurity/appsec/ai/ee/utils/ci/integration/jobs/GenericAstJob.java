@@ -65,7 +65,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @ToString.Exclude
     protected AstOperations astOps = null;
 
-    @Getter
+    @Getter(AccessLevel.PUBLIC)
     @Builder.Default
     @ToString.Exclude
     protected FileOperations fileOps = null;
