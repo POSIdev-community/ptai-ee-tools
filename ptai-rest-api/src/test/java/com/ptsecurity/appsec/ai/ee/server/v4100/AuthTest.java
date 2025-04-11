@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 @Tag("integration")
 @Environment(enabledFor = { V4100 })
-@DisplayName("Test PT AI 4.9.1 authentication calls")
+@DisplayName("Test PT AI 4.10.0 authentication calls")
 public class AuthTest extends BaseTest {
     @SneakyThrows
     @Test

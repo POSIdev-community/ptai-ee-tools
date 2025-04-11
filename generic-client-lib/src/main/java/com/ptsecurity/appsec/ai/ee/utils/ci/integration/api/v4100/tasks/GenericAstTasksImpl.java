@@ -5,6 +5,7 @@ import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
+import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ScanBriefBuilder;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.server.v4100.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
@@ -180,7 +181,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         ServerVersionTasks serverVersionTasks = new ServerVersionTasksImpl(client);
         Map<ServerVersionTasks.Component, String> versions = call(serverVersionTasks::current, "PT AI server API version read ailed");
 
-        return ScanBrief.builder()
+        ScanBriefBuilder scanBriefBuilder = ScanBrief.builder()
                 .apiVersion(client.getApiVersion())
                 .ptaiServerUrl(client.getConnectionSettings().getUrl())
                 .ptaiServerVersion(versions.get(ServerVersionTasks.Component.AIE))
@@ -188,8 +189,14 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .id(scanResultId)
                 .projectId(projectId)
                 .projectName(projectName)
-                .scanSettings(convert(scanSettings))
-                .build();
+                .scanSettings(convert(scanSettings));
+
+        ScanAgentInfoModel scanAgentInfoModel = scanResult.getScanAgentInfo();
+        if (scanAgentInfoModel != null) {
+            scanBriefBuilder.ptaiAgentName(scanAgentInfoModel.getName());
+        }
+
+        return scanBriefBuilder.build();
     }
 
     /**

@@ -24,6 +24,7 @@ import org.apache.tools.ant.types.FileSet;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -144,7 +145,7 @@ public class FileCollector {
                     FilenameUtils.separatorsToUnix(
                             FilenameUtils.normalize(transfer.getRemovePrefix() + "/")))
                     .orElse("");
-            if ('/' == removePrefix.charAt(0))
+            if (!removePrefix.isEmpty() && '/' == removePrefix.charAt(0))
                 removePrefix = removePrefix.substring(1);
             verbose("Pattern separator = %s", transfer.getPatternSeparator().isEmpty() ? "[empty]" : transfer.getPatternSeparator());
             verbose("Remove prefix = %s", removePrefix.isEmpty() ? "[empty]" : removePrefix);
@@ -190,11 +191,17 @@ public class FileCollector {
                     if (transfer.isFlatten()) {
                         if (0 == i) continue;
                         entryName = itemPath.getFileName().toString();
+                    } else if (relativePath.equals(removePrefix)) {
+                        continue;
                     } else {
                         if (!relativePath.startsWith(removePrefix))
                             throw GenericException.raise("File collect failed", new IllegalArgumentException(String.format("File's %s does not starts with prefix %s", item, removePrefix)));
                         entryName = StringUtils.removeStart(relativePath, removePrefix);
                     }
+                    if (entryName.startsWith("/")) {
+                        entryName = entryName.substring(1);
+                    }
+
                     verbose("File %s will be added as %s", itemPath.toString(), entryName);
                     res.add(new Entry(itemPath, entryName));
                 }
