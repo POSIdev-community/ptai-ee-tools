@@ -117,11 +117,11 @@ dependencies {
         annotationProcessor 'org.checkerframework:checker-qual:3.38.0'
     }
     // https://mvnrepository.com/artifact/org.jenkins-ci.plugins/token-macro
-    implementation "org.jenkins-ci.plugins:token-macro:321.vd7cc1f2a_52c8"
+    implementation "org.jenkins-ci.plugins:token-macro:${jenkinsTokenMacroPluginVersion}"
     // https://mvnrepository.com/artifact/org.jenkins-ci.plugins/credentials
-    implementation "org.jenkins-ci.plugins:credentials:2.6.1.1"
+    implementation "org.jenkins-ci.plugins:credentials:${jenkinsCredentialsPluginVersion}"
     // https://mvnrepository.com/artifact/org.jenkins-ci.plugins/structs
-    implementation "org.jenkins-ci.plugins:structs:324.va_f5d6774f3a_d"
+    implementation "org.jenkins-ci.plugins:structs:${jenkinsStructsPluginVersion}"
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     implementation 'org.apache.commons:commons-lang3:3.12.0'
