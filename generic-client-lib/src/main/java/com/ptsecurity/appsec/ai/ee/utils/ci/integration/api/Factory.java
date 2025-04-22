@@ -3,7 +3,6 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateTrustException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.VersionUnsupportedException;
@@ -114,11 +113,9 @@ public class Factory {
             try {
                 if (!connectionSettings.isInsecure()) {
                     String caCertificate = connectionSettings.getCaCertsPem();
-                    if (caCertificate == null || caCertificate.isEmpty()) {
-                        throw new SSLCertificateEmptyException(
-                                Resources.i18n_ast_settings_server_ca_pem_message_parse_empty());
+                    if (caCertificate != null && !caCertificate.isEmpty()) {
+                        CertificateHelper.readPem(caCertificate);
                     }
-                    CertificateHelper.readPem(caCertificate);
                 }
 
                 AbstractApiClient client = onClass(clazz).create(connectionSettings.validate(), advancedSettings).get();
