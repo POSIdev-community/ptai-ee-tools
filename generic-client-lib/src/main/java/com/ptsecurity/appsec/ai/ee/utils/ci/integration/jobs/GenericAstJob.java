@@ -6,7 +6,6 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanDiagnostic;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Export;
@@ -14,6 +13,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.SetupOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -53,6 +53,13 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Getter
     @Setter
     protected String projectName;
+
+    @Getter
+    @Setter
+    protected String branchName;
+
+    @Builder.Default
+    protected UUID branchId = null;
 
     @Builder.Default
     protected UUID projectId = null;
@@ -119,8 +126,16 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // Start scan
         process(Stage.ENQUEUED);
         GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
-        scanResultId = genericAstTasks.startScan(projectId, fullScanMode);
-        info("Scan enqueued, project name: %s, id: %s, result id: %s", projectName, projectId, scanResultId);
+        scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);
+
+        info(
+                "Scan enqueued, project name: %s, id: %s, branch name is %s result id: %s",
+                projectName,
+                projectId,
+                branchName,
+                scanResultId
+        );
+
         // Now we know scan result ID, so create initial scan brief with ID's and scan settings
         scanBrief = genericAstTasks.createScanBrief(projectId, scanResultId);
         scanBrief.setUseAsyncScan(async);
