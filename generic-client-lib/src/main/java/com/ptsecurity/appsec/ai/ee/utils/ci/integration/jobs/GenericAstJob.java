@@ -129,7 +129,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);
 
         info(
-                "Scan enqueued, project name: %s, id: %s, branch name is %s result id: %s",
+                "Scan enqueued, project name: %s, id: %s, branch name: %s, result id: %s",
                 projectName,
                 projectId,
                 branchName,
@@ -180,7 +180,14 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                 ? null
                 : ScanDiagnostic.create(scanBrief, genericAstTasks.getScanErrors(projectId, scanResultId), performance());
 
-        info("Scan finished, project name: %s, project id: %s, result id: %s", projectName, projectId, scanResultId);
+        info(
+                "Scan finished, project name: %s, project id: %s, branch name: %s, result id: %s",
+                projectName,
+                projectId,
+                branchName,
+                scanResultId
+        );
+
         fine("Resulting state is " + scanBrief.getState());
         if (!EnumSet.of(DONE, ABORTED, FAILED, ABORTED_FROM_CI).contains(scanBrief.getState())) {
             // Invalid task state, save diagnostic file "as is" i.e. with policy state set to NONE
