@@ -188,36 +188,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 jsonPolicy = JsonPolicyHelper.minimize(jsonPolicy);
         }
 
-        boolean selectedCustomBranchName = branchSettings instanceof CustomNameBranchSettings;
-
-        String branchName;
-        if (selectedCustomBranchName) {
-            branchName = ((CustomNameBranchSettings) branchSettings).getBranchName();
-            log.trace("Custom branch name before macro replacement is {}", branchName);
-            branchName = Util.replaceMacro(branchName, buildInfo.getEnvVars());
-            log.trace("Custom branch name after macro replacement is {}", projectName);
-        } else {
-            log.trace("Getting git branch name from environment");
-
-            Map<String, String> envVars = buildInfo.getEnvVars();
-
-            branchName = envVars.get("GIT_LOCAL_BRANCH");
-
-            if (StringUtils.isEmpty(branchName)) {
-                branchName = envVars.get("GIT_BRANCH");
-
-                if (branchName != null && branchName.startsWith("origin/")) {
-                    branchName = branchName.substring(7);
-                }
-            }
-
-            if (StringUtils.isEmpty(branchName)) {
-                throw new RuntimeException("Git branch name from environment is empty");
-            } else {
-                log.trace("Git branch name from environment is {}", branchName);
-            }
-        }
-
         ServerSettings serverSettings;
         String configName = null;
         Credentials credentials;
@@ -245,6 +215,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
         AdvancedSettings advancedSettings = new AdvancedSettings();
         advancedSettings.apply(descriptor.getAdvancedSettings());
         advancedSettings.apply(this.advancedSettings);
+
+        String branchName = getBranchName(buildInfo, projectName);
 
         check = descriptor.doTestProjectFields(
                 scanSettings, config,
@@ -352,5 +324,39 @@ public class Plugin extends Builder implements SimpleBuildStep {
             // projectActions.add(new AstJobTableResults(project));
         }
         return projectActions;
+    }
+
+    private String getBranchName(BuildInfo buildInfo, String projectName) {
+        boolean selectedCustomBranchName = branchSettings instanceof CustomNameBranchSettings;
+
+        if (selectedCustomBranchName) {
+            String branchName = ((CustomNameBranchSettings) branchSettings).getBranchName();
+            log.trace("Custom branch name before macro replacement is {}", branchName);
+            branchName = Util.replaceMacro(branchName, buildInfo.getEnvVars());
+            log.trace("Custom branch name after macro replacement is {}", projectName);
+            return branchName;
+        }
+
+        log.trace("Getting git branch name from environment");
+
+        Map<String, String> envVars = buildInfo.getEnvVars();
+
+        String branchName = envVars.get("GIT_LOCAL_BRANCH");
+
+        if (StringUtils.isEmpty(branchName)) {
+            branchName = envVars.get("GIT_BRANCH");
+
+            if (branchName != null && branchName.startsWith("origin/")) {
+                branchName = branchName.substring(7);
+            }
+        }
+
+        if (StringUtils.isEmpty(branchName)) {
+            throw new RuntimeException("Git branch name from environment is empty");
+        } else {
+            log.trace("Git branch name from environment is {}", branchName);
+        }
+
+        return branchName;
     }
 }
