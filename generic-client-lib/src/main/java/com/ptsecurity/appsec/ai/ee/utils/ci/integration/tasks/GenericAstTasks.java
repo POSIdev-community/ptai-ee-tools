@@ -14,9 +14,9 @@ import java.util.UUID;
  *
  */
 public interface GenericAstTasks {
-    void upload(@NonNull final UUID projectId, @NonNull final File sources) throws GenericException;
+    void upload(@NonNull final UUID projectId, @NonNull final File sources, String branchName) throws GenericException;
 
-    UUID startScan(@NonNull final UUID projectId, boolean fullScanMode) throws GenericException;
+    UUID startScan(@NonNull final UUID projectId, boolean fullScanMode, String branchName) throws GenericException;
 
     String getScanResultUrl(@NonNull final UUID projectId, @NonNull final UUID scanResultId) throws GenericException;
 

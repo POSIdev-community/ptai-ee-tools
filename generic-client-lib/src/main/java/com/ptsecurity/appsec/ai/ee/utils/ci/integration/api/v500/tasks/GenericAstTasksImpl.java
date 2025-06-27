@@ -39,20 +39,62 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         super(client);
     }
 
-    public void upload(@NonNull final UUID projectId, @NonNull final File sources) throws GenericException {
-        call(() -> client.getStoreApi().apiStoreProjectProjectIdBranchesArchivePost(projectId, null, null, sources),
-                "PT AI project sources upload failed");
+    public void upload(@NonNull final UUID projectId, @NonNull final File sources, String branchName) throws GenericException {
+        List<BranchModel> branches = call(
+                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
+                "PT AI get branches failed"
+        );
+
+        UUID branchId = branches.stream()
+                .filter(branch -> Objects.equals(branch.getName(), branchName))
+                .map(BranchModel::getId)
+                .findFirst()
+                .orElse(null);
+
+        if (branchId == null) {
+            call(() -> client.getStoreApi().apiStoreProjectProjectIdBranchesArchivePost(
+                            /* projectId = */ projectId,
+                            /* name = */ branchName,
+                            /* description = */ null,
+                            /* files = */ sources
+                    ),
+                    "PT AI project sources upload failed");
+            return;
+        }
+
+        call(() -> client.getStoreApi().apiStoreProjectIdBranchesBranchIdSourcesPost(
+                        /* projectId = */ projectId,
+                        /* branchId = */ branchId,
+                        /* archived = */ true,
+                        /* name = */ branchName,
+                        /* description = */ null,
+                        /* files = */ sources
+                ),
+                "PT AI project sources upload failed"
+        );
     }
 
     @Override
-    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode) throws GenericException {
+    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName) throws GenericException {
         StartScanModel startScanModel = new StartScanModel();
         // Setup scan mode: full or incremental. Default mode is
         // incremental, but it can be overridden by JSON settings or forced from UI
         ScanType scanType = fullScanMode ? ScanType.FULL : ScanType.INCREMENTAL;
         startScanModel.setScanType(scanType);
+
+        List<BranchModel> branches = call(
+                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
+                "PT AI get branches failed"
+        );
+
+        UUID branchId = branches.stream()
+                .filter(branch -> Objects.equals(branch.getName(), branchName))
+                .map(BranchModel::getId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Branch id with name " + branchName + " not found"));
+
         return call(
-                () -> client.getScanQueueApi().apiScansProjectIdStartPost(projectId, startScanModel),
+                () -> client.getScanQueueApi().apiScansBranchesBranchIdStartPost(branchId, startScanModel),
                 "PT AI project scan start failed");
     }
 

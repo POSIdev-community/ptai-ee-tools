@@ -6547,10 +6547,15 @@ paths:
                   type: string
                 description:
                   type: string
+                files:
+                  type: string
+                  format: binary
             encoding:
               name:
                 style: form
               description:
+                style: form
+              files:
                 style: form
       responses:
         '200':
