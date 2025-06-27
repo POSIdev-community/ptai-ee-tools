@@ -16,9 +16,9 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v411.converters.Enum
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v411.converters.IssuesConverter;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v411.converters.ScanErrorsConverter;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ServerVersionTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -41,12 +41,12 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         super(client);
     }
 
-    public void upload(@NonNull final UUID projectId, @NonNull final File sources) throws GenericException {
+    public void upload(@NonNull final UUID projectId, @NonNull final File sources, String branchName) throws GenericException {
         call(() -> client.getStoreApi().apiStoreProjectIdSourcesPost(projectId, true, true, sources), "PT AI project sources upload failed");
     }
 
     @Override
-    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode) throws GenericException {
+    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName) throws GenericException {
         StartScanModel startScanModel = new StartScanModel();
         // Setup scan mode: full or incremental. Default mode is
         // incremental, but it can be overridden by JSON settings or forced from UI

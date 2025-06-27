@@ -7,6 +7,12 @@ def f = namespace(FormTagLib)
 def st = namespace("jelly:stapler")
 
 f.dropdownDescriptorSelector(
+        title: _('branchSettings'),
+        field: 'branchSettings',
+        default: descriptor.getDefaultBranchSettingsDescriptor(),
+        descriptors: descriptor.getBranchSettingsDescriptors())
+
+f.dropdownDescriptorSelector(
         title: _('scanSettings'),
         field: 'scanSettings',
         default: descriptor.getDefaultScanSettingsDescriptor(),

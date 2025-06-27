@@ -6,7 +6,6 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanDiagnostic;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Export;
@@ -14,6 +13,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.SetupOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -53,6 +53,13 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Getter
     @Setter
     protected String projectName;
+
+    @Getter
+    @Setter
+    protected String branchName;
+
+    @Builder.Default
+    protected UUID branchId = null;
 
     @Builder.Default
     protected UUID projectId = null;
@@ -119,8 +126,16 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // Start scan
         process(Stage.ENQUEUED);
         GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
-        scanResultId = genericAstTasks.startScan(projectId, fullScanMode);
-        info("Scan enqueued, project name: %s, id: %s, result id: %s", projectName, projectId, scanResultId);
+        scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);
+
+        info(
+                "Scan enqueued, project name: %s, id: %s, branch name: %s, result id: %s",
+                projectName,
+                projectId,
+                branchName,
+                scanResultId
+        );
+
         // Now we know scan result ID, so create initial scan brief with ID's and scan settings
         scanBrief = genericAstTasks.createScanBrief(projectId, scanResultId);
         scanBrief.setUseAsyncScan(async);
@@ -165,7 +180,14 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                 ? null
                 : ScanDiagnostic.create(scanBrief, genericAstTasks.getScanErrors(projectId, scanResultId), performance());
 
-        info("Scan finished, project name: %s, project id: %s, result id: %s", projectName, projectId, scanResultId);
+        info(
+                "Scan finished, project name: %s, project id: %s, branch name: %s, result id: %s",
+                projectName,
+                projectId,
+                branchName,
+                scanResultId
+        );
+
         fine("Resulting state is " + scanBrief.getState());
         if (!EnumSet.of(DONE, ABORTED, FAILED, ABORTED_FROM_CI).contains(scanBrief.getState())) {
             // Invalid task state, save diagnostic file "as is" i.e. with policy state set to NONE

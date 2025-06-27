@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Project;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.client.BaseAstIT;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
@@ -91,6 +92,8 @@ public class PluginIT extends BaseAstIT {
         // Create PT AI plugin settings
         ScanSettingsUi scanSettings = new ScanSettingsUi(phpSmoke.getName());
 
+        CustomNameBranchSettings customNameBranchSettings = new CustomNameBranchSettings(phpSmoke.getName());
+
         ServerSettings serverSettings = new ServerSettings(CONNECTION().getUrl(), credentials.getId(), true);
         ConfigCustom configCustom = new ConfigCustom(serverSettings);
 
@@ -102,7 +105,17 @@ public class PluginIT extends BaseAstIT {
         ArrayList<Transfer> transfers = new ArrayList<>();
         transfers.add(new Transfer());
 
-        Plugin ptai = new Plugin(scanSettings, configCustom, workMode, AdvancedSettings.getDefault().toString(), false, false, transfers);
+        Plugin ptai = new Plugin(
+                scanSettings,
+                configCustom,
+                customNameBranchSettings,
+                workMode,
+                AdvancedSettings.getDefault().toString(),
+                false,
+                false,
+                transfers
+        );
+
         project.getBuildersList().add(ptai);
 
         FreeStyleBuild build = project.scheduleBuild2(0).get();

@@ -2,6 +2,9 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descript
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.PipelineEnvironmentBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalconfig.Config;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
@@ -107,6 +110,8 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
      * @param serverUrl PT AI server URL for task-defined private config
      * @param serverCredentialsId PT AI credentials Id for task-defined private config
      * @param configName Global configuration name
+     * @param branchSettings PT AI branch settings
+     * @param branchName PT AI branch name
      * @return Validation result
      */
     public FormValidation doTestProjectFields(
@@ -114,7 +119,9 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             final String jsonSettings, final String jsonPolicy,
             final String projectName,
             final String serverUrl, final String serverCredentialsId,
-            final String configName) {
+            final String configName,
+            final BranchSettings branchSettings,
+            final String branchName) {
         FormValidation res = null;
         // noinspection ConstantConditions
         do {
@@ -142,6 +149,13 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                     res = Validator.error(Resources.i18n_ast_settings_server_credentials_message_empty());
                     break;
                 }
+            }
+            if (branchSettings instanceof CustomNameBranchSettings) {
+                CustomNameBranchSettings.Descriptor customNameBranchDescriptor = Jenkins.get().getDescriptorByType(
+                        CustomNameBranchSettings.Descriptor.class
+                );
+                res = customNameBranchDescriptor.doCheckBranchName(branchName);
+                if (FormValidation.Kind.ERROR == res.kind) break;
             }
         } while (false);
         return res;
@@ -171,6 +185,16 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public static ScanSettings.ScanSettingsDescriptor getDefaultScanSettingsDescriptor() {
         return Jenkins.get().getDescriptorByType(ScanSettingsUi.Descriptor.class);
+    }
+
+    @SuppressWarnings("unused")
+    public static BranchSettings.BranchSettingsDescriptor getDefaultBranchSettingsDescriptor() {
+        return Jenkins.get().getDescriptorByType(PipelineEnvironmentBranchSettings.Descriptor.class);
+    }
+
+    @SuppressWarnings("unused")
+    public static List<BranchSettings.BranchSettingsDescriptor> getBranchSettingsDescriptors() {
+        return BranchSettings.getAll();
     }
 
     public static List<WorkMode.WorkModeDescriptor> getWorkModeDescriptors() {

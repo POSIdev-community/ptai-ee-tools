@@ -1,8 +1,8 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,9 @@ public class UiAstJobSetupOperationsImpl extends AbstractSetupOperations impleme
             throw GenericException.raise("Project setup failed", new IllegalArgumentException("Project " + owner.getProjectName() + " not found"));
         }
 
-        uploadSources(projectId);
+        String branchName = owner.getBranchName();
+
+        uploadSources(projectId, branchName);
         return projectId;
     }
 }

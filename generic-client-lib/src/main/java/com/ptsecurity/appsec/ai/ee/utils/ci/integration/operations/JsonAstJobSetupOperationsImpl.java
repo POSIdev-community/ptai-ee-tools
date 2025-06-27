@@ -27,7 +27,14 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
 
         jsonSettings = UnifiedAiProjScanSettings.loadSettings(jsonSettings).toJson();
         ProjectTasks projectTasks = new Factory().projectTasks(owner.getClient());
-        ProjectTasks.JsonParseBrief brief = projectTasks.setupFromJson(jsonSettings, jsonPolicy, this::uploadSources);
+        String branchName = owner.getBranchName();
+
+        ProjectTasks.JsonParseBrief brief = projectTasks.setupFromJson(
+                jsonSettings,
+                jsonPolicy,
+                projectId -> uploadSources(projectId, branchName)
+        );
+
         owner.setProjectName(brief.getProjectName());
 
         // If fullScanMode is false, but incremental scan is disabled, use fullScanMode indeed
