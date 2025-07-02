@@ -9,6 +9,8 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSetting
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor.PluginDescriptor;
@@ -65,6 +67,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
     private final com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings scanSettings;
 
     @Getter
+    private final BranchSettings branchSettings;
+
+    @Getter
     private final WorkMode workMode;
 
     @Getter
@@ -89,6 +94,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public Plugin(final com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings scanSettings,
                   final ConfigBase config,
+                  BranchSettings branchSettings,
                   final WorkMode workMode,
                   final String advancedSettings,
                   final boolean verbose,
@@ -96,6 +102,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
                   final ArrayList<Transfer> transfers) {
         this.scanSettings = scanSettings;
         this.config = config;
+        this.branchSettings = branchSettings;
         this.workMode = workMode;
         this.advancedSettings = advancedSettings;
         this.verbose = verbose;
@@ -209,11 +216,15 @@ public class Plugin extends Builder implements SimpleBuildStep {
         advancedSettings.apply(descriptor.getAdvancedSettings());
         advancedSettings.apply(this.advancedSettings);
 
+        String branchName = getBranchName(buildInfo, projectName);
+
         check = descriptor.doTestProjectFields(
                 scanSettings, config,
                 jsonSettings, jsonPolicy,
                 projectName,
-                serverUrl, credentialsId, configName);
+                serverUrl, credentialsId, configName,
+                branchSettings,
+                branchName);
         if (FormValidation.Kind.ERROR == check.kind)
             throw new AbortException(check.getMessage());
         // TODO: Implement scan node support when PT AI will be able to
@@ -227,6 +238,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
         JenkinsAstJob job = JenkinsAstJob.builder()
                 .projectName(selectedScanSettingsUi ? projectName : null)
+                .branchName(branchName)
                 .settings(selectedScanSettingsUi ? null : jsonSettings)
                 .policy(selectedScanSettingsUi ?  null : jsonPolicy)
                 .console(listener.getLogger())
@@ -312,5 +324,39 @@ public class Plugin extends Builder implements SimpleBuildStep {
             // projectActions.add(new AstJobTableResults(project));
         }
         return projectActions;
+    }
+
+    private String getBranchName(BuildInfo buildInfo, String projectName) {
+        boolean selectedCustomBranchName = branchSettings instanceof CustomNameBranchSettings;
+
+        if (selectedCustomBranchName) {
+            String branchName = ((CustomNameBranchSettings) branchSettings).getBranchName();
+            log.trace("Custom branch name before macro replacement is {}", branchName);
+            branchName = Util.replaceMacro(branchName, buildInfo.getEnvVars());
+            log.trace("Custom branch name after macro replacement is {}", projectName);
+            return branchName;
+        }
+
+        log.trace("Getting git branch name from environment");
+
+        Map<String, String> envVars = buildInfo.getEnvVars();
+
+        String branchName = envVars.get("GIT_LOCAL_BRANCH");
+
+        if (StringUtils.isEmpty(branchName)) {
+            branchName = envVars.get("GIT_BRANCH");
+
+            if (branchName != null && branchName.startsWith("origin/")) {
+                branchName = branchName.substring(7);
+            }
+        }
+
+        if (StringUtils.isEmpty(branchName)) {
+            throw new RuntimeException("Git branch name from environment is empty");
+        } else {
+            log.trace("Git branch name from environment is {}", branchName);
+        }
+
+        return branchName;
     }
 }

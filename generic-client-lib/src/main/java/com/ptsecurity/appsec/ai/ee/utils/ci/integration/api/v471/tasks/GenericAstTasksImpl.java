@@ -6,7 +6,6 @@ import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
-import com.ptsecurity.appsec.ai.ee.server.v471.api.JSON;
 import com.ptsecurity.appsec.ai.ee.server.v471.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v471.ApiClient;
@@ -24,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -40,12 +38,12 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         super(client);
     }
 
-    public void upload(@NonNull final UUID projectId, @NonNull final File sources) throws GenericException {
+    public void upload(@NonNull final UUID projectId, @NonNull final File sources, String branchName) throws GenericException {
         call(() -> client.getStoreApi().apiStoreProjectIdSourcesPost(projectId, true, true, sources), "PT AI project sources upload failed");
     }
 
     @Override
-    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode) throws GenericException {
+    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName) throws GenericException {
         StartScanModel startScanModel = new StartScanModel();
         // Setup scan mode: full or incremental. Default mode is
         // incremental, but it can be overridden by JSON settings or forced from UI
