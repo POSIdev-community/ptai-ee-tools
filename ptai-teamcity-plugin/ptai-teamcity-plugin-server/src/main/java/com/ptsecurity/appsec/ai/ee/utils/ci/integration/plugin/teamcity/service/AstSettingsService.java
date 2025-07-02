@@ -27,7 +27,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -142,6 +144,10 @@ public class AstSettingsService {
         PropertiesBean res = (null == bean) ? new PropertiesBean() : bean;
         res.fill(AST_SETTINGS, request);
 
+        if (BRANCH_SETTINGS_CUSTOM.equals(res.get(BRANCH_SETTINGS))) {
+            res.fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
+        }
+
         if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
             res.fill(JSON_SETTINGS, request).fill(JSON_POLICY, request);
         else if (AST_SETTINGS_UI.equals(res.get(AST_SETTINGS)))
@@ -242,6 +248,18 @@ public class AstSettingsService {
             } catch (GenericException e) {
                 results.add(JSON_POLICY, e.getDetailedMessage());
                 log.warn(e.getDetailedMessage(), e);
+            }
+        }
+
+        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
+            if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
+                results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
+            } else {
+                String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
+                int maxNameLength = 512;
+                if (customBranchName.length() > maxNameLength) {
+                    results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
+                }
             }
         }
 
