@@ -28,6 +28,20 @@ public class Params {
     public static final String SERVER_SETTINGS = PARAM("ServerSettings");
 
     /**
+     * Defines how branch name settings are defined. If this field equals to
+     * {@link Constants#BRANCH_SETTINGS_FROM_ENVIRONMENT} then settings are defined from
+     * pipeline environment, if equals to {@link Constants#BRANCH_SETTINGS_CUSTOM} then
+     * settings are defined from the value entered by the user
+     */
+    public static final String BRANCH_SETTINGS = PARAM("BranchSettings");
+
+    /**
+     * PT AI branch name whose branch settings are used if BRANCH_SETTINGS equals
+     * to {@link Constants#BRANCH_SETTINGS_CUSTOM}
+     */
+    public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = PARAM("BranchSettingsCustomBranchName");
+
+    /**
      * Defines how code AST settings are defined. If this field equals to
      * {@link Constants#AST_SETTINGS_JSON} then settings are defined via two JSONs, if
      * equals to {@link Constants#AST_SETTINGS_UI} then settings are defined via viewer

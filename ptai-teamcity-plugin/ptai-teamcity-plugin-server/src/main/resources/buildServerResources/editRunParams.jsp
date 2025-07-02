@@ -53,6 +53,19 @@
             BS.MultilineProperties.updateVisible();
         };
 
+        var ptaiCustomBranchFieldRows = [ 'row_${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}' ];
+
+        ptaiBranchSettingsChange = function () {
+            let mode = $('${BRANCH_SETTINGS}').value;
+            if (mode === '${BRANCH_SETTINGS_CUSTOM}') {
+                BS.Util.show(...ptaiCustomBranchFieldRows);
+            }
+            if (mode === '${BRANCH_SETTINGS_FROM_ENVIRONMENT}') {
+                BS.Util.hide(...ptaiCustomBranchFieldRows);
+            }
+            BS.MultilineProperties.updateVisible();
+        }
+
         // Array of table row identifiers that are to be shown if "UI" AST settings mode selected
         var ptaiAstSettingsUiFieldRows = [ 'row_${AST_SETTINGS_UI_PROJECT_NAME}' ];
         // Array of table row identifiers that are to be shown if "JSON" AST settings mode selected
@@ -187,6 +200,7 @@
         ptaiServerSettingsChange();
         ptaiAstSettingsChange();
         ptaiAstWorkModeChange();
+        ptaiBranchSettingsChange();
     });
 </script>
 
@@ -263,6 +277,35 @@
 
 <l:settingsGroup title="General AST settings">
     <tbody class="ptai-group">
+
+    <tr id="row_${BRANCH_SETTINGS}">
+        <th>
+            <label for="${BRANCH_SETTINGS}">${LABEL_BRANCH_SETTINGS}</label></th>
+        <td>
+            <props:selectProperty
+                    name="${BRANCH_SETTINGS}" enableFilter="true"
+                    className="longField" onchange="ptaiBranchSettingsChange()">
+                <props:option value="${BRANCH_SETTINGS_FROM_ENVIRONMENT}"
+                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${HINT_BRANCH_SETTINGS_FROM_ENVIRONMENT}</props:option>
+                <props:option value="${BRANCH_SETTINGS_CUSTOM}"
+                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${HINT_BRANCH_SETTINGS_CUSTOM}</props:option>
+            </props:selectProperty>
+            <span class="smallNote">${HINT_BRANCH_SETTINGS}</span>
+            <span class="error" id="error_${BRANCH_SETTINGS}"></span>
+        </td>
+    </tr>
+
+    <tr id="row_${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}">
+        <th>
+            <label for="${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}">${LABEL_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}<l:star/></label>
+        </th>
+        <td>
+            <props:textProperty name="${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}" className="longField"/>
+            <span class="smallNote">${HINT_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}</span>
+            <span class="error" id="error_${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}"></span>
+        </td>
+    </tr>
+
     <tr id="row_${AST_SETTINGS}">
         <th>
             <label for="${AST_SETTINGS}">${LABEL_AST_SETTINGS}</label></th>
