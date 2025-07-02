@@ -12,6 +12,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Expo
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.SetupOperations;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.BranchTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
@@ -126,6 +127,11 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // Start scan
         process(Stage.ENQUEUED);
         GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
+
+        if (genericAstTasks instanceof BranchTask && branchName == null) {
+            branchName = ((BranchTask) genericAstTasks).getWorkingOrDefaultBranchName(projectId);
+        }
+
         scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);
 
         info(
