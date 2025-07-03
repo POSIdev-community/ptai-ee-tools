@@ -24,7 +24,7 @@ public class Labels {
 
     public static final String BRANCH_SETTINGS = "Branch at PT AI Server";
     public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "From pipeline environment";
-    public static final String BRANCH_SETTINGS_CUSTOM = "Custom branch name";
+    public static final String BRANCH_SETTINGS_CUSTOM = "Custom branch";
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "Branch name";
 
     public static final String AST_SETTINGS = "Scan settings type";
