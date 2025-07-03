@@ -286,9 +286,9 @@
                     name="${BRANCH_SETTINGS}" enableFilter="true"
                     className="longField" onchange="ptaiBranchSettingsChange()">
                 <props:option value="${BRANCH_SETTINGS_FROM_ENVIRONMENT}"
-                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${HINT_BRANCH_SETTINGS_FROM_ENVIRONMENT}</props:option>
+                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${LABEL_BRANCH_SETTINGS_FROM_ENVIRONMENT}</props:option>
                 <props:option value="${BRANCH_SETTINGS_CUSTOM}"
-                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${HINT_BRANCH_SETTINGS_CUSTOM}</props:option>
+                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${LABEL_BRANCH_SETTINGS_CUSTOM}</props:option>
             </props:selectProperty>
             <span class="smallNote">${HINT_BRANCH_SETTINGS}</span>
             <span class="error" id="error_${BRANCH_SETTINGS}"></span>
@@ -301,7 +301,6 @@
         </th>
         <td>
             <props:textProperty name="${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}" className="longField"/>
-            <span class="smallNote">${HINT_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}</span>
             <span class="error" id="error_${BRANCH_SETTINGS_CUSTOM_BRANCH_NAME}"></span>
         </td>
     </tr>
