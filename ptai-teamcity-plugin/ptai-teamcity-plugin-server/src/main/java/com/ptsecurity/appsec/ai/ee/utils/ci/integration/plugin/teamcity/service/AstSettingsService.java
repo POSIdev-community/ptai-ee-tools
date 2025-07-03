@@ -257,7 +257,7 @@ public class AstSettingsService {
             } else {
                 String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
                 int maxNameLength = 512;
-                if (customBranchName.length() > maxNameLength) {
+                if (customBranchName.length() >= maxNameLength) {
                     results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
                 }
             }

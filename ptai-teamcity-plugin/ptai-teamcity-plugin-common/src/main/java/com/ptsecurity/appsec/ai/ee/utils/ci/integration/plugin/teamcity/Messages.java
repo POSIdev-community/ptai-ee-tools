@@ -4,7 +4,7 @@ public class Messages {
     public static final String MESSAGE_GLOBAL_SETTINGS_INVALID = "Global connection settings are invalid";
 
     public static final String MESSAGE_CUSTOM_BRANCH_NAME_EMPTY = "Custom branch name must not be empty";
-    public static final String MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG = "Custom branch name exceeds the length of 512 characters";
+    public static final String MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG = "Custom branch name is greater than or equal to 512 characters";
     public static final String MESSAGE_JSON_SETTINGS_EMPTY = "JSON-defined scan settings must not be empty";
     public static final String MESSAGE_JSON_SETTINGS_INVALID = "JSON-defined scan settings are invalid";
     public static final String MESSAGE_JSON_POLICY_INVALID = "JSON-defined scan policy is invalid";
