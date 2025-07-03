@@ -2,12 +2,12 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.FileSaver;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +24,7 @@ public class GenerateReportsJob extends AbstractJob implements FileSaver, TextOu
 
     protected String projectName;
     protected UUID projectId;
+    protected String branchName;
     protected UUID scanResultId;
 
     protected Path output;
@@ -53,7 +54,7 @@ public class GenerateReportsJob extends AbstractJob implements FileSaver, TextOu
             throw GenericException.raise("Project " + projectName + " not found", new IllegalArgumentException(projectName));
 
         if (null == scanResultId)
-            scanResultId = projectTasks.getLatestAstResult(projectId);
+            scanResultId = projectTasks.getLatestAstResult(projectId, branchName);
         if (null == scanResultId)
             throw GenericException.raise("Latest scan result not found", new IllegalArgumentException(projectName));
 

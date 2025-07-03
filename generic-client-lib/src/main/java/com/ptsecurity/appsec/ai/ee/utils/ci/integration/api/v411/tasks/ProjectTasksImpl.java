@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v411.tasks;
 
-import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ScanSettings.Language;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.server.v411.projectmanagement.ApiException;
@@ -12,19 +11,17 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
@@ -85,9 +82,9 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
     }
 
     @Override
-    public UUID getLatestAstResult(@NonNull UUID id) throws GenericException {
+    public UUID getLatestAstResult(@NonNull UUID projectId, String branchName) throws GenericException {
         ScanResultModel scanResult = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsLastGet(id),
+                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsLastGet(projectId),
                 "PT AI project latest scan result search failed");
         return (null == scanResult) ? null : scanResult.getId();
     }

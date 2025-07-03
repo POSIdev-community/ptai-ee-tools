@@ -86,16 +86,21 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         return result;
     }
 
-    // TODO: branches
     @Override
-    public UUID getLatestAstResult(@NonNull UUID id) throws GenericException {
-        List<BranchWithScanInfoModel> branches = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(id),
+    public UUID getLatestAstResult(@NonNull UUID projectId, String branchName) throws GenericException {
+        List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
+                () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
                 "PT AI project branches with scan result load failed");
 
-        assert !branches.isEmpty();
+        assert !branchesWithScanInfoModel.isEmpty();
 
-        ScanStatisticLightModel scanResult = branches.stream()
+        if (branchName != null) {
+            branchesWithScanInfoModel = branchesWithScanInfoModel.stream()
+                    .filter(branch -> Objects.equals(branch.getName(), branchName))
+                    .collect(Collectors.toList());
+        }
+
+        ScanStatisticLightModel scanResult = branchesWithScanInfoModel.stream()
                 .map(BranchWithScanInfoModel::getLastScan)
                 .filter(scan -> scan != null && scan.getScanDate() != null)
                 .max(Comparator.comparing(ScanStatisticLightModel::getScanDate))
