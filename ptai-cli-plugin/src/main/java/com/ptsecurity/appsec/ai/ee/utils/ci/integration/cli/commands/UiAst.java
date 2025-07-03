@@ -31,7 +31,7 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
             names = {"-b", "--branch-name"},
             order = 1,
             paramLabel = "<name>",
-            description = "PT AI branch name. If parameter is not set, default branch is used.")
+            description = "PT AI branch name. If parameter is not set, default branch is used")
     protected String branchName = null;
 
     @CommandLine.Option(
