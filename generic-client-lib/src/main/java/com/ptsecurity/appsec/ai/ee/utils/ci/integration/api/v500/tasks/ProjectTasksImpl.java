@@ -7,6 +7,7 @@ import com.ptsecurity.appsec.ai.ee.server.v500.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v500.converters.AiProjConverter;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.LatestAstResultBranchTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
@@ -29,7 +30,7 @@ import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
-public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
+public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, LatestAstResultBranchTask {
     public ProjectTasksImpl(@NonNull final AbstractApiClient client) {
         super(client);
     }
@@ -84,6 +85,23 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         else
             log.debug("Project found, name is {}", result);
         return result;
+    }
+
+    @Override
+    public UUID getLatestAstResult(@NonNull UUID projectId) throws GenericException {
+        List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
+                () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
+                "PT AI project branches with scan result load failed");
+
+        assert !branchesWithScanInfoModel.isEmpty();
+
+        ScanStatisticLightModel scanResult = branchesWithScanInfoModel.stream()
+                .map(BranchWithScanInfoModel::getLastScan)
+                .filter(scan -> scan != null && scan.getScanDate() != null)
+                .max(Comparator.comparing(ScanStatisticLightModel::getScanDate))
+                .orElse(null);
+
+        return (null == scanResult) ? null : scanResult.getId();
     }
 
     @Override
