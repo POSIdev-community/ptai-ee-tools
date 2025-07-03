@@ -91,7 +91,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
     }
 
     @Override
-    public UUID getLatestAstResult(@NonNull UUID projectId, String branchName) throws GenericException {
+    public UUID getLatestAstResult(@NonNull UUID projectId) throws GenericException {
         ScanResultModel scanResult = call(
                 () -> client.getProjectsApi().apiProjectsProjectIdScanResultsLastGet(projectId),
                 "PT AI project latest scan result search failed");

@@ -17,7 +17,7 @@ public interface ProjectTasks {
 
     String searchProject(@NonNull final UUID id) throws GenericException;
 
-    UUID getLatestAstResult(@NonNull final UUID projectId, String branchName) throws GenericException;
+    UUID getLatestAstResult(@NonNull final UUID projectId) throws GenericException;
 
     UUID getLatestCompleteAstResult(@NonNull final UUID id) throws GenericException;
 

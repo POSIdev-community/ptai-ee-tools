@@ -48,15 +48,15 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
 
         UUID branchId = branches.stream()
                 .filter(branch -> branchName != null
-                        ? Objects.equals(branch.getName(), branchName)
-                        : Objects.equals(branch.getIsWorking(), true))
+                        ? branchName.equals(branch.getName())
+                        : Boolean.TRUE.equals(branch.getIsWorking()))
                 .map(BranchModel::getId)
                 .findFirst()
                 .orElse(null);
 
         String defaultBranchName = "default";
         UUID defaultBranchId = branches.stream()
-                .filter(branch -> Objects.equals(branch.getName(), defaultBranchName))
+                .filter(branch -> defaultBranchName.equals(branch.getName()))
                 .map(BranchModel::getId)
                 .findFirst()
                 .orElse(null);
