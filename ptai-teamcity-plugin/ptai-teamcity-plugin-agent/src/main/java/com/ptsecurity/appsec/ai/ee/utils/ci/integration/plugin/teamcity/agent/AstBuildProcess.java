@@ -185,13 +185,10 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
     private String getBranchName(Map<String, String> params ) {
         boolean selectedCustomBranchSettings = BRANCH_SETTINGS_CUSTOM.equals(params.get(Params.BRANCH_SETTINGS));
 
-        String branchName;
         if (selectedCustomBranchSettings) {
-            branchName = params.get(Params.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
-        } else {
-            branchName = agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
+            return params.get(Params.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
         }
 
-        return branchName;
+        return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
     }
 }

@@ -251,16 +251,8 @@ public class AstSettingsService {
             }
         }
 
-        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
-            if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
-                results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
-            } else {
-                String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
-                int maxNameLength = 512;
-                if (customBranchName.length() >= maxNameLength) {
-                    results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
-                }
-            }
+        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM) && bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
         }
 
         if (bean.empty(INCLUDES))
