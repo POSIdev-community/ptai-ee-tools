@@ -9926,7 +9926,6 @@ components:
           $ref: '#/components/schemas/UserModel'
         creationDate:
           type: string
-          format: date-time
       additionalProperties: false
     ReportTemplateUpsertModel:
       type: object
