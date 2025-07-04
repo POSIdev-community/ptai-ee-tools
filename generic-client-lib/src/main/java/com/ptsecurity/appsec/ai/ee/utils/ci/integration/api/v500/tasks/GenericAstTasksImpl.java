@@ -41,30 +41,17 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     }
 
     public void upload(@NonNull final UUID projectId, @NonNull final File sources, final String branchName) throws GenericException {
-        List<BranchModel> branches = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
-                "PT AI get branches failed"
-        );
-
-        UUID branchId = branches.stream()
-                .filter(branch -> branchName != null
-                        ? branchName.equals(branch.getName())
-                        : Boolean.TRUE.equals(branch.getIsWorking()))
-                .map(BranchModel::getId)
-                .findFirst()
-                .orElse(null);
+        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
 
         String defaultBranchName = "default";
-        UUID defaultBranchId = branches.stream()
-                .filter(branch -> defaultBranchName.equals(branch.getName()))
-                .map(BranchModel::getId)
-                .findFirst()
-                .orElse(null);
+        UUID branchId = null;
+        if (!branches.isEmpty()) {
+            branchId = getTargetBranchId(branches, branchName, defaultBranchName);
+        }
 
-        UUID targetBranchId = branchId != null ? branchId : defaultBranchId;
         String targetBranchName = branchName != null ? branchName : defaultBranchName;
 
-        if (targetBranchId == null) {
+        if (branchId == null) {
             call(() -> client.getStoreApi().apiStoreProjectProjectIdBranchesArchivePost(
                     projectId,
                     targetBranchName,
@@ -72,6 +59,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                     sources
             ), "PT AI project sources upload failed");
         } else {
+            UUID targetBranchId = branchId;
             call(() -> client.getStoreApi().apiStoreProjectIdBranchesBranchIdSourcesPost(
                     projectId,
                     targetBranchId,
@@ -91,16 +79,8 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         ScanType scanType = fullScanMode ? ScanType.FULL : ScanType.INCREMENTAL;
         startScanModel.setScanType(scanType);
 
-        List<BranchModel> branches = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
-                "PT AI get branches failed"
-        );
-
-        UUID branchId = branches.stream()
-                .filter(branch -> Objects.equals(branch.getName(), branchName))
-                .map(BranchModel::getId)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Branch id with name " + branchName + " not found"));
+        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
+        UUID branchId = getBranchModelByName(branches, branchName).getId();
 
         return call(
                 () -> client.getScanQueueApi().apiScansBranchesBranchIdStartPost(branchId, startScanModel),
@@ -115,23 +95,64 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     }
 
     @Override
-    public String getWorkingOrDefaultBranchName(@NonNull UUID projectId) {
-        List<BranchModel> branches = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
-                "PT AI get branches failed"
-        );
+    public String getOldestOrDefaultBranchName(@NonNull UUID projectId) {
+        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
 
-        String workingBranchName = branches.stream()
-                .filter(branch -> Objects.equals(branch.getIsWorking(), true))
-                .map(BranchModel::getName)
-                .findFirst()
-                .orElse(null);
+        if (branches.isEmpty()) {
+            return "default";
+        }
 
-        if (workingBranchName != null) {
-            return workingBranchName;
+        String oldestBranchName = getBranchModelWithOldestSourcesChangingDate(branches).getName();
+
+        if (oldestBranchName != null) {
+            return oldestBranchName;
         }
 
         return "default";
+    }
+
+    private UUID getTargetBranchId(List<BranchModel> branches, String branchName, @NonNull String defaultBranchName) {
+        UUID branchId = null;
+        BranchModel targetBranch;
+        if (branchName != null) {
+            targetBranch = getBranchModelByName(branches, branchName);
+        } else {
+            targetBranch = getBranchModelWithOldestSourcesChangingDate(branches);
+        }
+
+        if (targetBranch == null) {
+            targetBranch = getBranchModelByName(branches, defaultBranchName);
+        }
+
+        if (targetBranch != null) {
+            branchId = targetBranch.getId();
+        }
+
+        return branchId;
+    }
+
+    private List<BranchModel> getBranchModelsByProjectId(@NonNull UUID projectId) {
+        return call(
+                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
+                "PT AI get branches failed"
+        );
+    }
+
+    private BranchModel getBranchModelByName(
+            @NonNull final List<BranchModel> branches,
+            @NonNull final String branchName
+    ) {
+        return branches.stream()
+                .filter(branch -> branchName.equals(branch.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private BranchModel getBranchModelWithOldestSourcesChangingDate(@NonNull final List<BranchModel> branches) {
+        return branches.stream()
+                .filter(branch -> branch.getSourcesChangingDate() != null)
+                .min(Comparator.comparing(BranchModel::getSourcesChangingDate))
+                .orElse(null);
     }
 
     public static class ProjectPollingThread implements Runnable {

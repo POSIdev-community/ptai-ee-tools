@@ -89,42 +89,41 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
 
     @Override
     public UUID getLatestAstResult(@NonNull UUID projectId) throws GenericException {
-        List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
-                "PT AI project branches with scan result load failed");
-
-        assert !branchesWithScanInfoModel.isEmpty();
-
-        ScanStatisticLightModel scanResult = branchesWithScanInfoModel.stream()
-                .map(BranchWithScanInfoModel::getLastScan)
-                .filter(scan -> scan != null && scan.getScanDate() != null)
-                .max(Comparator.comparing(ScanStatisticLightModel::getScanDate))
-                .orElse(null);
-
-        return (null == scanResult) ? null : scanResult.getId();
+        List<BranchWithScanInfoModel> branchesWithScanInfoModel = getBranchesWithScanInfoModel(projectId);
+        return filterLastScanResultId(branchesWithScanInfoModel);
     }
 
     @Override
     public UUID getLatestAstResult(@NonNull UUID projectId, String branchName) throws GenericException {
+        List<BranchWithScanInfoModel> branchesWithScanInfoModel = getBranchesWithScanInfoModel(projectId);
+
+        if (branchName != null) {
+            branchesWithScanInfoModel = branchesWithScanInfoModel.stream()
+                    .filter(branch -> branchName.equals(branch.getName()))
+                    .collect(Collectors.toList());
+        }
+
+        return filterLastScanResultId(branchesWithScanInfoModel);
+    }
+
+    private List<BranchWithScanInfoModel> getBranchesWithScanInfoModel(@NonNull UUID projectId) {
         List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
                 () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
                 "PT AI project branches with scan result load failed");
 
         assert !branchesWithScanInfoModel.isEmpty();
 
-        if (branchName != null) {
-            branchesWithScanInfoModel = branchesWithScanInfoModel.stream()
-                    .filter(branch -> Objects.equals(branch.getName(), branchName))
-                    .collect(Collectors.toList());
-        }
+        return branchesWithScanInfoModel;
+    }
 
+    private UUID filterLastScanResultId(List<BranchWithScanInfoModel> branchesWithScanInfoModel) {
         ScanStatisticLightModel scanResult = branchesWithScanInfoModel.stream()
                 .map(BranchWithScanInfoModel::getLastScan)
                 .filter(scan -> scan != null && scan.getScanDate() != null)
                 .max(Comparator.comparing(ScanStatisticLightModel::getScanDate))
                 .orElse(null);
 
-        return (null == scanResult) ? null : scanResult.getId();
+        return scanResult == null ? null : scanResult.getId();
     }
 
     @Override
