@@ -58,17 +58,19 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                     null,
                     sources
             ), "PT AI project sources upload failed");
-        } else {
-            UUID targetBranchId = branchId;
-            call(() -> client.getStoreApi().apiStoreProjectIdBranchesBranchIdSourcesPost(
-                    projectId,
-                    targetBranchId,
-                    true,
-                    targetBranchName,
-                    null,
-                    sources
-            ), "PT AI project sources upload failed");
+
+            return;
         }
+
+        UUID targetBranchId = branchId;
+        call(() -> client.getStoreApi().apiStoreProjectIdBranchesBranchIdSourcesPost(
+                projectId,
+                targetBranchId,
+                true,
+                targetBranchName,
+                null,
+                sources
+        ), "PT AI project sources upload failed");
     }
 
     @Override
