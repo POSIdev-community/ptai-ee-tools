@@ -108,10 +108,13 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 ? params
                 : globals;
 
+        String branchName = getBranchName(params);
+
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
                 .artifactsWatcher(artifactsWatcher)
                 .projectName(selectedScanSettingsUi ? projectName : null)
+                .branchName(branchName)
                 .settings(selectedScanSettingsUi ? null : settings)
                 .policy(selectedScanSettingsUi ?  null : policy)
                 .connectionSettings(ConnectionSettings.builder()
@@ -177,5 +180,15 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         } catch (final CancellationException e) {
             return BuildFinishedStatus.INTERRUPTED;
         }
+    }
+
+    private String getBranchName(Map<String, String> params ) {
+        boolean selectedCustomBranchSettings = BRANCH_SETTINGS_CUSTOM.equals(params.get(Params.BRANCH_SETTINGS));
+
+        if (selectedCustomBranchSettings) {
+            return params.get(Params.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
+        }
+
+        return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
     }
 }

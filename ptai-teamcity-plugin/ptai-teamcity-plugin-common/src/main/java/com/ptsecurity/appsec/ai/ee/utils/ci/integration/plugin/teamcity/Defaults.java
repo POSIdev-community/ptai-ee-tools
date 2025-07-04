@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity;
 
-import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import lombok.NonNull;
@@ -39,6 +38,18 @@ public class Defaults {
      * See {@link Params#SERVER_SETTINGS} and {@link Constants#SERVER_SETTINGS_GLOBAL}
      */
     public static final String SERVER_SETTINGS = SERVER_SETTINGS_GLOBAL;
+
+    /**
+     * See {@link Params#BRANCH_SETTINGS} and {@link Constants#BRANCH_SETTINGS_FROM_ENVIRONMENT}
+     */
+    public static final String BRANCH_SETTINGS = BRANCH_SETTINGS_FROM_ENVIRONMENT;
+
+    /**
+     * See {@link Params#BRANCH_SETTINGS} and {@link Constants#BRANCH_SETTINGS_CUSTOM}
+     */
+    public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "";
+
+    public static final String BRANCH_SETTINGS_EXISTING_BRANCH_NAME = "";
 
     /**
      * See {@link Params#AST_SETTINGS} and {@link Constants#AST_SETTINGS_UI}
