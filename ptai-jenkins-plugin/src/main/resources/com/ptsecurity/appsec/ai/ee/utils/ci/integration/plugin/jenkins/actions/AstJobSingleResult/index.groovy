@@ -135,6 +135,14 @@ l.layout(title: Resources.i18n_ast_result_label()) {
 
         def scanSettings = [:]
         scanSettings[Resources.i18n_ast_settings_base_projectname_label()] = "${scanBriefDetailed.projectName}"
+
+        def branch = scanBriefDetailed.scanSettings.branchName;
+        if (null != branch) {
+            scanSettings[Resources.i18n_ast_settings_branch_name_label()] = "${branch}"
+        } else {
+            scanSettings[Resources.i18n_ast_settings_branch_name_label()] = Resources.i18n_misc_strings_empty()
+        }
+
         def url = scanBriefDetailed.scanSettings.url;
         if (null == url) url = Resources.i18n_misc_strings_empty();
         scanSettings[Resources.i18n_ast_settings_base_url_label()] = url

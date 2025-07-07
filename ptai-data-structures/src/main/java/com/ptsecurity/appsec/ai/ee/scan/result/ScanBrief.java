@@ -102,6 +102,10 @@ public class ScanBrief {
         @JsonProperty
         protected UUID id;
 
+        @NonNull
+        @JsonProperty
+        protected String branchName;
+
         public enum Engine {
             AI, PM, TAINT, STATICCODEANALYSIS, DC, FINGERPRINT, CONFIGURATION, BLACKBOX
         }
