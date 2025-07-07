@@ -2,7 +2,7 @@ FROM gradle:7.1.1-jdk11 AS builder
 
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
-RUN gradle build --no-daemon
+RUN gradle :ptai-cli-plugin:build --no-daemon
 
 FROM openjdk:8-jre
 
