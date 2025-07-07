@@ -28,6 +28,13 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob.
                 "1000:Invalid input"})
 public class UiAst extends BaseCommand implements Callable<Integer> {
     @CommandLine.Option(
+            names = {"-b", "--branch-name"},
+            order = 1,
+            paramLabel = "<name>",
+            description = "PT AI branch name. If parameter is not set, default branch is used")
+    protected String branchName = null;
+
+    @CommandLine.Option(
             names = {"--input"}, order = 3,
             required = true,
             paramLabel = "<path>",
@@ -98,6 +105,7 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
                         .insecure(insecure)
                         .build())
                 .projectName(project)
+                .branchName(branchName)
                 .async(async)
                 .input(input).output(output)
                 .includes(includes).excludes(excludes)
