@@ -34,6 +34,9 @@ public class Constants {
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "BranchSettingsFromEnvironment";
+    public static final String BRANCH_SETTINGS_CUSTOM = "BranchSettingsCustom";
+
     public static final String AST_SETTINGS_JSON = "SettingsJson";
     public static final String AST_SETTINGS_UI = "SettingsUI";
 

@@ -1,9 +1,4 @@
-<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants" %>
-<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Hints" %>
-<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Labels" %>
-<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params" %>
-<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Defaults" %>
-<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.ReportsHelper" %>
+<%@ page import="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.*" %>
 
 <c:set var="SERVER_SETTINGS_GLOBAL_URL" value="<%=Params.URL%>"/>
 <c:set var="LABEL_SERVER_SETTINGS_GLOBAL_URL" value="<%=Labels.URL%>"/>
@@ -48,6 +43,20 @@
 <c:set var="LABEL_SERVER_SETTINGS_LOCAL_INSECURE" value="<%=Labels.INSECURE%>"/>
 <c:set var="HINT_SERVER_SETTINGS_LOCAL_INSECURE" value="<%=Hints.INSECURE%>"/>
 
+<c:set var="BRANCH_SETTINGS" value="<%=Params.BRANCH_SETTINGS%>"/>
+<c:set var="LABEL_BRANCH_SETTINGS" value="<%=Labels.BRANCH_SETTINGS%>"/>
+<c:set var="HINT_BRANCH_SETTINGS" value="<%=Hints.BRANCH_SETTINGS%>"/>
+<%-- Branch settings combobox content --%>
+<c:set var="BRANCH_SETTINGS_FROM_ENVIRONMENT" value="<%=Constants.BRANCH_SETTINGS_FROM_ENVIRONMENT%>"/>
+<c:set var="LABEL_BRANCH_SETTINGS_FROM_ENVIRONMENT" value="<%=Labels.BRANCH_SETTINGS_FROM_ENVIRONMENT%>"/>
+<c:set var="HINT_BRANCH_SETTINGS_FROM_ENVIRONMENT" value="<%=Hints.BRANCH_SETTINGS_FROM_ENVIRONMENT%>"/>
+<c:set var="BRANCH_SETTINGS_CUSTOM" value="<%=Constants.BRANCH_SETTINGS_CUSTOM%>"/>
+<c:set var="LABEL_BRANCH_SETTINGS_CUSTOM" value="<%=Labels.BRANCH_SETTINGS_CUSTOM%>"/>
+<c:set var="HINT_BRANCH_SETTINGS_CUSTOM" value="<%=Hints.BRANCH_SETTINGS_CUSTOM%>"/>
+
+<c:set var="BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Params.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
+<c:set var="LABEL_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Labels.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
+<c:set var="HINT_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Hints.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
 
 <c:set var="AST_SETTINGS" value="<%=Params.AST_SETTINGS%>"/>
 <c:set var="LABEL_AST_SETTINGS" value="<%=Labels.AST_SETTINGS%>"/>
