@@ -129,7 +129,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
 
         if (genericAstTasks instanceof BranchTask && branchName == null) {
-            branchName = ((BranchTask) genericAstTasks).getOldestOrDefaultBranchName(projectId);
+            branchName = ((BranchTask) genericAstTasks).getWorkingOrDefaultBranchName(projectId);
         }
 
         scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);

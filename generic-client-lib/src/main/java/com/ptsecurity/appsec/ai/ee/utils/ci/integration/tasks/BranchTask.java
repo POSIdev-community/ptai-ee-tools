@@ -5,5 +5,5 @@ import lombok.NonNull;
 import java.util.UUID;
 
 public interface BranchTask {
-    String getOldestOrDefaultBranchName(@NonNull UUID projectId);
+    String getWorkingOrDefaultBranchName(@NonNull UUID projectId);
 }

@@ -46,7 +46,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         String defaultBranchName = "default";
         UUID branchId = null;
         if (!branches.isEmpty()) {
-            branchId = getTargetBranchId(branches, branchName, defaultBranchName);
+            branchId = getTargetBranchId(branches, branchName, defaultBranchName, projectId);
         }
 
         String targetBranchName = branchName != null ? branchName : defaultBranchName;
@@ -97,14 +97,14 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     }
 
     @Override
-    public String getOldestOrDefaultBranchName(@NonNull UUID projectId) {
+    public String getWorkingOrDefaultBranchName(@NonNull UUID projectId) {
         List<BranchModel> branches = getBranchModelsByProjectId(projectId);
 
         if (branches.isEmpty()) {
             return "default";
         }
 
-        String oldestBranchName = getBranchModelWithOldestSourcesChangingDate(branches).getName();
+        String oldestBranchName = getWorkingBranchModel(projectId, branches).getName();
 
         if (oldestBranchName != null) {
             return oldestBranchName;
@@ -113,13 +113,18 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         return "default";
     }
 
-    private UUID getTargetBranchId(List<BranchModel> branches, String branchName, @NonNull String defaultBranchName) {
+    private UUID getTargetBranchId(
+            List<BranchModel> branches,
+            String branchName,
+            @NonNull String defaultBranchName,
+            @NonNull UUID projectId
+    ) {
         UUID branchId = null;
         BranchModel targetBranch;
         if (branchName != null) {
             targetBranch = getBranchModelByName(branches, branchName);
         } else {
-            targetBranch = getBranchModelWithOldestSourcesChangingDate(branches);
+            targetBranch = getWorkingBranchModel(projectId, branches);
         }
 
         if (targetBranch == null) {
@@ -150,10 +155,26 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .orElse(null);
     }
 
-    private BranchModel getBranchModelWithOldestSourcesChangingDate(@NonNull final List<BranchModel> branches) {
+    private BranchModel getWorkingBranchModel(@NonNull UUID projectId, List<BranchModel> branches) {
+        List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
+                () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
+                "PT AI get branches failed"
+        );
+
+        BranchWithScanInfoModel workingBranchWithScanInfoModel = branchesWithScanInfoModel.stream()
+                .filter(BranchWithScanInfoModel::getIsWorking)
+                .findFirst()
+                .orElse(null);
+
+        if (workingBranchWithScanInfoModel == null) {
+            return null;
+        }
+
+        UUID branchId = workingBranchWithScanInfoModel.getId();
+
         return branches.stream()
-                .filter(branch -> branch.getSourcesChangingDate() != null)
-                .min(Comparator.comparing(BranchModel::getSourcesChangingDate))
+                .filter(branch -> branchId.equals(branch.getId()))
+                .findFirst()
                 .orElse(null);
     }
 
