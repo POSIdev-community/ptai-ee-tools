@@ -371,7 +371,18 @@ public class AstSettingsService {
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
                 results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
             }
+
             // Check reporting settings
+            boolean isAnyReportSelected = bean.eq(REPORTING_REPORT, TRUE) ||
+                    bean.eq(REPORTING_RAWDATA, TRUE) ||
+                    bean.eq(REPORTING_SARIF, TRUE) ||
+                    bean.eq(REPORTING_SONARGIIF, TRUE) ||
+                    bean.eq(REPORTING_JSON, TRUE);
+
+            if (!isAnyReportSelected) {
+                return;
+            }
+
             Reports reports = bean.convert();
             reports = ReportUtils.validate(reports);
             new Factory().reportsTasks(client).check(reports);
