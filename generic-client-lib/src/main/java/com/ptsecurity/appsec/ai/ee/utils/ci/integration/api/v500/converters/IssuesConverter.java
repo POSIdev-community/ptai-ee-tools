@@ -128,6 +128,7 @@ public class IssuesConverter {
     public static ScanResult.ScanSettings convert(@NonNull final ScanSettingsModel scanSettings) {
         ScanResult.ScanSettings res = ScanResult.ScanSettings.builder()
                 .id(Objects.requireNonNull(scanSettings.getId(), "Scan settings ID is null"))
+                .branchName(Objects.requireNonNull(scanSettings.getBranchName(), "Scan settings branch name is null"))
                 .build();
 
         if (null != scanSettings.getBlackBoxSettings()) {
