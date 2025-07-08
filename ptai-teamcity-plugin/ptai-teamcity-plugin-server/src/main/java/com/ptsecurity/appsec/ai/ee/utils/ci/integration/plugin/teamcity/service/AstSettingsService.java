@@ -144,10 +144,6 @@ public class AstSettingsService {
         PropertiesBean res = (null == bean) ? new PropertiesBean() : bean;
         res.fill(AST_SETTINGS, request);
 
-        if (BRANCH_SETTINGS_CUSTOM.equals(res.get(BRANCH_SETTINGS))) {
-            res.fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
-        }
-
         if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
             res.fill(JSON_SETTINGS, request).fill(JSON_POLICY, request);
         else if (AST_SETTINGS_UI.equals(res.get(AST_SETTINGS)))
@@ -173,6 +169,9 @@ public class AstSettingsService {
                 .fill(REPORTING_SONARGIIF_FILTER, request);
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
+
+        res.fill(BRANCH_SETTINGS, request)
+                .fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
 
         return res;
     }
@@ -251,9 +250,7 @@ public class AstSettingsService {
             }
         }
 
-        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM) && bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
-            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
-        }
+        validateBranchSettings(bean, results);
 
         if (bean.empty(INCLUDES))
             results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
@@ -317,6 +314,26 @@ public class AstSettingsService {
                 if (result.fail())
                     results.add(REPORTING_JSON_SETTINGS, Resources.i18n_ast_settings_mode_synchronous_subjob_export_advanced_settings_message_invalid_details(result.getDetails()));
             }
+        }
+    }
+
+    private static void validateBranchSettings(
+            @NonNull final PropertiesBean bean,
+            @NonNull final VerificationResults results
+    ) {
+        if (!bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
+            return;
+        }
+
+        if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
+            return;
+        }
+
+        String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
+        int maxNameLength = 512;
+        if (customBranchName.length() > maxNameLength) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
         }
     }
 
