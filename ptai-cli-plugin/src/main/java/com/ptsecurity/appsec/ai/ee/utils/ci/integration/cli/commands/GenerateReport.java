@@ -45,15 +45,14 @@ public class GenerateReport extends BaseCommand implements Callable<Integer> {
                 paramLabel = "<UUID>",
                 description = "PT AI project Id")
         UUID id;
-
-        @CommandLine.Option(
-                names = {"-b", "--branch-name"},
-                order = 4,
-                paramLabel = "<name>",
-                description = "PT AI branch name")
-        protected String branchName = null;
-
     }
+
+    @CommandLine.Option(
+            names = {"-b", "--branch-name"},
+            order = 4,
+            paramLabel = "<name>",
+            description = "PT AI branch name")
+    protected String branchName = null;
 
     @CommandLine.ArgGroup(multiplicity = "1")
     protected ProjectInfo projectInfo = null;
@@ -115,7 +114,7 @@ public class GenerateReport extends BaseCommand implements Callable<Integer> {
                         .build())
                 .projectId(projectInfo.id)
                 .projectName(projectInfo.name)
-                .branchName(projectInfo.branchName)
+                .branchName(branchName)
                 .scanResultId(scanResultId)
                 .output(output)
                 .reports(reports.convert())
