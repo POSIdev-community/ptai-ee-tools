@@ -57,7 +57,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                     targetBranchName,
                     null,
                     sources
-            ), "PT AI project sources upload failed");
+            ), "PT AI project sources upload failed. branchId == null");
 
             return;
         }
@@ -70,7 +70,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 targetBranchName,
                 null,
                 sources
-        ), "PT AI project sources upload failed");
+        ), "PT AI project sources upload failed. branchId != null");
     }
 
     @Override
@@ -125,6 +125,10 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
             targetBranch = getBranchModelByName(branches, branchName);
         } else {
             targetBranch = getWorkingBranchModel(projectId, branches);
+        }
+
+        if (branchName != null && targetBranch == null) {
+            return null;
         }
 
         if (targetBranch == null) {
