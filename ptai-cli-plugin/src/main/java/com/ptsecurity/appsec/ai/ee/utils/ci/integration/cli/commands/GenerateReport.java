@@ -4,9 +4,9 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.operations.LocalFileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenerateReportsJob;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,13 @@ public class GenerateReport extends BaseCommand implements Callable<Integer> {
                 description = "PT AI project Id")
         UUID id;
     }
+
+    @CommandLine.Option(
+            names = {"-b", "--branch-name"},
+            order = 4,
+            paramLabel = "<name>",
+            description = "PT AI branch name")
+    protected String branchName = null;
 
     @CommandLine.ArgGroup(multiplicity = "1")
     protected ProjectInfo projectInfo = null;
@@ -107,6 +114,7 @@ public class GenerateReport extends BaseCommand implements Callable<Integer> {
                         .build())
                 .projectId(projectInfo.id)
                 .projectName(projectInfo.name)
+                .branchName(branchName)
                 .scanResultId(scanResultId)
                 .output(output)
                 .reports(reports.convert())

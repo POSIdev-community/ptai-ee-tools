@@ -10,7 +10,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import com.ptsecurity.misc.tools.helpers.CallHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +18,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -88,9 +86,9 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
     }
 
     @Override
-    public UUID getLatestAstResult(@NonNull UUID id) throws GenericException {
+    public UUID getLatestAstResult(@NonNull UUID projectId) throws GenericException {
         ScanResultModel scanResult = call(
-                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsLastGet(id),
+                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsLastGet(projectId),
                 "PT AI project latest scan result search failed");
         return (null == scanResult) ? null : scanResult.getId();
     }

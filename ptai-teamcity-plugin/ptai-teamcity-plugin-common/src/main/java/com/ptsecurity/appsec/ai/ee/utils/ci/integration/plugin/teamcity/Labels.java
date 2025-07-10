@@ -22,6 +22,11 @@ public class Labels {
     public static final String SERVER_SETTINGS_GLOBAL = "Globally defined";
     public static final String SERVER_SETTINGS_LOCAL = "Task scope defined";
 
+    public static final String BRANCH_SETTINGS = "Branch at PT AI Server";
+    public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "From pipeline environment";
+    public static final String BRANCH_SETTINGS_CUSTOM = "Custom branch";
+    public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "Branch name";
+
     public static final String AST_SETTINGS = "Scan settings type";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
     public static final String AST_SETTINGS_UI = Resources.i18n_ast_settings_type_ui_label();

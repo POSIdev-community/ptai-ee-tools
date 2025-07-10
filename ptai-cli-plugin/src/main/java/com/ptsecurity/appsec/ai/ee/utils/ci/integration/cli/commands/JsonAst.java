@@ -25,6 +25,13 @@ import java.util.concurrent.Callable;
                 "1000:Invalid input"})
 public class JsonAst extends BaseCommand implements Callable<Integer> {
     @CommandLine.Option(
+            names = {"-b", "--branch-name"},
+            order = 1,
+            paramLabel = "<name>",
+            description = "PT AI branch name. If parameter is not set, default branch is used.")
+    protected String branchName = null;
+
+    @CommandLine.Option(
             names = {"--input"}, order = 3,
             required = true,
             paramLabel = "<path>",
@@ -101,6 +108,7 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
                         .insecure(insecure)
                         .build())
                 .settings(jsonSettings)
+                .branchName(branchName)
                 .policy(jsonPolicy)
                 .async(async)
                 .input(input).output(output)

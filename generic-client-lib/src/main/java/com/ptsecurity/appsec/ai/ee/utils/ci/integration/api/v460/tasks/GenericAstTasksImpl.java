@@ -19,12 +19,10 @@ import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -40,12 +38,12 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         super(client);
     }
 
-    public void upload(@NonNull final UUID projectId, @NonNull final File sources) throws GenericException {
+    public void upload(@NonNull final UUID projectId, @NonNull final File sources, String branchName) throws GenericException {
         call(() -> client.getStoreApi().apiStoreProjectIdSourcesPost(projectId, true, true, sources), "PT AI project sources upload failed");
     }
 
     @Override
-    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode) throws GenericException {
+    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName) throws GenericException {
         StartScanModel startScanModel = new StartScanModel();
         // Setup scan mode: full or incremental. Default mode is
         // incremental, but it can be overridden by JSON settings or forced from UI

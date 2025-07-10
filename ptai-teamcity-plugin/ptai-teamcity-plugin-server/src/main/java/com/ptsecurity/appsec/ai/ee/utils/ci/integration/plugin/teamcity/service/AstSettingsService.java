@@ -27,7 +27,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -168,6 +170,9 @@ public class AstSettingsService {
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
 
+        res.fill(BRANCH_SETTINGS, request)
+                .fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
+
         return res;
     }
 
@@ -245,6 +250,8 @@ public class AstSettingsService {
             }
         }
 
+        validateBranchSettings(bean, results);
+
         if (bean.empty(INCLUDES))
             results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
         if (bean.empty(PATTERN_SEPARATOR))
@@ -310,6 +317,26 @@ public class AstSettingsService {
         }
     }
 
+    private static void validateBranchSettings(
+            @NonNull final PropertiesBean bean,
+            @NonNull final VerificationResults results
+    ) {
+        if (!bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
+            return;
+        }
+
+        if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
+            return;
+        }
+
+        String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
+        int maxNameLength = 512;
+        if (customBranchName.length() > maxNameLength) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
+        }
+    }
+
     private static AbstractApiClient createApiClient(@NonNull PropertiesBean bean) {
         return Factory.client(ConnectionSettings.builder()
                 .url(bean.get(URL))
@@ -361,7 +388,18 @@ public class AstSettingsService {
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
                 results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
             }
+
             // Check reporting settings
+            boolean isAnyReportSelected = bean.eq(REPORTING_REPORT, TRUE) ||
+                    bean.eq(REPORTING_RAWDATA, TRUE) ||
+                    bean.eq(REPORTING_SARIF, TRUE) ||
+                    bean.eq(REPORTING_SONARGIIF, TRUE) ||
+                    bean.eq(REPORTING_JSON, TRUE);
+
+            if (!isAnyReportSelected) {
+                return;
+            }
+
             Reports reports = bean.convert();
             reports = ReportUtils.validate(reports);
             new Factory().reportsTasks(client).check(reports);

@@ -24,7 +24,6 @@ import java.util.Map;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.*;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.AST_MODE;
 
 /**
  * PT AI build step configuration page requires access to some globally defined
@@ -69,6 +68,13 @@ public class AstEditRunTypeControllerExtension implements EditRunTypeControllerE
 
         if (!SERVER_SETTINGS_GLOBAL.equals(properties.get(SERVER_SETTINGS)) && !SERVER_SETTINGS_LOCAL.equals(properties.get(SERVER_SETTINGS)))
             properties.put(SERVER_SETTINGS, Defaults.SERVER_SETTINGS);
+
+        if (!BRANCH_SETTINGS_FROM_ENVIRONMENT.equals(properties.get(BRANCH_SETTINGS)) &&
+            !BRANCH_SETTINGS_CUSTOM.equals(properties.get(BRANCH_SETTINGS))
+        ) {
+            properties.put(BRANCH_SETTINGS, Defaults.BRANCH_SETTINGS);
+        }
+
         if (!AST_SETTINGS_UI.equals(properties.get(AST_SETTINGS)) && !AST_SETTINGS_JSON.equals(properties.get(AST_SETTINGS)))
             properties.put(AST_SETTINGS, Defaults.AST_SETTINGS);
         if (!AST_MODE_ASYNC.equals(properties.get(AST_MODE)) && !AST_MODE_SYNC.equals(properties.get(AST_MODE)))

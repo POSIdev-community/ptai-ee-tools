@@ -234,6 +234,10 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
         let parentListener = PtaiConnectionSettingsForm.createErrorListener();
 
         return OO.extend(parentListener, {
+            onPtaiBranchSettingsCustomBranchNameError: function (elem) {
+                this.handle("ptaiBranchSettingsCustomBranchName", elem)
+            },
+
             onPtaiProjectNameError: function (elem) {
                 this.handle("ptaiProjectName", elem);
             },
