@@ -249,3 +249,18 @@
 + [Feature] PT AI v.4.9.0 support approved
 ### 20241216
 + [Feature] PT AI v.4.9.1 support approved
+### 20250228
++ [Feature] PT AI v.4.10.0 support approved
++ [Feature] Enabled SCA Analysis functionality
++ [Feature] Added support for project tags
++ ### 20250411
++ [Feature] PT AI v.4.11.0 support approved
++ [Feature] Added support for scanning Java 21 version
++ ### 20250710
++ [Feature] PT AI v.5.0.0 support approved
++ [Feature] For Jenkins and TeamCity, the 'Branch at PT AI Server' parameter has been added to the project task with two
+options:
+  + "From pipeline environment" if the name of the scanned branch is specified in the pipeline environment variable
+  + "Custom branch" if you need to specify a branch manually (enter a name in the Branch name field)
++ [Feature] Added the --branch-name CLI parameter to scan a specified branch (creates it if missing)
++ [Feature] Removed Jenkins and TeamCity builds from the CLI plugin's Dockerfile
