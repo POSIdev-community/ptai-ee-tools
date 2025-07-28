@@ -104,10 +104,10 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
             return "default";
         }
 
-        String oldestBranchName = getWorkingBranchModel(projectId, branches).getName();
+        String workingBranchName = Objects.requireNonNull(getWorkingBranchModel(projectId, branches)).getName();
 
-        if (oldestBranchName != null) {
-            return oldestBranchName;
+        if (workingBranchName != null) {
+            return workingBranchName;
         }
 
         return "default";
@@ -160,6 +160,15 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     }
 
     private BranchModel getWorkingBranchModel(@NonNull UUID projectId, List<BranchModel> branches) {
+        BranchModel workingBranch = branches.stream()
+                .filter(BranchModel::getIsWorking)
+                .findFirst()
+                .orElse(null);
+
+        if (workingBranch != null) {
+            return workingBranch;
+        }
+
         List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
                 () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
                 "PT AI get branches failed"
