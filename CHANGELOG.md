@@ -264,3 +264,5 @@ options:
   + "Custom branch" if you need to specify a branch manually (enter a name in the Branch name field)
 + [Feature] Added the --branch-name CLI parameter to scan a specified branch (creates it if missing)
 + [Feature] Removed Jenkins and TeamCity builds from the CLI plugin's Dockerfile
+### 20250728
++ [Feature] PT AI v.5.1.0 support approved

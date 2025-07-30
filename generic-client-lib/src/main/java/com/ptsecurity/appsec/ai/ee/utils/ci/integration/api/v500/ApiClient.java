@@ -41,13 +41,12 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-import static com.ptsecurity.appsec.ai.ee.server.v500.auth.model.AuthScope.ACCESSTOKEN;
 import static com.ptsecurity.appsec.ai.ee.server.v500.auth.model.AuthScope.WEB;
 import static com.ptsecurity.appsec.ai.ee.server.v500.notifications.model.Stage.*;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 
 @Slf4j
-@VersionRange(min = {5, 0, 0, 0}, max = {5, 0, 99999, 99999})
+@VersionRange(min = {5, 0, 0, 0}, max = {5, 1, 99999, 99999})
 public class ApiClient extends AbstractApiClient {
     @Getter
     protected final String id = UUID.randomUUID().toString();
