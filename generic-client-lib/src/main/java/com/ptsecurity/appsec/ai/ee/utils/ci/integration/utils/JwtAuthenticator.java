@@ -102,9 +102,12 @@ public class JwtAuthenticator extends AbstractTool implements Authenticator {
 
     private String extractBearerToken(@NonNull Request request) {
         String header = request.header("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
+        final String bearerPrefix = "Bearer ";
+        
+        if (header == null || !header.startsWith(bearerPrefix)) {
             return null;
         }
-        return header.substring(7);
+
+        return header.substring(bearerPrefix.length());
     }
 }
