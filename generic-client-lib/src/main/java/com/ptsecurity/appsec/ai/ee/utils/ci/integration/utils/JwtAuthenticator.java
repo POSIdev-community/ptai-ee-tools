@@ -42,8 +42,20 @@ public class JwtAuthenticator extends AbstractTool implements Authenticator {
      */
     @Override
     public Request authenticate(Route route, @NonNull Response response) throws IOException {
-        // Any authentication problem while getting JWT treated as a critical failure
+        final String staleToken = extractBearerToken(response.request());
+
+        Request newRequest = retryWithNewerToken(staleToken, response.request());
+        if (newRequest != null) {
+            return newRequest;
+        }
+
         synchronized (mutex) {
+            newRequest = retryWithNewerToken(staleToken, response.request());
+            if (newRequest != null) {
+                return newRequest;
+            }
+
+            // Any authentication problem while getting JWT treated as a critical failure
             String auth = response.header("WWW-Authenticate");
             if (StringUtils.isEmpty(auth) || !auth.startsWith("Bearer")) {
                 log.error("Unauthorized, but invalid WWW-Authenticate response header: {}", auth);
@@ -64,9 +76,38 @@ public class JwtAuthenticator extends AbstractTool implements Authenticator {
                 return null;
 
             // Tell OkHTTP to resend failed request with new JWT
-            return response.request().newBuilder()
-                    .header("Authorization", "Bearer " + client.getApiJwt().getAccessToken())
-                    .build();
+            return newRequestWithToken(response.request(), client.getApiJwt().getAccessToken());
         }
+    }
+
+    private Request retryWithNewerToken(String staleToken, @NonNull Request originalRequest) {
+        if (client.getApiJwt() == null) {
+            return null;
+        }
+        final String currentToken = client.getApiJwt().getAccessToken();
+
+        if (staleToken != null && !staleToken.equals(currentToken)) {
+            log.trace("Token was refreshed while waiting for lock. Retrying with new token.");
+            return newRequestWithToken(originalRequest, currentToken);
+        }
+
+        return null;
+    }
+
+    private Request newRequestWithToken(@NonNull Request request, @NonNull String accessToken) {
+        return request.newBuilder()
+                .header("Authorization", "Bearer " + accessToken)
+                .build();
+    }
+
+    private String extractBearerToken(@NonNull Request request) {
+        String header = request.header("Authorization");
+        final String bearerPrefix = "Bearer ";
+        
+        if (header == null || !header.startsWith(bearerPrefix)) {
+            return null;
+        }
+
+        return header.substring(bearerPrefix.length());
     }
 }
