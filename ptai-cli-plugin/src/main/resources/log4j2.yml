@@ -49,5 +49,6 @@ Configuration:
     Root:
       level: trace
       AppenderRef:
+        - ref: CONSOLE
         - ref: FILE
         - ref: TRACE
