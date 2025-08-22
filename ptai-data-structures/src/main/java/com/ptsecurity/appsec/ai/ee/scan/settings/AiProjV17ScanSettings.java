@@ -1,18 +1,17 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
-import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage____;
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.networknt.schema.ValidationMessage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
+import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage____;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
 import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -130,6 +129,11 @@ public class AiProjV17ScanSettings extends UnifiedAiProjScanSettings {
     @Override
     public @NonNull String getProjectName() {
         return S("ProjectName");
+    }
+
+    @Override
+    public String getBranchName() {
+        return S("BranchName");
     }
 
     @Override
