@@ -1,7 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.networknt.schema.ValidationMessage;
@@ -14,6 +12,7 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
 import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -130,6 +129,12 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
     @Override
     public @NonNull String getProjectName() {
         return S("ProjectName");
+    }
+
+    @Override
+    public String getBranchName() {
+        log.trace("No branch name support for AIPROJ schema v.1.5");
+        return null;
     }
 
     @Override

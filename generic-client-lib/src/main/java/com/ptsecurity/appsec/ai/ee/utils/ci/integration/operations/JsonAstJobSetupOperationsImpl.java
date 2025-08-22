@@ -25,14 +25,23 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
         // TODO: Add "replace macro" implementation for settings and policy
         log.trace("Check JSON settings");
 
-        jsonSettings = UnifiedAiProjScanSettings.loadSettings(jsonSettings).toJson();
+        UnifiedAiProjScanSettings scanSettings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
+        jsonSettings = scanSettings.toJson();
         ProjectTasks projectTasks = new Factory().projectTasks(owner.getClient());
-        String branchName = owner.getBranchName();
 
+        String branchName = scanSettings.getBranchName();
+
+        if (branchName == null) {
+            branchName = owner.getBranchName();
+        } else {
+            owner.setBranchName(branchName);
+        }
+
+        String finalBranchName = branchName;
         ProjectTasks.JsonParseBrief brief = projectTasks.setupFromJson(
                 jsonSettings,
                 jsonPolicy,
-                projectId -> uploadSources(projectId, branchName)
+                projectId -> uploadSources(projectId, finalBranchName)
         );
 
         owner.setProjectName(brief.getProjectName());

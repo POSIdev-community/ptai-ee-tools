@@ -28,7 +28,6 @@ import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV15.Version
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV16.Version._1_6;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV17.Version._1_7;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_invalid;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -342,6 +341,8 @@ public abstract class UnifiedAiProjScanSettings {
      */
     @NonNull
     public abstract String getProjectName();
+
+    public abstract String getBranchName();
 
     public UnifiedAiProjScanSettings setProjectName(@NonNull final String name) {
         rootNode.put("ProjectName", name);
