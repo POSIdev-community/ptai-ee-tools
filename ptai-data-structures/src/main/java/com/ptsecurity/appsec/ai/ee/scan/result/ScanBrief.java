@@ -89,6 +89,11 @@ public class ScanBrief {
     @Getter
     @Setter
     @JsonProperty
+    protected String branchId;
+
+    @Getter
+    @Setter
+    @JsonProperty
     @Builder.Default
     protected Boolean useAsyncScan = false;
 
@@ -102,7 +107,6 @@ public class ScanBrief {
         @JsonProperty
         protected UUID id;
 
-        @NonNull
         @JsonProperty
         protected String branchName;
 
