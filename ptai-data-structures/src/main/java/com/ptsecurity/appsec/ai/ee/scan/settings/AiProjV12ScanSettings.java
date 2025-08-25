@@ -19,9 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.v1_11;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.v1_17;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.v1_8;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -127,6 +125,12 @@ public class AiProjV12ScanSettings extends UnifiedAiProjScanSettings {
     @Override
     public @NonNull String getProjectName() {
         return S("ProjectName");
+    }
+
+    @Override
+    public String getBranchName() {
+        log.trace("No branch name support for AIPROJ schema v.1.2");
+        return null;
     }
 
     @Override

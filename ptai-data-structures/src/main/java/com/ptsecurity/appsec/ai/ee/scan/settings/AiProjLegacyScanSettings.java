@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.networknt.schema.ValidatorTypeCode.ADDITIONAL_PROPERTIES;
-import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType.AUTO;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType.MANUAL;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.v1_11;
@@ -40,6 +39,12 @@ public class AiProjLegacyScanSettings extends UnifiedAiProjScanSettings {
     @Override
     public @NonNull String getProjectName() {
         return S("ProjectName");
+    }
+
+    @Override
+    public String getBranchName() {
+        log.trace("No branch name support for legacy AIPROJ schema");
+        return null;
     }
 
     @Override
