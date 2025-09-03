@@ -379,6 +379,12 @@ public class AiProjLegacyScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    public @NonNull Boolean isApplyAllPMRules() {
+        log.trace("No ApplyAllPMRules rules support for legacy AIPROJ schema");
+        return false;
+    }
+
+    @Override
     public @NonNull Boolean isUseCustomYaraRules() {
         return B("UseCustomYaraRules");
     }

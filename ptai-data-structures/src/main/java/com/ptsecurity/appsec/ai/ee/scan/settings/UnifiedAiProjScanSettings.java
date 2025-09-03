@@ -22,11 +22,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV13.Version.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV14.Version._1_4;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV15.Version._1_5;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV16.Version._1_6;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV17.Version._1_7;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV18.Version.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -133,6 +129,8 @@ public abstract class UnifiedAiProjScanSettings {
                 settings = (root.path("ScanModules").isMissingNode())
                         ? new AiProjLegacyScanSettings(root)
                         : new AiProjV10ScanSettings(root);
+            else if (_1_8.value().equals(versionNode.textValue()))
+                settings = new AiProjV18ScanSettings(root);
             else if (_1_7.value().equals(versionNode.textValue()))
                 settings = new AiProjV17ScanSettings(root);
             else if (_1_6.value().equals(versionNode.textValue()))
@@ -333,7 +331,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18 }
     public abstract Version getVersion();
 
     /**
@@ -568,6 +566,9 @@ public abstract class UnifiedAiProjScanSettings {
     public abstract Boolean isUseSastRules();
     @NonNull
     public abstract Boolean isUseCustomPmRules();
+
+    @NonNull
+    public abstract Boolean isApplyAllPMRules();
 
     @NonNull
     @Deprecated

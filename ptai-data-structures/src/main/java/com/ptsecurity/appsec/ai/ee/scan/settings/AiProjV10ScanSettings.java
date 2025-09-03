@@ -198,6 +198,12 @@ public class AiProjV10ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    public @NonNull Boolean isApplyAllPMRules() {
+        log.trace("No ApplyAllPMRules rules support for AIPROJ schema v.1.0");
+        return false;
+    }
+
+    @Override
     public @NonNull Boolean isUseCustomYaraRules() {
         return B("ComponentsSettings.UseCustomYaraRules");
     }
