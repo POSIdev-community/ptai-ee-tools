@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.getTemplate;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.ResourcesHelper.getResource7ZipString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,7 +39,8 @@ public class ScanResultTest extends BaseTest {
                     version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
                     version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490 ||
                     version == ApiVersion.V491 || version == ApiVersion.V4100 ||
-                    version == ApiVersion.V4110 || version == ApiVersion.V500) {
+                    version == ApiVersion.V4110 || version == ApiVersion.V500 ||
+                    version == ApiVersion.V520) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_OWASP_BRICKS);
@@ -70,7 +72,8 @@ public class ScanResultTest extends BaseTest {
                     version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
                     version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490 ||
                     version == ScanBrief.ApiVersion.V491 || version == ApiVersion.V4100 ||
-                    version == ApiVersion.V4110 || version == ApiVersion.V500) {
+                    version == ApiVersion.V4110 || version == ApiVersion.V500 ||
+                    version == ApiVersion.V520) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_SMOKE);
