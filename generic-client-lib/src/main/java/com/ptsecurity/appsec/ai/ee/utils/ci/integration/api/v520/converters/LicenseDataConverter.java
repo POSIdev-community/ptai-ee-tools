@@ -28,6 +28,7 @@ public class LicenseDataConverter {
         LANGUAGES_MAP.put(ProgrammingLanguageGroup.KOTLIN, "Kotlin");
         LANGUAGES_MAP.put(ProgrammingLanguageGroup.RUBY, "Ruby");
         LANGUAGES_MAP.put(ProgrammingLanguageGroup.SOLIDITY, "Solidity");
+        LANGUAGES_MAP.put(ProgrammingLanguageGroup.SCALA, "Scala");
     }
 
     @NonNull

@@ -133,7 +133,8 @@ public class ReportsConverter {
                 ProgrammingLanguageGroup.KOTLIN,
                 ProgrammingLanguageGroup.SQL,
                 ProgrammingLanguageGroup.RUBY,
-                ProgrammingLanguageGroup.SOLIDITY);
+                ProgrammingLanguageGroup.SOLIDITY,
+                ProgrammingLanguageGroup.SCALA);
 
         Reports.IssuesFilter.ProgrammingLanguage language = uniqModel.getLanguage();
         if (language != null) {
@@ -152,6 +153,7 @@ public class ReportsConverter {
                 case SQL: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SQL));
                 case RUBY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.RUBY));
                 case SOLIDITY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SOLIDITY));
+                case SCALA: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SCALA));
             }
             log.info("Language setted: {}", apiModel.getLanguages());
             return;
@@ -206,7 +208,9 @@ public class ReportsConverter {
         if (languages.contains(Reports.IssuesFilter.ProgrammingLanguage.SOLIDITY)) {
             mappedLanguages.add(ProgrammingLanguageGroup.SOLIDITY);
         }
-
+        if (languages.contains(Reports.IssuesFilter.ProgrammingLanguage.SCALA)) {
+            mappedLanguages.add(ProgrammingLanguageGroup.SCALA);
+        }
         apiModel.setLanguages(mappedLanguages);
         log.info("Language setted 2: {}", apiModel.getLanguages());
     }

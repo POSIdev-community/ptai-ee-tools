@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.7.json",
+  "Version": "1.7",
+  "ProjectName": "Python App",
+  "BranchName": "master",
+  "ProgrammingLanguages": ["Python"],
+  "ScanModules": [
+    "StaticCodeAnalysis"
+  ]
+}
