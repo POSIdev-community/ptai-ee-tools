@@ -569,10 +569,13 @@ public class AiProjConverter {
 
     @SneakyThrows
     public static SecurityPoliciesModel apply(
+            @NonNull final UnifiedAiProjScanSettings settings,
             final Policy[] policy,
             @NonNull final SecurityPoliciesModel model) {
-        model.setCheckSecurityPoliciesAccordance(null != policy && 0 != policy.length);
-        model.setSecurityPolicies(Boolean.TRUE.equals(model.getCheckSecurityPoliciesAccordance()) ? JsonPolicyHelper.serialize(policy) : "");
+        model.setCheckSecurityPoliciesAccordance(settings.isUseSecurityPolicies());
+        Boolean checkSecurityPoliciesAccordance = model.getCheckSecurityPoliciesAccordance();
+        boolean requiredSetSecurityPolicies = Boolean.TRUE.equals(checkSecurityPoliciesAccordance) && policy != null;
+        model.setSecurityPolicies(requiredSetSecurityPolicies ? JsonPolicyHelper.serialize(policy) : "");
         return model;
     }
 }
