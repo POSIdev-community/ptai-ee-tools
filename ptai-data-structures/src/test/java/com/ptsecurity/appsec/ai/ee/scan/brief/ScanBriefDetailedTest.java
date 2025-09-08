@@ -6,10 +6,10 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate;
-import com.ptsecurity.misc.tools.helpers.ArchiveHelper;
 import com.ptsecurity.misc.tools.BaseTest;
-import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import com.ptsecurity.misc.tools.TempFile;
+import com.ptsecurity.misc.tools.helpers.ArchiveHelper;
+import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,9 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.getTemplate;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.serialize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +37,8 @@ public class ScanBriefDetailedTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Convert PT AI 4.1.1, 4.2.0, 4.3.0, 4.4.1, 4.5.0, 4.6.0, 4.7.0, 4.7.1, 4.7.2, 4.8.0, 4.8.1, 4.9.0, 4.9.1, 4.10.0, 4.11.0, 5.0.0 scan results")
+    @DisplayName("Convert PT AI 4.1.1, 4.2.0, 4.3.0, 4.4.1, 4.5.0, 4.6.0, 4.7.0, 4.7.1, 4.7.2, 4.8.0, 4.8.1, 4.9.0," +
+            "4.9.1, 4.10.0, 4.11.0, 5.0.0, 5.2.0 scan results")
     @SneakyThrows
     public void generateScanResults() {
         try (TempFile temp = TempFile.createFolder()) {
@@ -58,7 +60,8 @@ public class ScanBriefDetailedTest extends BaseTest {
                             version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
                             version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490 ||
                             version == ScanBrief.ApiVersion.V491 || version == ScanBrief.ApiVersion.V4100 ||
-                            version == ScanBrief.ApiVersion.V4110 || version == ScanBrief.ApiVersion.V500) {
+                            version == ScanBrief.ApiVersion.V4110 || version == ScanBrief.ApiVersion.V500 ||
+                            version == ScanBrief.ApiVersion.V520) {
                         continue;
                     }
                     if (JAVA_OWASP_BENCHMARK == templateId) {

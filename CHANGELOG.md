@@ -266,3 +266,6 @@ options:
 + [Feature] Removed Jenkins and TeamCity builds from the CLI plugin's Dockerfile
 ### 20250728
 + [Feature] PT AI v.5.1.0 support approved
+### 20250903
++ [Feature] PT AI v.5.2.0 support approved
++ [Feature] Added support for scanning Scala

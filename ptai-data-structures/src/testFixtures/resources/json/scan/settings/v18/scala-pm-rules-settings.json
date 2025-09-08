@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.8.json",
+  "Version": "1.8",
+  "ProjectName": "Scala App",
+  "ProgrammingLanguages": ["Scala"],
+  "ScanModules": [
+    "StaticCodeAnalysis"
+  ],
+  "ApplyAllPMRules": true
+}

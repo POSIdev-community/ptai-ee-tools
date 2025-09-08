@@ -129,6 +129,7 @@ public class Reports {
             SQL,
             RUBY,
             SOLIDITY,
+            SCALA,
             ALL
         }
 

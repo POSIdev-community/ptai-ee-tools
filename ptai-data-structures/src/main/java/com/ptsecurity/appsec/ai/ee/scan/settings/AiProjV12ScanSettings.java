@@ -224,6 +224,12 @@ public class AiProjV12ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    public @NonNull Boolean isApplyAllPMRules() {
+        log.trace("No ApplyAllPMRules rules support for AIPROJ schema v.1.2");
+        return false;
+    }
+
+    @Override
     public @NonNull Boolean isUseCustomYaraRules() {
         log.trace("No custom SAST rules support for AIPROJ schema v.1.2");
         return false;
