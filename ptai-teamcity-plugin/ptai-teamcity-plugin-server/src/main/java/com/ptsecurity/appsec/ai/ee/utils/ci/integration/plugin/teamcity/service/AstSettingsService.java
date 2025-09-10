@@ -386,7 +386,11 @@ public class AstSettingsService {
                 UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(bean.getProperties().get(JSON_SETTINGS));
                 results.add("JSON settings are verified, project name is " + settings.getProjectName());
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
-                results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
+                if (policyJson != null) {
+                    results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
+                } else {
+                    results.add("JSON policy is verified");
+                }
             }
 
             // Check reporting settings
