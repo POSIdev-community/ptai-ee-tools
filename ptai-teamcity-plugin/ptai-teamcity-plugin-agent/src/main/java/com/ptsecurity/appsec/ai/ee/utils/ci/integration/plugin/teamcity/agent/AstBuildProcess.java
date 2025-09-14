@@ -77,7 +77,10 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         String policy = null;
         if (!selectedScanSettingsUi) {
             settings = BaseJsonHelper.minimize(params.get(Params.JSON_SETTINGS));
-            policy = BaseJsonHelper.minimize(params.get(Params.JSON_POLICY));
+            String policyParamValue = params.get(Params.JSON_POLICY);
+            if (policyParamValue != null) {
+                policy = BaseJsonHelper.minimize(params.get(Params.JSON_POLICY));
+            }
         } else
             projectName = params.get(Params.PROJECT_NAME);
 
