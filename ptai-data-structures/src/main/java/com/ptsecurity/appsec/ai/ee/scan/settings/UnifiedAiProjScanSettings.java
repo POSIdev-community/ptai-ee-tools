@@ -493,6 +493,8 @@ public abstract class UnifiedAiProjScanSettings {
     @AllArgsConstructor
     public static class PmTaintSettings {
         protected Boolean usePublicAnalysisMethod;
+        @Builder.Default
+        protected List<String> pmGroups = new ArrayList<>();
         protected String customParameters;
     }
 

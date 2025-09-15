@@ -367,9 +367,36 @@ public class AiProjConverter {
 
     @SneakyThrows
     public static AnalysisRulesUpdateSettingsModel apply(
-            @NonNull final UnifiedAiProjScanSettings settings) {
-        return new AnalysisRulesUpdateSettingsModel()
+            @NonNull final UnifiedAiProjScanSettings settings,
+            ApiClient client) {
+        List<PMGroupModel> pmGroups  = call(
+                () -> client.getPmGroupsApi().apiConfigsPmGroupsGet(),
+                "Failed to get PT AI PM Group Models");
+
+        Map<String, UUID> pmGroupsByName = pmGroups.stream()
+                .collect(Collectors.toMap(
+                        PMGroupModel::getName,
+                        PMGroupModel::getId,
+                        (existing, replacement) -> existing,
+                        HashMap::new
+                ));
+
+        List<UUID> pmGroupIds = new ArrayList<>();
+
+        for (String groupName : settings.getPmTaintSettings().getPmGroups()) {
+            if (pmGroupsByName.containsKey(groupName)) {
+                pmGroupIds.add(pmGroupsByName.get(groupName));
+            } else {
+                log.warn("PM group with such name '{}' not found. Group will be ignored.", groupName);
+            }
+        }
+
+        AnalysisRulesUpdateSettingsModel updateSettingsModel = new AnalysisRulesUpdateSettingsModel()
                 .applyAllPmRules(settings.isApplyAllPMRules());
+
+        updateSettingsModel.setPmGroupIds(pmGroupIds);
+
+        return updateSettingsModel;
     }
 
     /**

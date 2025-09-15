@@ -275,10 +275,21 @@ public class AiProjV18ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public PmTaintSettings getPmTaintSettings() {
-        if (N("PmTaintSettings").isMissingNode()) return null;
+        JsonNode pmTaintSettings = N("PmTaintSettings");
+        if (pmTaintSettings.isMissingNode()) return null;
+
+        List<String> pmGroups = new ArrayList<>();
+        JsonNode pmGroupsNode = N(pmTaintSettings, "PMGroups");
+        if (pmGroupsNode.isArray()) {
+            for (JsonNode pmGroupNameNode : pmGroupsNode) {
+                pmGroups.add(pmGroupNameNode.asText());
+            }
+        }
+
         return PmTaintSettings.builder()
                 .usePublicAnalysisMethod(B("PmTaintSettings.UsePublicAnalysisMethod"))
                 .customParameters(S("PmTaintSettings.CustomParameters"))
+                .pmGroups(pmGroups)
                 .build();
     }
 

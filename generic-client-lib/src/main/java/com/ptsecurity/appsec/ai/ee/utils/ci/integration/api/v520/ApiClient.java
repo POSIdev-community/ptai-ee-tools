@@ -65,6 +65,10 @@ public class ApiClient extends AbstractApiClient {
 
     @Getter
     @ToString.Exclude
+    protected final PmGroupsApi pmGroupsApi = new PmGroupsApi(new com.ptsecurity.appsec.ai.ee.server.v520.api.ApiClient());
+
+    @Getter
+    @ToString.Exclude
     protected final ReportsApi reportsApi = new ReportsApi(new com.ptsecurity.appsec.ai.ee.server.v520.api.ApiClient());
 
     @Getter
@@ -101,12 +105,12 @@ public class ApiClient extends AbstractApiClient {
 
     public ApiClient(@NonNull final ConnectionSettings connectionSettings) {
         super(connectionSettings, AdvancedSettings.getDefault());
-        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, mailingApi, healthCheckApi, versionApi));
+        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, mailingApi, healthCheckApi, versionApi, branchesApi, pmGroupsApi));
     }
 
     public ApiClient(@NonNull final ConnectionSettings connectionSettings, @NonNull final AdvancedSettings advancedSettings) {
         super(connectionSettings, advancedSettings);
-        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, mailingApi, healthCheckApi, versionApi));
+        apis.addAll(Arrays.asList(authApi, projectsApi, configsApi, reportsApi, licenseApi, scanQueueApi, scanAgentApi, storeApi, mailingApi, healthCheckApi, versionApi, branchesApi, pmGroupsApi));
     }
 
     protected ApiResponse<AuthResultModel> initialAuthentication() throws GenericException {
