@@ -516,6 +516,13 @@
           "title": "Use public analysis method",
           "type": ["null", "boolean"]
         },
+        "PMGroups": {
+          "title": "List of enabled PM group names",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "CustomParameters": {
           "title": "Custom parameters",
           "description": "Custom PmTaint kernel startup parameters",
@@ -725,14 +732,6 @@
       "title": "Apply all PM rules",
       "description": "Apply all PM rules",
       "type": "boolean"
-    },
-    "PMGroups": {
-      "title": "List of enabled PM group uuids",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uuid"
-      }
     },
     "UseSecurityPolicies": {
       "title": "Use security policies",

@@ -243,7 +243,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
                 "PT AI project policy assignment failed");
 
         log.trace("Apply custom analysis rules");
-        AnalysisRulesUpdateSettingsModel analysisRulesUpdateSettingsModel = AiProjConverter.apply(settings);
+        AnalysisRulesUpdateSettingsModel analysisRulesUpdateSettingsModel = AiProjConverter.apply(settings, client);
         call(
                 () -> client.getProjectsApi().apiProjectsProjectIdAnalysisRulesPut(projectId, analysisRulesUpdateSettingsModel),
                 "PT AI project policy custom analysis rules update failed");
