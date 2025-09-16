@@ -169,7 +169,7 @@ public class AiProjConverter {
         // Set isUnpackUserJarFiles
         model.setUnpackUserPackages(javaSettings.getUnpackUserPackages());
         model.setDownloadDependencies(javaSettings.getDownloadDependencies());
-        model.setUseAvailablePublicAndProtectedMethods(model.getUseAvailablePublicAndProtectedMethods());
+        model.setUseAvailablePublicAndProtectedMethods(javaSettings.getUsePublicAnalysisMethod());
         model.setVersion(JAVA_VERSION_MAP.getOrDefault(javaSettings.getJavaVersion(), JavaVersions._11));
         // Set userPackagePrefixes and launchJvmParameters
         model.setUserPackagePrefixes(javaSettings.getUserPackagePrefixes());
