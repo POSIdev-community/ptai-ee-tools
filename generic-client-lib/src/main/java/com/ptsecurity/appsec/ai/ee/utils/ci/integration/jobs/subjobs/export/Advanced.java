@@ -3,8 +3,8 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class Advanced extends Export {
             @NonNull final ScanBrief scanBrief) throws GenericException {
         ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
         try {
-            reportsTasks.exportAdvanced(scanBrief.getProjectId(), scanBrief.getId(), reports, owner.getFileOps());
+            reportsTasks.exportAdvanced(scanBrief.getProjectId(), scanBrief.getId(), reports, owner.getFileOps(), null);
         } catch (GenericException e) {
             owner.warning(e);
         }
