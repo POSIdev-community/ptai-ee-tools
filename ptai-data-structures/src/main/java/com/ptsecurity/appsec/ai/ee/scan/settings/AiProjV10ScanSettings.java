@@ -102,6 +102,12 @@ public class AiProjV10ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    public String getBranchName() {
+        log.trace("No branch name support for AIPROJ schema v.1.0");
+        return null;
+    }
+
+    @Override
     public @NonNull ScanBrief.ScanSettings.Language getProgrammingLanguage() {
         return PROGRAMMING_LANGUAGE_MAP.get(S("ProgrammingLanguage"));
     }
@@ -189,6 +195,12 @@ public class AiProjV10ScanSettings extends UnifiedAiProjScanSettings {
     @Override
     public @NonNull Boolean isUseCustomPmRules() {
         throw GenericException.raise("No custom PM rules support for AIPROJ schema v.1.0", new UnsupportedOperationException());
+    }
+
+    @Override
+    public @NonNull Boolean isApplyAllPMRules() {
+        log.trace("No ApplyAllPMRules rules support for AIPROJ schema v.1.0");
+        return false;
     }
 
     @Override

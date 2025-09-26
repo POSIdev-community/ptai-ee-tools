@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.6.json",
+  "Version": "1.6",
+  "ProjectName": "Java",
+  "ProgrammingLanguages": ["Java"],
+  "ScanModules": [
+    "StaticCodeAnalysis",
+    "Configuration"
+  ],
+  "JavaSettings": {
+    "Version": "21"
+  }
+}

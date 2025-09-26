@@ -237,7 +237,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
                 () -> client.getProjectsApi().apiProjectsProjectIdSecurityPoliciesGet(projectId),
                 "failed to get PT AI project security policies");
         log.trace("Apply security policy");
-        AiProjConverter.apply(policy, securityPoliciesModel);
+        AiProjConverter.apply(settings, policy, securityPoliciesModel);
         call(
                 () -> client.getProjectsApi().apiProjectsProjectIdSecurityPoliciesPut(projectId, securityPoliciesModel),
                 "PT AI project policy assignment failed");

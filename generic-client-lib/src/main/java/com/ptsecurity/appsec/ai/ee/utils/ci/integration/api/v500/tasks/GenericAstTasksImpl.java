@@ -321,6 +321,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .id(scanResultId)
                 .projectId(projectId)
                 .projectName(projectName)
+                .branchId(scanResult.getBranchId().toString())
                 .scanSettings(convert(scanSettings));
 
         ScanAgentInfoModel scanAgentInfoModel = scanResult.getScanAgentInfo();
@@ -408,6 +409,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         // So we need to set state from brief
         scanResult.setState(scanBrief.getState());
         scanResult.setPtaiAgentName(scanBrief.getPtaiAgentName());
+        scanResult.setBranchId(scanBrief.getBranchId());
         return scanResult;
     }
 
