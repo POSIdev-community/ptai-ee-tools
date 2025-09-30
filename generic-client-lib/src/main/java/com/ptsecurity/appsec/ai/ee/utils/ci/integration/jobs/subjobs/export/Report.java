@@ -30,7 +30,7 @@ public class Report extends Export {
             @NonNull final ScanBrief scanBrief) throws GenericException {
         ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
         try {
-            reportsTasks.exportReport(scanBrief.getProjectId(), scanBrief.getId(), report, owner.getFileOps(), null);
+            reportsTasks.exportReport(scanBrief.getProjectId(), scanBrief.getId(), report, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

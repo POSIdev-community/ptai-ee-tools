@@ -151,7 +151,6 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
      * @param reports      Reports to be generated. These reports are explicitly checked
      *                     as this method may be called directly as not the part
      *                     of {@link GenericAstJob#execute()} call
-     * @param templateLoc Locale of template
      * @throws GenericException Exception that contains details about failed report validation / generation
      */
     @Override
@@ -159,8 +158,7 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId,
             @NonNull final Reports reports,
-            @NonNull final FileOperations fileOps,
-            Locale templateLoc
+            @NonNull final FileOperations fileOps
     ) throws GenericException {
         log.trace("Validate and check reports to be generated");
         final Reports checkedReports = ReportUtils.validate(reports);
@@ -178,7 +176,7 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
             try {
                 if (item instanceof Report) {
                     Report report = (Report) item;
-                    exportReport(projectId, scanResultId, report, fileOps, templateLoc);
+                    exportReport(projectId, scanResultId, report, fileOps);
                 } else if (item instanceof RawData) {
                     RawData rawData = (RawData) item;
                     exportRawJson(projectId, scanResultId, rawData, fileOps);
@@ -196,13 +194,13 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
     }
 
     @Override
-    public void exportReport(@NonNull UUID projectId, @NonNull UUID scanResultId, @NonNull Report report, @NonNull FileOperations fileOps, Locale templateLoc) throws GenericException {
+    public void exportReport(@NonNull UUID projectId, @NonNull UUID scanResultId, @NonNull Report report, @NonNull FileOperations fileOps) throws GenericException {
         fine("Started: HTML report generation for project id: %s, scan result id: %s, template: %s", projectId, scanResultId, report.getTemplate());
 
         log.trace("Load all report templates to find one with {} name", report.getTemplate());
 
         ReportTemplateModel templateModel = null;
-        Locale templateLocale = templateLoc;
+        Locale templateLocale = report.getTemplateLocale();
 
         Locale[] searchLocales = (templateLocale != null)
                 ? new Locale[]{templateLocale}

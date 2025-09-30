@@ -29,22 +29,19 @@ public interface ReportsTasks {
      * @param reports      Reports to be generated. These reports are explicitly checked
      *                     as this method may be called directly as not the part
      *                     of {@link GenericAstJob#execute()} call
-     * @param templateLoc Locale of template
      * @throws GenericException Exception that contains details about failed report validation / generation
      */
     void exportAdvanced(
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId,
             @NonNull final Reports reports,
-            @NonNull final FileOperations fileOps,
-            Locale templateLoc) throws GenericException;
+            @NonNull final FileOperations fileOps) throws GenericException;
 
     void exportReport(
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId,
             @NonNull final Report report,
-            @NonNull final FileOperations fileOps,
-            Locale templateLoc) throws GenericException;
+            @NonNull final FileOperations fileOps) throws GenericException;
 
     /**
      * Method saves "raw JSON" issues to file using task-specific file operations

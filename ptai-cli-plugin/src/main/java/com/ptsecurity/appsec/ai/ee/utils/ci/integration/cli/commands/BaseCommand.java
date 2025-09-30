@@ -78,6 +78,7 @@ public abstract class BaseCommand {
                             .template(reporting.report.template)
                             .includeDfd(reporting.report.includeDfd)
                             .includeGlossary(reporting.report.includeGlossary)
+                            .templateLocale(reporting.report.templateLocale)
                             .build());
                 if (null != reporting.raw)
                     reports.getRaw().add(Reports.RawData.builder()
@@ -181,6 +182,13 @@ public abstract class BaseCommand {
                 names = {"--report-include-glossary"}, order = 6,
                 description = "Enable this option if you want to add reference information about vulnerabilities to the report")
         protected boolean includeGlossary = false;
+
+        @CommandLine.Option(
+                names = {"-l", "--locale"},
+                order = 4,
+                paramLabel = "<locale>",
+                description = "Locale ID of template, one of EN, RU")
+        protected Reports.Locale templateLocale = null;
     }
 
     @Getter @Setter

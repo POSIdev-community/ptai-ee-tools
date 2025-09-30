@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.commands;
 
-import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.operations.LocalFileOperations;
@@ -77,13 +76,6 @@ public class GenerateReport extends BaseCommand implements Callable<Integer> {
             description = "Folder where AST report is to be stored. By default .ptai folder is used")
     protected Path output = Paths.get(System.getProperty("user.dir")).resolve(AbstractJob.DEFAULT_OUTPUT_FOLDER);
 
-    @CommandLine.Option(
-            names = {"-l", "--locale"},
-            order = 4,
-            paramLabel = "<locale>",
-            description = "Locale ID of template, one of EN, RU")
-    protected Reports.Locale templateLocale = null;
-
     @Slf4j
     @SuperBuilder
     public static class CliGenerateReportsJob extends GenerateReportsJob {
@@ -123,7 +115,6 @@ public class GenerateReport extends BaseCommand implements Callable<Integer> {
                 .projectId(projectInfo.id)
                 .projectName(projectInfo.name)
                 .branchName(branchName)
-                .templateLocale(templateLocale)
                 .scanResultId(scanResultId)
                 .output(output)
                 .reports(reports.convert())

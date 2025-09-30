@@ -27,7 +27,6 @@ public class GenerateReportsJob extends AbstractJob implements FileSaver, TextOu
     protected UUID projectId;
     protected String branchName;
     protected UUID scanResultId;
-    protected Reports.Locale templateLocale;
 
     protected Path output;
 
@@ -63,6 +62,6 @@ public class GenerateReportsJob extends AbstractJob implements FileSaver, TextOu
         if (null == scanResultId)
             throw GenericException.raise("Latest scan result not found", new IllegalArgumentException(projectName));
 
-        reportsTasks.exportAdvanced(projectId, scanResultId, reports, fileOps, templateLocale);
+        reportsTasks.exportAdvanced(projectId, scanResultId, reports, fileOps);
     }
 }
