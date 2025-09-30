@@ -173,7 +173,7 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
             try {
                 if (item instanceof Report) {
                     Report report = (Report) item;
-                    exportReport(projectId, scanResultId, report, fileOps, null);
+                    exportReport(projectId, scanResultId, report, fileOps, templateLoc);
                 } else if (item instanceof RawData) {
                     RawData rawData = (RawData) item;
                     exportRawJson(projectId, scanResultId, rawData, fileOps);
