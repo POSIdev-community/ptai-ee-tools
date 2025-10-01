@@ -2,9 +2,9 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.*;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 
 import java.util.List;
@@ -23,16 +23,25 @@ public interface ReportsTasks {
      * for AST job and for CLI reports generation we need to explicitly check reports
      * and not to imply that such check will be done as a first step in
      * calling {@link GenericAstJob#execute()}} method
-     * @param projectId PT AI project ID
+     *
+     * @param projectId    PT AI project ID
      * @param scanResultId PT AI AST result ID
-     * @param reports Reports to be generated. These reports are explicitly checked
-     *                as this method may be called directly as not the part
-     *                of {@link GenericAstJob#execute()} call
+     * @param reports      Reports to be generated. These reports are explicitly checked
+     *                     as this method may be called directly as not the part
+     *                     of {@link GenericAstJob#execute()} call
      * @throws GenericException Exception that contains details about failed report validation / generation
      */
-    void exportAdvanced(@NonNull final UUID projectId, @NonNull final UUID scanResultId, @NonNull final Reports reports, @NonNull final FileOperations fileOps) throws GenericException;
+    void exportAdvanced(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            @NonNull final Reports reports,
+            @NonNull final FileOperations fileOps) throws GenericException;
 
-    void exportReport(@NonNull final UUID projectId, @NonNull final UUID scanResultId, @NonNull final Report report, @NonNull final FileOperations fileOps) throws GenericException;
+    void exportReport(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            @NonNull final Report report,
+            @NonNull final FileOperations fileOps) throws GenericException;
 
     /**
      * Method saves "raw JSON" issues to file using task-specific file operations

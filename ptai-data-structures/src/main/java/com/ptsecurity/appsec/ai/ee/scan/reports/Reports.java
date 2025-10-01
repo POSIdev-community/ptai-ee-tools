@@ -287,6 +287,8 @@ public class Reports {
         @NonNull
         @JsonProperty
         protected String template;
+
+        protected Reports.Locale templateLocale;
     }
 
     @Getter

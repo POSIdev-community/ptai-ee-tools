@@ -4,9 +4,9 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ListReportTemplatesJob;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
                 "1000:Invalid input"})
 public class ListReportTemplates extends BaseCommand implements Callable<Integer> {
     @CommandLine.Option(
-            names = {"--locale"}, required = true, order = 4,
+            names = {"-l", "--locale"}, required = true, order = 4,
             paramLabel = "<locale>",
             description = "Locale ID of templates to be listed, one of EN, RU")
     protected Reports.Locale locale;

@@ -17,7 +17,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanResultHelper;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
 import com.ptsecurity.misc.tools.helpers.StringHelper;
 import lombok.NonNull;
@@ -141,11 +140,12 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
      * for AST job and for CLI reports generation we need to explicitly check reports
      * and not to imply that such check will be done as a first step in
      * calling {@link GenericAstJob#execute()} method
-     * @param projectId PT AI project ID
+     *
+     * @param projectId    PT AI project ID
      * @param scanResultId PT AI AST result ID
-     * @param reports Reports to be generated. These reports are explicitly checked
-     *                as this method may be called directly as not the part
-     *                of {@link GenericAstJob#execute()} call
+     * @param reports      Reports to be generated. These reports are explicitly checked
+     *                     as this method may be called directly as not the part
+     *                     of {@link GenericAstJob#execute()} call
      * @throws GenericException Exception that contains details about failed report validation / generation
      */
     @Override

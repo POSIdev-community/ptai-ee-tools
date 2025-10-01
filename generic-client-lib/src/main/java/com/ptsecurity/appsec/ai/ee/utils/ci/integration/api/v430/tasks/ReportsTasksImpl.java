@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.*;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
-import com.ptsecurity.appsec.ai.ee.server.v430.api.model.*;
+import com.ptsecurity.appsec.ai.ee.server.v430.api.model.ReportGenerateModel;
+import com.ptsecurity.appsec.ai.ee.server.v430.api.model.ReportTemplateModel;
+import com.ptsecurity.appsec.ai.ee.server.v430.api.model.ReportType;
+import com.ptsecurity.appsec.ai.ee.server.v430.api.model.UserReportParametersModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
@@ -141,11 +144,12 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
      * for AST job and for CLI reports generation we need to explicitly check reports
      * and not to imply that such check will be done as a first step in
      * calling {@link GenericAstJob#execute()} method
-     * @param projectId PT AI project ID
+     *
+     * @param projectId    PT AI project ID
      * @param scanResultId PT AI AST result ID
-     * @param reports Reports to be generated. These reports are explicitly checked
-     *                as this method may be called directly as not the part
-     *                of {@link GenericAstJob#execute()} call
+     * @param reports      Reports to be generated. These reports are explicitly checked
+     *                     as this method may be called directly as not the part
+     *                     of {@link GenericAstJob#execute()} call
      * @throws GenericException Exception that contains details about failed report validation / generation
      */
     @Override
