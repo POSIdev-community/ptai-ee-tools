@@ -162,6 +162,9 @@ public abstract class UnifiedAiProjScanSettings {
             JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
             Set<ValidationMessage> errors = jsonSchema.validate(root);
 
+            log.trace("Validate Programming Languages");
+            settings.validateProgrammingLanguages(result);
+
             log.trace("Validate Tags attribute");
             JsonNode tagsNode = root.path("Tags");
             if (!tagsNode.isMissingNode() && tagsNode.isArray()) {
@@ -208,7 +211,7 @@ public abstract class UnifiedAiProjScanSettings {
         throw new JsonMappingException("Root must be a JSON object, but got: " + node.getNodeType());
     }
 
-    private static void addErrorMessageToResult(ParseResult result, String errorMessage) {
+    protected static void addErrorMessageToResult(ParseResult result, String errorMessage) {
         result.getMessages().add(ParseResult.Message.builder()
                 .type(ParseResult.Message.Type.ERROR)
                 .text(errorMessage)
@@ -357,6 +360,8 @@ public abstract class UnifiedAiProjScanSettings {
         res.add(this.getProgrammingLanguage());
         return res;
     }
+
+    protected void validateProgrammingLanguages(ParseResult result) {}
 
     public abstract UnifiedAiProjScanSettings setProgrammingLanguage(@NonNull final ScanBrief.ScanSettings.Language language);
 
