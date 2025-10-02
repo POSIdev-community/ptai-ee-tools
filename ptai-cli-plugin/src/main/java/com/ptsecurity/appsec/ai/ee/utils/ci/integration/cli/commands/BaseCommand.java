@@ -78,7 +78,7 @@ public abstract class BaseCommand {
                             .template(reporting.report.template)
                             .includeDfd(reporting.report.includeDfd)
                             .includeGlossary(reporting.report.includeGlossary)
-                            .templateLocale(reporting.report.templateLocale)
+                            .locale(reporting.report.templateLocale)
                             .build());
                 if (null != reporting.raw)
                     reports.getRaw().add(Reports.RawData.builder()

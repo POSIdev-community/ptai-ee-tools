@@ -201,7 +201,7 @@ public class ReportsTasksImpl extends AbstractTaskImpl implements ReportsTasks {
         log.trace("Load all report templates to find one with {} name", report.getTemplate());
 
         ReportTemplateModel templateModel = null;
-        Locale templateLocale = report.getTemplateLocale();
+        Locale templateLocale = report.getLocale();
 
         Locale[] searchLocales = (templateLocale != null)
                 ? new Locale[]{templateLocale}
