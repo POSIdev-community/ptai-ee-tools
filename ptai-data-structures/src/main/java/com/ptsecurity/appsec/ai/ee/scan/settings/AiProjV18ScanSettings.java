@@ -21,6 +21,7 @@ import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__6.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule__.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -169,6 +170,17 @@ public class AiProjV18ScanSettings extends UnifiedAiProjScanSettings {
         ArrayNode languagesNode = rootNode.putArray("ProgrammingLanguages");
         languages.forEach((language) -> languagesNode.add(language.getValue()));
         return this;
+    }
+
+    @Override
+    protected void validateProgrammingLanguages(ParseResult result) {
+        Set<ScanBrief.ScanSettings.Language> languages = getProgrammingLanguages();
+        if (languages.contains(ScanBrief.ScanSettings.Language.CSHARPWINONLY) &&
+                languages.contains(ScanBrief.ScanSettings.Language.CSHARP)) {
+            String errorMessage = i18n_ast_settings_type_manual_json_settings_message_csharp_error();
+            log.error(errorMessage);
+            addErrorMessageToResult(result, errorMessage);
+        }
     }
 
     @Override

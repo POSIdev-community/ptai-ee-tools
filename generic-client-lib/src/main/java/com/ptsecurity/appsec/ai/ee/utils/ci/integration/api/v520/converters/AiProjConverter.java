@@ -143,6 +143,15 @@ public class AiProjConverter {
             log.trace("Set base project blackbox settings");
             result.setBlackBox(apply(settings, new BlackBoxSettingsBaseModel()));
         }
+
+        List<LegacyProgrammingLanguageGroup> languages = result.getLanguages();
+        if (languages != null &&
+                languages.contains(LegacyProgrammingLanguageGroup.CSHARPWINONLY) &&
+                languages.contains(LegacyProgrammingLanguageGroup.CSHARP)) {
+            String message = "Project settings error: cannot use both C# (Windows) and C# (Windows, Linux). Please choose one";
+            log.error(message);
+            throw new IllegalArgumentException(message);
+        }
         return result;
     }
 
