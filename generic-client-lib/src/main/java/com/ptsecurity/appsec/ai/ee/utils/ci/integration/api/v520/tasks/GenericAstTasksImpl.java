@@ -81,8 +81,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         ScanType scanType = fullScanMode ? ScanType.FULL : ScanType.INCREMENTAL;
         startScanModel.setScanType(scanType);
 
-        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
-        UUID branchId = getBranchModelByName(branches, branchName).getId();
+        UUID branchId = getBranchIdByName(projectId, branchName);
 
         return call(
                 () -> client.getScanQueueApi().apiScansBranchesBranchIdStartPost(branchId, startScanModel),
@@ -113,6 +112,15 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         return "default";
     }
 
+    @Override
+    public UUID getBranchIdByName(
+            @NonNull final UUID projectId,
+            @NonNull final String branchName
+    ) {
+        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
+        return filterBranchModelByName(branches, branchName).getId();
+    }
+
     private UUID getTargetBranchId(
             List<BranchModel> branches,
             String branchName,
@@ -122,7 +130,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         UUID branchId = null;
         BranchModel targetBranch;
         if (branchName != null) {
-            targetBranch = getBranchModelByName(branches, branchName);
+            targetBranch = filterBranchModelByName(branches, branchName);
         } else {
             targetBranch = getWorkingBranchModel(projectId, branches);
         }
@@ -132,7 +140,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         }
 
         if (targetBranch == null) {
-            targetBranch = getBranchModelByName(branches, defaultBranchName);
+            targetBranch = filterBranchModelByName(branches, defaultBranchName);
         }
 
         if (targetBranch != null) {
@@ -149,7 +157,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         );
     }
 
-    private BranchModel getBranchModelByName(
+    private BranchModel filterBranchModelByName(
             @NonNull final List<BranchModel> branches,
             @NonNull final String branchName
     ) {
