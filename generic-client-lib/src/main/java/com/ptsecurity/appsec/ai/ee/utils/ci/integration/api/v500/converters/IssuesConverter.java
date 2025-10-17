@@ -401,7 +401,12 @@ public class IssuesConverter {
             @NonNull final Map<ServerVersionTasks.Component, String> versions,
             @NonNull final ScanBrief destination) {
         destination.setPtaiServerVersion(versions.get(ServerVersionTasks.Component.AIE));
-        destination.setPtaiAgentVersion(versions.get(ServerVersionTasks.Component.AIC));
+
+        Optional.ofNullable(scanResult.getScanAgentInfo())
+                .map(ScanAgentInfoModel::getVersion)
+                .filter(StringUtils::isNotEmpty)
+                .ifPresent(destination::setPtaiAgentVersion);
+
         destination.setId(Objects.requireNonNull(scanResult.getId(), "Scan result ID is null"));
         destination.setProjectId(Objects.requireNonNull(scanResult.getProjectId(), "Scan result project ID is null"));
         destination.setProjectName(projectName);
