@@ -13,7 +13,7 @@ dependencies {
     implementation project(':generic-client-lib')
 
     // https://mvnrepository.com/artifact/commons-io/commons-io
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-io:commons-io:2.20.0'
     // https://mvnrepository.com/artifact/info.picocli/picocli
     implementation 'info.picocli:picocli:4.2.0'
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
