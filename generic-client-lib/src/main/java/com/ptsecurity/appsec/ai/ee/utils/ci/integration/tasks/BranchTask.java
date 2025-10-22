@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface BranchTask {
     String getWorkingOrDefaultBranchName(@NonNull UUID projectId);
+    UUID getBranchIdByName(@NonNull final UUID projectId, @NonNull final String branchName);
 }

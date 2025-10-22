@@ -130,15 +130,17 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
         if (genericAstTasks instanceof BranchTask && branchName == null) {
             branchName = ((BranchTask) genericAstTasks).getWorkingOrDefaultBranchName(projectId);
+            branchId = ((BranchTask) genericAstTasks).getBranchIdByName(projectId, branchName);
         }
 
         scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);
 
         info(
-                "Scan enqueued, project name: %s, id: %s, branch name: %s, result id: %s",
+                "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s, result id: %s",
                 projectName,
                 projectId,
                 branchName,
+                branchId,
                 scanResultId
         );
 
@@ -187,10 +189,11 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                 : ScanDiagnostic.create(scanBrief, genericAstTasks.getScanErrors(projectId, scanResultId), performance());
 
         info(
-                "Scan finished, project name: %s, project id: %s, branch name: %s, result id: %s",
+                "Scan finished, project name: %s, project id: %s, branch name: %s, branch id: %s, result id: %s",
                 projectName,
                 projectId,
                 branchName,
+                branchId,
                 scanResultId
         );
 
