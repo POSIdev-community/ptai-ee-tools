@@ -12,9 +12,9 @@ dependencies {
     // swaggerCodegen 'org.openapitools:openapi-generator-cli:6.2.0'
 
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
-    api 'com.squareup.okhttp3:okhttp:4.2.2'
+    api 'com.squareup.okhttp3:okhttp:5.2.1'
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    api 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.code.gson:gson:2.13.2'
 
     // https://mvnrepository.com/artifact/org.openapitools/jackson-databind-nullable
     // implementation 'org.openapitools:jackson-databind-nullable:0.2.3'

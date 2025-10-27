@@ -6,7 +6,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.Buffer;
-import okio.BufferedSink;
 import okio.BufferedSource;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -69,26 +68,46 @@ public class LoggingInterceptor implements Interceptor {
             }
         }
 
-        if (logBody) {
+        ResponseBody body = response.body();
+        if (logBody && isReadableResponseBody(response)) {
             int maxBody = advancedSettings.getInt(LOGGING_HTTP_RESPONSE_MAX_BODY_SIZE);
-            if (0 != maxBody && null != response.body()) {
-                BufferedSource source = response.body().source();
-                source.request(Long.MAX_VALUE); // Buffer the entire body.
-                Buffer buffer = source.getBuffer();
-                if (buffer.size() < maxBody) maxBody = (int) buffer.size();
-                String bufferData = buffer.clone().readString(maxBody, StandardCharsets.UTF_8);
+            if (maxBody > 0) {
+                try {
+                    BufferedSource source = body.source();
+                    source.request(Long.MAX_VALUE); // Buffer the entire body.
+                    Buffer buffer = source.getBuffer();
+                    if (buffer.size() < maxBody) maxBody = (int) buffer.size();
+                    String bufferData = buffer.clone().readString(maxBody, StandardCharsets.UTF_8);
 
-                if (maxBody >= bufferData.length()) {
-                    log.trace("Response body: {}", StringUtils.isEmpty(bufferData) ? "[empty]" : bufferData);
-                } else {
-                    log.trace("Response body trimmed to first {} bytes as it {} bytes long", maxBody, bufferData.length());
-                    log.trace("Trimmed response body: {}", bufferData.substring(0, maxBody));
+                    if (maxBody >= bufferData.length()) {
+                        log.trace("Response body: {}", StringUtils.isEmpty(bufferData) ? "[empty]" : bufferData);
+                    } else {
+                        log.trace("Response body trimmed to first {} bytes as it {} bytes long", maxBody, bufferData.length());
+                        log.trace("Trimmed response body: {}", bufferData.substring(0, maxBody));
+                    }
+                } catch (IllegalStateException e) {
+                    log.trace("Response body is not readable: {}", e.getMessage());
                 }
             }
-        } else
+        } else if (!logBody) {
             log.trace("Response body skipped for authentication call");
+        } else {
+            log.trace("Response body is not readable (cached/network/prior response or WebSocket)");
+        }
 
         return response;
+    }
+
+    private boolean isReadableResponseBody(Response response) {
+        if (response.networkResponse() != null ||
+                response.cacheResponse() != null ||
+                response.priorResponse() != null) {
+            return false;
+        }
+
+        String connectionHeader = response.header("Connection");
+        String upgradeHeader = response.header("Upgrade");
+        return !"Upgrade".equalsIgnoreCase(connectionHeader) || !"websocket".equalsIgnoreCase(upgradeHeader);
     }
 
     private boolean encodingUnknown(@NonNull final Headers headers) {
@@ -98,28 +117,34 @@ public class LoggingInterceptor implements Interceptor {
 
     protected void traceBody(
             @NonNull final Headers headers,
-            @NonNull final RequestBody body) throws IOException {
-        long contentLength = body.contentLength();
-        String bodySize = -1L != contentLength ? contentLength + " byte" : "unknown";
-        log.trace("Request body size: {}", bodySize);
+            @NonNull final RequestBody body) {
+        try {
+            long contentLength = body.contentLength();
+            String bodySize = -1L != contentLength ? contentLength + " byte" : "unknown";
+            log.trace("Request body size: {}", bodySize);
 
-        String contentType = headers.get("Content-Type");
-        if (!"application/json-patch+json".equals(contentType) && !"application/json".equals(contentType)) {
-            log.trace("Non-JSON request body skipped");
-            return;
-        }
+            String contentType = headers.get("Content-Type");
+            if (!"application/json-patch+json".equals(contentType) && !"application/json".equals(contentType)) {
+                log.trace("Non-JSON request body skipped");
+                return;
+            }
 
-        Buffer buffer = new Buffer();
-        body.writeTo(buffer);
-        int maxBody = advancedSettings.getInt(LOGGING_HTTP_REQUEST_MAX_BODY_SIZE);
+            Buffer buffer = new Buffer();
+            body.writeTo(buffer);
+            int maxBody = advancedSettings.getInt(LOGGING_HTTP_REQUEST_MAX_BODY_SIZE);
 
-        if (maxBody >= contentLength) {
-            String stringBody = buffer.readString(StandardCharsets.UTF_8);
-            log.trace("Request body: {}", StringUtils.isEmpty(stringBody) ? "[empty]" : stringBody);
-        } else {
-            log.trace("Request body trimmed to first {} bytes as it {} bytes long", maxBody, contentLength);
-            String stringBody = buffer.readString(maxBody, StandardCharsets.UTF_8);
-            log.trace("Trimmed request body: {}", StringUtils.isEmpty(stringBody) ? "[empty]" : stringBody);
+            if (maxBody >= contentLength) {
+                String stringBody = buffer.readString(StandardCharsets.UTF_8);
+                log.trace("Request body: {}", StringUtils.isEmpty(stringBody) ? "[empty]" : stringBody);
+            } else {
+                log.trace("Request body trimmed to first {} bytes as it {} bytes long", maxBody, contentLength);
+                String stringBody = buffer.readString(maxBody, StandardCharsets.UTF_8);
+                log.trace("Trimmed request body: {}", StringUtils.isEmpty(stringBody) ? "[empty]" : stringBody);
+            }
+        } catch (IOException e) {
+            log.trace("Failed to read request body: {}", e.getMessage());
+        } catch (IllegalStateException e) {
+            log.trace("Request body is not readable: {}", e.getMessage());
         }
     }
 }
