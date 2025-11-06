@@ -294,8 +294,16 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiReportingRawDataFilter", elem);
             },
 
+            onPtaiReportingSarifFileError: function (elem) {
+                this.handle("ptaiReportingSarifFile", elem);
+            },
+
             onPtaiReportingSarifFilterError: function (elem) {
                 this.handle("ptaiReportingSarifFilter", elem)
+            },
+
+            onPtaiReportingSonarGiifFileError: function (elem) {
+                this.handle("ptaiReportingSonarGiifFile", elem);
             },
 
             onPtaiReportingSonarGiifFilterError: function (elem) {
