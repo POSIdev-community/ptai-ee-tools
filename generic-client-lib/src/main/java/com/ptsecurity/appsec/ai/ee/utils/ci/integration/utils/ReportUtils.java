@@ -1,6 +1,9 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
+import com.ptsecurity.appsec.ai.ee.scan.settings.ReportSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.StringHelper;
@@ -52,6 +55,15 @@ public class ReportUtils {
         return call(
                 () -> createObjectMapper().readValue(json, Reports.IssuesFilter.class),
                 "JSON filter settings parse failed");
+    }
+
+    public static void validateJsonReportSettings(String json) throws GenericException {
+        ObjectMapper objectMapper = createObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+
+        call(
+                () -> objectMapper.readValue(json, ReportSettings.class),
+                "JSON report settings parse failed");
     }
 
     /**
