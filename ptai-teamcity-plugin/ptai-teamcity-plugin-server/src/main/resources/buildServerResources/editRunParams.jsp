@@ -431,6 +431,7 @@
                     }"
                     className="longField"/>
             <span class="smallNote">${HINT_REPORTING_REPORT_FILE}</span>
+            <span class="error" id="error_${REPORTING_REPORT_FILE}"></span>
         </td>
     </tr>
     <tr id="row_${REPORTING_REPORT_TEMPLATE}">
@@ -447,6 +448,7 @@
                     }"
                     className="longField"/>
             <span class="smallNote">${HINT_REPORTING_REPORT_TEMPLATE}</span>
+            <span class="error" id="error_${REPORTING_REPORT_TEMPLATE}"></span>
         </td>
     </tr>
     <tr id="row_${REPORTING_REPORT_DATAFLOW}">
@@ -507,6 +509,7 @@
                     }"
                     className="longField"/>
             <span class="smallNote">${HINT_REPORTING_RAWDATA_FILE}</span>
+            <span class="error" id="error_${REPORTING_RAWDATA_FILE}"></span>
         </td>
     </tr>
     <tr id="row_${REPORTING_RAWDATA_FILTER}">
@@ -549,6 +552,7 @@
                     }"
                     className="longField"/>
             <span class="smallNote">${HINT_REPORTING_SARIF_FILE}</span>
+            <span class="error" id="error_${REPORTING_SARIF_FILE}"></span>
         </td>
     </tr>
     <tr id="row_${REPORTING_SARIF_FILTER}">
@@ -592,6 +596,7 @@
                     }"
                     className="longField"/>
             <span class="smallNote">${HINT_REPORTING_SONARGIIF_FILE}</span>
+            <span class="error" id="error_${REPORTING_SONARGIIF_FILE}"></span>
         </td>
     </tr>
     <tr id="row_${REPORTING_SONARGIIF_FILTER}">
