@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalcon
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
@@ -195,6 +196,11 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public static List<BranchSettings.BranchSettingsDescriptor> getBranchSettingsDescriptors() {
         return BranchSettings.getAll();
+    }
+
+    @SuppressWarnings("unused")
+    public static ScanLabelSettings.ScanLabelSettingsDescriptor getDefaulScanLabelSettingsDescriptor() {
+        return Jenkins.get().getDescriptorByType(ScanLabelSettings.ScanLabelSettingsDescriptor.class);
     }
 
     public static List<WorkMode.WorkModeDescriptor> getWorkModeDescriptors() {

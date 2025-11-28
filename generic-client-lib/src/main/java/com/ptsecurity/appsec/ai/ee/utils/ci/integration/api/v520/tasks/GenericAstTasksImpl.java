@@ -74,7 +74,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     }
 
     @Override
-    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName) throws GenericException {
+    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName, String scanLabel) throws GenericException {
         StartScanModel startScanModel = new StartScanModel();
         // Setup scan mode: full or incremental. Default mode is
         // incremental, but it can be overridden by JSON settings or forced from UI

@@ -35,6 +35,13 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
     protected String branchName = null;
 
     @CommandLine.Option(
+            names = {"--scan-label"},
+            order = 2,
+            paramLabel = "<label>",
+            description = "PT AI scan label")
+    protected String scanLabel = "";
+
+    @CommandLine.Option(
             names = {"--input"}, order = 3,
             required = true,
             paramLabel = "<path>",
@@ -106,6 +113,7 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
                         .build())
                 .projectName(project)
                 .branchName(branchName)
+                .scanLabel(scanLabel)
                 .async(async)
                 .input(input).output(output)
                 .includes(includes).excludes(excludes)

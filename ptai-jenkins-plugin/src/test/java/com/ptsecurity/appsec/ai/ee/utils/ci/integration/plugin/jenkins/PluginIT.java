@@ -13,6 +13,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchset
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.serversettings.ServerSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.WorkModeSync;
@@ -93,6 +94,7 @@ public class PluginIT extends BaseAstIT {
         ScanSettingsUi scanSettings = new ScanSettingsUi(phpSmoke.getName());
 
         CustomNameBranchSettings customNameBranchSettings = new CustomNameBranchSettings(phpSmoke.getName());
+        ScanLabelSettings scanLabelSettings = new ScanLabelSettings(phpSmoke.getName());
 
         ServerSettings serverSettings = new ServerSettings(CONNECTION().getUrl(), credentials.getId(), true);
         ConfigCustom configCustom = new ConfigCustom(serverSettings);
@@ -109,6 +111,7 @@ public class PluginIT extends BaseAstIT {
                 scanSettings,
                 configCustom,
                 customNameBranchSettings,
+                scanLabelSettings,
                 workMode,
                 AdvancedSettings.getDefault().toString(),
                 false,

@@ -18,6 +18,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalcon
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.serversettings.ServerSettings;
@@ -70,6 +71,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
     private final BranchSettings branchSettings;
 
     @Getter
+    private final ScanLabelSettings scanLabelSettings;
+
+    @Getter
     private final WorkMode workMode;
 
     @Getter
@@ -95,6 +99,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
     public Plugin(final com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings scanSettings,
                   final ConfigBase config,
                   BranchSettings branchSettings,
+                  ScanLabelSettings scanLabelSettings,
                   final WorkMode workMode,
                   final String advancedSettings,
                   final boolean verbose,
@@ -103,6 +108,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
         this.scanSettings = scanSettings;
         this.config = config;
         this.branchSettings = branchSettings;
+        this.scanLabelSettings = scanLabelSettings;
         this.workMode = workMode;
         this.advancedSettings = advancedSettings;
         this.verbose = verbose;
@@ -217,6 +223,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
         advancedSettings.apply(this.advancedSettings);
 
         String branchName = getBranchName(buildInfo, projectName);
+        String scanLabel = scanLabelSettings.getScanLabel();
 
         check = descriptor.doTestProjectFields(
                 scanSettings, config,
@@ -239,6 +246,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
         JenkinsAstJob job = JenkinsAstJob.builder()
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
+                .scanLabel(scanLabel)
                 .settings(selectedScanSettingsUi ? null : jsonSettings)
                 .policy(selectedScanSettingsUi ?  null : jsonPolicy)
                 .console(listener.getLogger())

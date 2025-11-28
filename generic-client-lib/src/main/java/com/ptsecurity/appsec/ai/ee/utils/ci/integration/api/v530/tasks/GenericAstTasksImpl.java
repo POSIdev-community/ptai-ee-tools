@@ -74,12 +74,19 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     }
 
     @Override
-    public UUID startScan(@NonNull UUID projectId, boolean fullScanMode, String branchName) throws GenericException {
+    public UUID startScan(
+            @NonNull UUID projectId,
+            boolean fullScanMode,
+            String branchName,
+            String scanLabel) throws GenericException {
         StartScanModel startScanModel = new StartScanModel();
         // Setup scan mode: full or incremental. Default mode is
         // incremental, but it can be overridden by JSON settings or forced from UI
         ScanType scanType = fullScanMode ? ScanType.FULL : ScanType.INCREMENTAL;
         startScanModel.setScanType(scanType);
+        if (!scanLabel.trim().isEmpty()) {
+            startScanModel.setScanLabel(scanLabel);
+        }
 
         UUID branchId = getBranchIdByName(projectId, branchName);
 
@@ -330,6 +337,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .projectId(projectId)
                 .projectName(projectName)
                 .branchId(scanResult.getBranchId().toString())
+                .scanLabel(scanResult.getScanLabel())
                 .scanSettings(convert(scanSettings));
 
         ScanAgentInfoModel scanAgentInfoModel = scanResult.getScanAgentInfo();
@@ -418,6 +426,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         scanResult.setState(scanBrief.getState());
         scanResult.setPtaiAgentName(scanBrief.getPtaiAgentName());
         scanResult.setBranchId(scanBrief.getBranchId());
+        scanResult.setScanLabel(scanBrief.getScanLabel());
         return scanResult;
     }
 

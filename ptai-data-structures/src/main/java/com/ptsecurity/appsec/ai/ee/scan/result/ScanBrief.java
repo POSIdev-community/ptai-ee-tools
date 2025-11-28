@@ -94,6 +94,11 @@ public class ScanBrief {
     @Getter
     @Setter
     @JsonProperty
+    protected String scanLabel;
+
+    @Getter
+    @Setter
+    @JsonProperty
     @Builder.Default
     protected Boolean useAsyncScan = false;
 
