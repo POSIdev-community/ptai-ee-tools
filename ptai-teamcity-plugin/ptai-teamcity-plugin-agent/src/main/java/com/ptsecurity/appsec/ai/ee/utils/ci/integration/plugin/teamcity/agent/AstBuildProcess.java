@@ -112,12 +112,14 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 : globals;
 
         String branchName = getBranchName(params);
+        String scanLabel =  params.get(Params.SCAN_LABEL);
 
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
                 .artifactsWatcher(artifactsWatcher)
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
+                .scanLabel(scanLabel)
                 .settings(selectedScanSettingsUi ? null : settings)
                 .policy(selectedScanSettingsUi ?  null : policy)
                 .connectionSettings(ConnectionSettings.builder()

@@ -143,7 +143,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
         scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
 
-        boolean isScanLabelEmpty = scanLabel.trim().isEmpty();
+        boolean isScanLabelEmpty =  scanLabel == null || scanLabel.trim().isEmpty();
         String scanEnqueuedFormat = "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s" +
                 (!isScanLabelEmpty ? ", scan label: %s" : "") +
                 ", result id: %s";

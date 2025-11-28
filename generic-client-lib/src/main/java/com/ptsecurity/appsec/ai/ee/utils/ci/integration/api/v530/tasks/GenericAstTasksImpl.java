@@ -84,7 +84,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         // incremental, but it can be overridden by JSON settings or forced from UI
         ScanType scanType = fullScanMode ? ScanType.FULL : ScanType.INCREMENTAL;
         startScanModel.setScanType(scanType);
-        if (!scanLabel.trim().isEmpty()) {
+        if (scanLabel != null && !scanLabel.trim().isEmpty()) {
             startScanModel.setScanLabel(scanLabel);
         }
 
