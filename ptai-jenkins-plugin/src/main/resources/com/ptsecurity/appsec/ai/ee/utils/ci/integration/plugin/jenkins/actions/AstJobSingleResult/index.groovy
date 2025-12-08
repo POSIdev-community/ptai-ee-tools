@@ -143,6 +143,13 @@ l.layout(title: Resources.i18n_ast_result_label()) {
             scanSettings[Resources.i18n_ast_settings_branch_name_label()] = Resources.i18n_misc_strings_empty()
         }
 
+        def label = scanBriefDetailed.scanLabel;
+        if (null != label) {
+            scanSettings[Resources.i18n_ast_settings_scan_label()] = "${label}"
+        } else {
+            scanSettings[Resources.i18n_ast_settings_scan_label()] = Resources.i18n_misc_strings_empty()
+        }
+
         def url = scanBriefDetailed.scanSettings.url;
         if (null == url) url = Resources.i18n_misc_strings_empty();
         scanSettings[Resources.i18n_ast_settings_base_url_label()] = url

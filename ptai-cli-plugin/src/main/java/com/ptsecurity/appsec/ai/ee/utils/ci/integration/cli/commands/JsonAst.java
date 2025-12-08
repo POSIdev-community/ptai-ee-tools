@@ -32,6 +32,13 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
     protected String branchName = null;
 
     @CommandLine.Option(
+            names = {"--scan-label"},
+            order = 2,
+            paramLabel = "<label>",
+            description = "PT AI scan label")
+    protected String scanLabel = "";
+
+    @CommandLine.Option(
             names = {"--input"}, order = 3,
             required = true,
             paramLabel = "<path>",
@@ -109,6 +116,7 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
                         .build())
                 .settings(jsonSettings)
                 .branchName(branchName)
+                .scanLabel(scanLabel)
                 .policy(jsonPolicy)
                 .async(async)
                 .input(input).output(output)

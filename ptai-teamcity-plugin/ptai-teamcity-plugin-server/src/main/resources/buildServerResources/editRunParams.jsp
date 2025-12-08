@@ -305,6 +305,16 @@
         </td>
     </tr>
 
+    <tr id="row_${SCAN_LABEL}">
+        <th>
+            <label for="${SCAN_LABEL}">${LABEL_SCAN_LABEL}</label>
+        </th>
+        <td>
+            <props:textProperty name="${SCAN_LABEL}" className="longField"/>
+            <span class="error" id="error_${SCAN_LABEL}"></span>
+        </td>
+    </tr>
+
     <tr id="row_${AST_SETTINGS}">
         <th>
             <label for="${AST_SETTINGS}">${LABEL_AST_SETTINGS}</label></th>

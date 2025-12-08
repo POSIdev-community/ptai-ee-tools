@@ -26,7 +26,7 @@ public class ScanBrief {
         @Deprecated V36,
         @Deprecated V40,
         @Deprecated V41,
-        V411, V420, V430, V44X, V450, V460, V470, V471, V472, V480, V481, V490, V491, V4100, V4110, V500, V520;
+        V411, V420, V430, V44X, V450, V460, V470, V471, V472, V480, V481, V490, V491, V4100, V4110, V500, V520, V530;
 
         @SneakyThrows
         public static boolean isDeprecated(@NonNull final ApiVersion version) {
@@ -90,6 +90,11 @@ public class ScanBrief {
     @Setter
     @JsonProperty
     protected String branchId;
+
+    @Getter
+    @Setter
+    @JsonProperty
+    protected String scanLabel;
 
     @Getter
     @Setter

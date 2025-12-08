@@ -12,6 +12,8 @@ f.dropdownDescriptorSelector(
         default: descriptor.getDefaultBranchSettingsDescriptor(),
         descriptors: descriptor.getBranchSettingsDescriptors())
 
+f.property(field: 'scanLabelSettings')
+
 f.dropdownDescriptorSelector(
         title: _('scanSettings'),
         field: 'scanSettings',

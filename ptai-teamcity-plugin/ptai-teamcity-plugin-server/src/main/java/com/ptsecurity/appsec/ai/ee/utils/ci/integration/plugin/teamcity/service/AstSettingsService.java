@@ -173,6 +173,8 @@ public class AstSettingsService {
         res.fill(BRANCH_SETTINGS, request)
                 .fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
 
+        res.fill(SCAN_LABEL, request);
+
         return res;
     }
 
