@@ -122,7 +122,8 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             final String serverUrl, final String serverCredentialsId,
             final String configName,
             final BranchSettings branchSettings,
-            final String branchName) {
+            final String branchName,
+            final String scanLabel) {
         FormValidation res = null;
         // noinspection ConstantConditions
         do {
@@ -158,6 +159,12 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                 res = customNameBranchDescriptor.doCheckBranchName(branchName);
                 if (FormValidation.Kind.ERROR == res.kind) break;
             }
+
+            ScanLabelSettings.ScanLabelSettingsDescriptor scanLabelSettingsDescriptor = Jenkins.get().getDescriptorByType(
+                    ScanLabelSettings.ScanLabelSettingsDescriptor.class
+            );
+            res = scanLabelSettingsDescriptor.doCheckScanLabel(scanLabel);
+            if (FormValidation.Kind.ERROR == res.kind) break;
         } while (false);
         return res;
     }

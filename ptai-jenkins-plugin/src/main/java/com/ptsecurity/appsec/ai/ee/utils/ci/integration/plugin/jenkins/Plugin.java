@@ -231,7 +231,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 projectName,
                 serverUrl, credentialsId, configName,
                 branchSettings,
-                branchName);
+                branchName,
+                scanLabel);
         if (FormValidation.Kind.ERROR == check.kind)
             throw new AbortException(check.getMessage());
         // TODO: Implement scan node support when PT AI will be able to
