@@ -104,7 +104,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull String getJsonSchema() {
-        return ResourcesHelper.getResourceString("aiproj/schema/aiproj-v1.8.json");
+        return ResourcesHelper.getResourceString("aiproj/schema/aiproj-v1.9.json");
     }
 
     @Override
