@@ -400,6 +400,12 @@ public class IssuesConverter {
         destination.setId(Objects.requireNonNull(scanResult.getId(), "Scan result ID is null"));
         destination.setProjectId(Objects.requireNonNull(scanResult.getProjectId(), "Scan result project ID is null"));
         destination.setProjectName(projectName);
+
+        Optional.of(scanResult)
+                .map(ScanResultModel::getScanLabel)
+                .filter(StringUtils::isNotEmpty)
+                .ifPresent(destination::setScanLabel);
+
         destination.setScanSettings(convert(scanSettings));
 
         ScanStatisticModel statistic = Objects.requireNonNull(scanResult.getStatistic(), "Scan result statistics is null");
