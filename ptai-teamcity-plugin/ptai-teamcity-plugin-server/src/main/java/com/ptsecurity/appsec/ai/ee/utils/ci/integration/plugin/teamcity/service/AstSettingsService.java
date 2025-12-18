@@ -11,6 +11,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSetting
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
@@ -253,6 +254,7 @@ public class AstSettingsService {
         }
 
         validateBranchSettings(bean, results);
+        validateScanLabel(bean, results);
 
         if (bean.empty(INCLUDES))
             results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
@@ -336,6 +338,19 @@ public class AstSettingsService {
         int maxNameLength = 512;
         if (customBranchName.length() > maxNameLength) {
             results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
+        }
+    }
+
+    private static void validateScanLabel(@NonNull PropertiesBean bean, @NonNull VerificationResults results) {
+        if (bean.empty(SCAN_LABEL)) {
+            return;
+        }
+
+        String scanLabel = bean.get(SCAN_LABEL);
+        if (!ScanLabelValidator.validateMaxLength(scanLabel)) {
+            results.add(SCAN_LABEL, MESSAGE_SCAN_LABEL_TOO_LONG);
+        } else if (!ScanLabelValidator.containOnlyCommonAndRussianChars(scanLabel)) {
+            results.add(SCAN_LABEL, MESSAGE_SCAN_LABEL_UNACCEPTABLE_SYMBOLS);
         }
     }
 
