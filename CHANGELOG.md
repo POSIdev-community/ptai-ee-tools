@@ -269,3 +269,6 @@ options:
 ### 20250903
 + [Feature] PT AI v.5.2.0 support approved
 + [Feature] Added support for scanning Scala
+### 20251127
++ [Feature] PT AI v.5.3.0 support approved
++ [Feature] Added scan-label (A commit hash can be used as a scan label)

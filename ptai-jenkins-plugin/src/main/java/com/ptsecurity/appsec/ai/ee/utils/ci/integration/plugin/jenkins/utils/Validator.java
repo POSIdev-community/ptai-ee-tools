@@ -5,6 +5,7 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.UrlHelper;
@@ -19,7 +20,6 @@ import java.util.regex.Pattern;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.ERROR;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.WARNING;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.Version.V11;
 
 @Slf4j
 public class Validator {
@@ -124,6 +124,15 @@ public class Validator {
 
     public static FormValidation doCheckFieldAdvancedSettings(String value, String errorMessage) {
         return doCheckFieldAdvancedSettings(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
+    }
+
+    public static FormValidation doCheckScanLabelMaxLength(String value, String errorMessage) {
+        return ScanLabelValidator.validateMaxLength(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
+    }
+
+    public static FormValidation doCheckScanLabelContainOnlyCommonAndRussianChars(String value, String errorMessage) {
+        return ScanLabelValidator.containOnlyCommonAndRussianChars(value)
+                ? FormValidation.ok() : FormValidation.error(errorMessage);
     }
 
     public static FormValidation error(Exception e) {

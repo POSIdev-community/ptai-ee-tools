@@ -59,6 +59,10 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Setter
     protected String branchName;
 
+    @Getter
+    @Setter
+    protected String scanLabel;
+
     @Builder.Default
     protected UUID branchId = null;
 
@@ -137,16 +141,18 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             branchId = ((BranchTask) genericAstTasks).getBranchIdByName(projectId, branchName);
         }
 
-        scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName);
+        scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
 
-        info(
-                "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s, result id: %s",
-                projectName,
-                projectId,
-                branchName,
-                branchId,
-                scanResultId
-        );
+        boolean isScanLabelEmpty =  scanLabel == null || scanLabel.trim().isEmpty();
+        String scanEnqueuedFormat = "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s" +
+                (!isScanLabelEmpty ? ", scan label: %s" : "") +
+                ", result id: %s";
+
+        Object[] scanEnqueuedArgs = !isScanLabelEmpty
+                ? new Object[]{projectName, projectId, branchName, branchId, scanLabel, scanResultId}
+                : new Object[]{projectName, projectId, branchName, branchId, scanResultId};
+
+        info(scanEnqueuedFormat, scanEnqueuedArgs);
 
         // Now we know scan result ID, so create initial scan brief with ID's and scan settings
         scanBrief = genericAstTasks.createScanBrief(projectId, scanResultId);
@@ -192,14 +198,15 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                 ? null
                 : ScanDiagnostic.create(scanBrief, genericAstTasks.getScanErrors(projectId, scanResultId), performance());
 
-        info(
-                "Scan finished, project name: %s, project id: %s, branch name: %s, branch id: %s, result id: %s",
-                projectName,
-                projectId,
-                branchName,
-                branchId,
-                scanResultId
-        );
+        String scanFinishedFormat = "Scan finished, project name: %s, project id: %s, branch name: %s, branch id: %s" +
+                (!isScanLabelEmpty ? ", scan label: %s" : "") +
+                ", result id: %s";
+
+        Object[] scanFinishedArgs = !isScanLabelEmpty
+                ? new Object[]{projectName, projectId, branchName, branchId, scanLabel, scanResultId}
+                : new Object[]{projectName, projectId, branchName, branchId, scanResultId};
+
+        info(scanFinishedFormat, scanFinishedArgs);
 
         fine("Resulting state is " + scanBrief.getState());
         if (!EnumSet.of(DONE, ABORTED, FAILED, ABORTED_FROM_CI).contains(scanBrief.getState())) {

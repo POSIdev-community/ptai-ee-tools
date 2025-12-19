@@ -80,6 +80,8 @@ public class Sarif extends Export {
         Tool sarifTool = new Tool();
         sarifRun.setTool(sarifTool);
 
+        setScanLabel(scanResult, sarifRun);
+
         ToolComponent driver = new ToolComponent()
                 .withName("Positive Technologies Application Inspector")
                 .withInformationUri(new URI("https://www.ptsecurity.com/ww-en/products/ai/"))
@@ -234,5 +236,19 @@ public class Sarif extends Export {
         if (isEmpty(placeList)) return;
         for (BaseSourceIssue.Place place : placeList)
             if (null != place) list.add(tfl(place, text));
+    }
+
+    @SneakyThrows
+    private static void setScanLabel(ScanResult scanResult, Run sarifRun) {
+        String scanLabel = scanResult.getScanLabel();
+        if (scanLabel == null){
+            return;
+        }
+
+        sarifRun.setVersionControlProvenance(Collections.singleton(
+                new VersionControlDetails()
+                        .withRepositoryUri(URI.create("http://localhost"))
+                        .withRevisionId(scanLabel)
+        ));
     }
 }

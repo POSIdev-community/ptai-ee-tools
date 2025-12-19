@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV18.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV19.Version.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -129,6 +129,8 @@ public abstract class UnifiedAiProjScanSettings {
                 settings = (root.path("ScanModules").isMissingNode())
                         ? new AiProjLegacyScanSettings(root)
                         : new AiProjV10ScanSettings(root);
+            else if (_1_9.value().equals(versionNode.textValue()))
+                settings = new AiProjV19ScanSettings(root);
             else if (_1_8.value().equals(versionNode.textValue()))
                 settings = new AiProjV18ScanSettings(root);
             else if (_1_7.value().equals(versionNode.textValue()))

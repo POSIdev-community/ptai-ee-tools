@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalcon
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
@@ -121,7 +122,8 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             final String serverUrl, final String serverCredentialsId,
             final String configName,
             final BranchSettings branchSettings,
-            final String branchName) {
+            final String branchName,
+            final String scanLabel) {
         FormValidation res = null;
         // noinspection ConstantConditions
         do {
@@ -157,6 +159,12 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                 res = customNameBranchDescriptor.doCheckBranchName(branchName);
                 if (FormValidation.Kind.ERROR == res.kind) break;
             }
+
+            ScanLabelSettings.ScanLabelSettingsDescriptor scanLabelSettingsDescriptor = Jenkins.get().getDescriptorByType(
+                    ScanLabelSettings.ScanLabelSettingsDescriptor.class
+            );
+            res = scanLabelSettingsDescriptor.doCheckScanLabel(scanLabel);
+            if (FormValidation.Kind.ERROR == res.kind) break;
         } while (false);
         return res;
     }
@@ -195,6 +203,11 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public static List<BranchSettings.BranchSettingsDescriptor> getBranchSettingsDescriptors() {
         return BranchSettings.getAll();
+    }
+
+    @SuppressWarnings("unused")
+    public static ScanLabelSettings.ScanLabelSettingsDescriptor getDefaulScanLabelSettingsDescriptor() {
+        return Jenkins.get().getDescriptorByType(ScanLabelSettings.ScanLabelSettingsDescriptor.class);
     }
 
     public static List<WorkMode.WorkModeDescriptor> getWorkModeDescriptors() {

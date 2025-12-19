@@ -52,6 +52,11 @@ public class Defaults {
     public static final String BRANCH_SETTINGS_EXISTING_BRANCH_NAME = "";
 
     /**
+     * See {@link Params#SCAN_LABEL}
+     */
+    public static final String SCAN_LABEL = "";
+
+    /**
      * See {@link Params#AST_SETTINGS} and {@link Constants#AST_SETTINGS_UI}
      */
     public static final String AST_SETTINGS = AST_SETTINGS_UI;

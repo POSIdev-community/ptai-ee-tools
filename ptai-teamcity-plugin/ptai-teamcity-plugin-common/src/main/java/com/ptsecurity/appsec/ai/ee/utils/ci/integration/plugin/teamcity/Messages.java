@@ -12,6 +12,8 @@ public class Messages {
     public static final String MESSAGE_INCLUDES_EMPTY = "Files to analyse pattern must not be empty";
     public static final String MESSAGE_PATTERN_SEPARATOR_EMPTY = "Pattern separator must not be empty";
     public static final String MESSAGE_PATTERN_SEPARATOR_INVALID = "Pattern separator is invalid";
+    public static final String MESSAGE_SCAN_LABEL_TOO_LONG = "The scan label length must not exceed 40 characters";
+    public static final String MESSAGE_SCAN_LABEL_UNACCEPTABLE_SYMBOLS = "Letters (en/ru), numbers, symbols .-_ and spaces are allowed";
 
     public static final String MESSAGE_SAVE_SUCCESS = "PT AI server connection settings saved successfully";
 }

@@ -58,6 +58,10 @@
 <c:set var="LABEL_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Labels.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
 <c:set var="HINT_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Hints.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
 
+<c:set var="SCAN_LABEL" value="<%=Params.SCAN_LABEL%>"/>
+<c:set var="LABEL_SCAN_LABEL" value="<%=Labels.SCAN_LABEL%>"/>
+<c:set var="HINT_SCAN_LABEL" value="<%=Hints.SCAN_LABEL%>"/>
+
 <c:set var="AST_SETTINGS" value="<%=Params.AST_SETTINGS%>"/>
 <c:set var="LABEL_AST_SETTINGS" value="<%=Labels.AST_SETTINGS%>"/>
 <c:set var="HINT_AST_SETTINGS" value="<%=Hints.AST_SETTINGS%>"/>

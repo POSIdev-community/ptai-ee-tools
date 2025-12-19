@@ -26,6 +26,8 @@ public class Hints {
     public static final String BRANCH_SETTINGS_CUSTOM = "Custom PT AI branch name";
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "Branch name";
 
+    public static final String SCAN_LABEL = "Label";
+
     public static final String AST_SETTINGS = "Choose how AST settings are defined";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
     public static final String AST_SETTINGS_UI = Resources.i18n_ast_settings_type_ui_label();

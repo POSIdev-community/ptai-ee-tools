@@ -42,6 +42,11 @@ public class Params {
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = PARAM("BranchSettingsCustomBranchName");
 
     /**
+     * PT AI scan label
+     */
+    public static final String SCAN_LABEL = PARAM("ScanLabel");
+
+    /**
      * Defines how code AST settings are defined. If this field equals to
      * {@link Constants#AST_SETTINGS_JSON} then settings are defined via two JSONs, if
      * equals to {@link Constants#AST_SETTINGS_UI} then settings are defined via viewer
