@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v411.ConverterTest;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v530.ConverterTest;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +23,7 @@ public class SarifTest extends ConverterTest {
     @DisplayName("Generate multiflow SARIF report")
     public void generateMultiflowReport() {
         boolean processGroups = false;
-        ScanResult scanResult = generateScanResultV411(getTemplate(ProjectTemplate.ID.PHP_SMOKE).getName());
+        ScanResult scanResult = generateScanResult530(getTemplate(ProjectTemplate.ID.PHP_SMOKE).getName());
 
         SarifSchema210 sarif = Sarif.convert(scanResult, true);
 
