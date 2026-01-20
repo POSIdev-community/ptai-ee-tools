@@ -28,7 +28,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.WorkModeAsync;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.WorkModeSync;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.Base;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import hudson.AbortException;
@@ -189,9 +188,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
             log.trace("JSON-defined project settings after macro replacement is {}", jsonSettings);
             settings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
             projectName = settings.getProjectName();
-
-            if (StringUtils.isNotEmpty(jsonPolicy))
-                jsonPolicy = JsonPolicyHelper.minimize(jsonPolicy);
         }
 
         ServerSettings serverSettings;
@@ -268,6 +264,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .buildInfo(buildInfo)
                 .transfers(transfers)
                 .fullScanMode(fullScanMode)
+                .jsonSettings(jsonSettings)
                 .advancedSettings(advancedSettings)
                 .build();
         if (workMode instanceof WorkModeSync) {

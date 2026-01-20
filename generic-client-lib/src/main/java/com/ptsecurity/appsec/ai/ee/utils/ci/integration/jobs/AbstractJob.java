@@ -1,13 +1,13 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.AstPolicyViolationException;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.MinorAstErrorsException;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -41,12 +41,11 @@ public abstract class AbstractJob extends AbstractTool {
 
     @Getter
     @Builder.Default
-    protected AbstractApiClient client = null;
+    protected AictlClient client = null;
 
     public JobExecutionResult execute() {
         try {
             init();
-            validate();
             client = Factory.client(this);
 
             unsafeExecute();
@@ -72,10 +71,6 @@ public abstract class AbstractJob extends AbstractTool {
     }
 
     protected abstract void init() throws GenericException;
-
-    protected void validate() throws GenericException {
-        connectionSettings.validate();
-    }
 
     protected abstract void unsafeExecute() throws GenericException;
     /**

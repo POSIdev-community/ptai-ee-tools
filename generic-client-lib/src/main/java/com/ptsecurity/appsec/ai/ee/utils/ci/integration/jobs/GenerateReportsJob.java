@@ -1,13 +1,11 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.FileSaver;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.LatestAstResultBranchTask;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,22 +44,20 @@ public class GenerateReportsJob extends AbstractJob implements FileSaver, TextOu
 
     @Override
     protected void unsafeExecute() throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(client);
-        ProjectTasks projectTasks = new Factory().projectTasks(client);
+        ReportsTask reportsTask = new ReportsTask(client);
+        ProjectTask projectTasks = new ProjectTask(client);
 
         if (null == projectId)
-            projectId = projectTasks.searchProject(projectName);
+            projectId = projectTasks.searchProjectId(projectName);
         if (null == projectId)
             throw GenericException.raise("Project " + projectName + " not found", new IllegalArgumentException(projectName));
 
         if (null == scanResultId) {
-            scanResultId = projectTasks instanceof LatestAstResultBranchTask
-                    ? ((LatestAstResultBranchTask) projectTasks).getLatestAstResult(projectId, branchName)
-                    : projectTasks.getLatestAstResult(projectId);
+            scanResultId = projectTasks.getLatestAstResult(projectId, branchName);
         }
         if (null == scanResultId)
             throw GenericException.raise("Latest scan result not found", new IllegalArgumentException(projectName));
 
-        reportsTasks.exportAdvanced(projectId, scanResultId, reports, fileOps);
+        reportsTask.exportAdvanced(projectId, scanResultId, reports, fileOps);
     }
 }

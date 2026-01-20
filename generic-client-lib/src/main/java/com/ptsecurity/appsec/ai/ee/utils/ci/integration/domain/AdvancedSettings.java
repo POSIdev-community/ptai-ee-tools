@@ -31,11 +31,6 @@ public class AdvancedSettings implements Serializable {
         /**
          * Maximum response body size to be output to log
          */
-        LOGGING_HTTP_RESPONSE_MAX_BODY_SIZE("logging.http.response.max.body.size", SettingType.INTEGER, 102400, Resources::i18n_ast_settings_advanced_logging_http_response_max_body_size),
-        LOGGING_HTTP_REQUEST_MAX_BODY_SIZE("logging.http.request.max.body.size", SettingType.INTEGER, 51200, Resources::i18n_ast_settings_advanced_logging_http_request_max_body_size),
-        LOGGING_HTTP_CREDENTIALS("logging.http.credentials", SettingType.BOOLEAN, Boolean.FALSE, Resources::i18n_ast_settings_advanced_logging_http_credentials),
-        HTTP_REQUEST_READ_TIMEOUT("http.request.read.timeout", SettingType.INTEGER, 3600, Resources::i18n_ast_settings_advanced_http_request_read_timeout),
-        HTTP_REQUEST_WRITE_TIMEOUT("http.request.write.timeout", SettingType.INTEGER, 3600, Resources::i18n_ast_settings_advanced_http_request_write_timeout),
         AST_RESULT_REST_URL_FILENAME("ast.result.rest.url.filename", SettingType.STRING, "rest.url", Resources::i18n_ast_settings_advanced_ast_result_rest_url_filename),
         AST_DIAGNOSTIC_JSON_FILENAME("ast.diagnostic.json.filename", SettingType.STRING, "", Resources::i18n_ast_settings_advanced_ast_diagnostic_json_filename),
         JENKINS_DATA_CHUNK_SIZE("jenkins.data.chunk.size", SettingType.INTEGER, 10 * 1024 * 1024, Resources::i18n_ast_settings_advanced_jenkins_data_chunk_size),
@@ -117,12 +112,6 @@ public class AdvancedSettings implements Serializable {
         if (SettingType.STRING != info.getType())
             throw GenericException.raise("Can't get advanced setting string value", new ClassCastException());
         return (String) settings.get(info);
-    }
-
-    public boolean getBoolean(@NonNull final SettingInfo info) {
-        if (SettingType.BOOLEAN != info.getType())
-            throw GenericException.raise("Can't get advanced setting boolean value", new ClassCastException());
-        return (Boolean) settings.get(info);
     }
 
     @Override

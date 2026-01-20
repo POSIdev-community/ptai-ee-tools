@@ -14,7 +14,7 @@ import java.util.ArrayList;
 @Accessors(chain = true)
 public class ServerCheckResult extends ArrayList<String> {
     public enum State {
-        OK, WARNING, ERROR
+        OK, ERROR
     }
 
     @NonNull
@@ -23,6 +23,4 @@ public class ServerCheckResult extends ArrayList<String> {
     public String text() {
         return String.join(". ", this);
     }
-
 }
-

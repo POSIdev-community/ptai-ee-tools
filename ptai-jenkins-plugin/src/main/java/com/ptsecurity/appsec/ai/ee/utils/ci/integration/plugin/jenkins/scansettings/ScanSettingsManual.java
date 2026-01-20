@@ -1,23 +1,15 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings;
 
-import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.Validator;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import hudson.Extension;
-import hudson.model.Item;
 import hudson.util.FormValidation;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 @ToString
 public class ScanSettingsManual extends com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings {

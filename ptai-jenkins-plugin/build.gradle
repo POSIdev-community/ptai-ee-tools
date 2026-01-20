@@ -147,7 +147,6 @@ dependencies {
 
     testImplementation(testFixtures(project(':generic-client-lib')))
     testImplementation(testFixtures(project(":ptai-data-structures")))
-    testImplementation(testFixtures(project(":ptai-rest-api")))
     testImplementation(testFixtures(project(":generic-client-lib")))
 
     // Need this to execute Jenkins plugin integration tests

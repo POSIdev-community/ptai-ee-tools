@@ -2,8 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,16 +20,16 @@ public class Report extends Export {
 
     @Override
     public void validate() throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
-        reportsTasks.check(report);
+        ReportsTask reportsTask = new ReportsTask(owner.getClient());
+        reportsTask.check(report);
     }
 
     @Override
     public void execute(
             @NonNull final ScanBrief scanBrief) throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
+        ReportsTask reportsTask = new ReportsTask(owner.getClient());
         try {
-            reportsTasks.exportReport(scanBrief.getProjectId(), scanBrief.getId(), report, owner.getFileOps());
+            reportsTask.exportReport(scanBrief.getProjectId(), scanBrief.getId(), report, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

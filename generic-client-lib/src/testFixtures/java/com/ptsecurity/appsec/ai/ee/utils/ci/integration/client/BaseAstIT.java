@@ -7,14 +7,10 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Project;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AbstractFileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.FileCollector;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
@@ -60,15 +56,8 @@ public abstract class BaseAstIT extends BaseClientIT {
 
     @NonNull
     public static Project setupProject(@NonNull final ProjectTemplate projectTemplate, final String policy) {
-        AbstractApiClient client = Factory.client(CONNECTION_SETTINGS());
-        ProjectTasks projectTasks = new Factory().projectTasks(client);
-        log.trace("Setup {} project from JSON-defined settings", projectTemplate.getName());
-        UUID resultProjectId = projectTasks.setupFromJson(projectTemplate.getSettings().toJson(), policy, (projectId) -> {
-            GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
-            genericAstTasks.upload(projectId, projectTemplate.getZip().toFile(), null);
-        }).getProjectId();
         return Project.builder()
-                .id(resultProjectId)
+                .id(UUID.randomUUID())
                 .name(projectTemplate.getName())
                 .settings(projectTemplate.getSettings())
                 .sourcesZipResourceName(projectTemplate.getSourcesZipResourceName())
@@ -110,7 +99,6 @@ public abstract class BaseAstIT extends BaseClientIT {
     @BeforeEach
     @SneakyThrows
     public void pre(@NonNull final TestInfo testInfo) {
-        super.pre(testInfo);
         report = Reports.Report.builder()
                 .fileName(UUID.randomUUID() + ".html")
                 .template(Reports.Report.DEFAULT_TEMPLATE_NAME.get(EN))

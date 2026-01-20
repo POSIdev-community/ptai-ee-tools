@@ -6,10 +6,7 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Class that stores top-level information about completed AST job. That
@@ -23,10 +20,33 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScanBrief {
     public enum ApiVersion {
-        @Deprecated V36,
-        @Deprecated V40,
-        @Deprecated V41,
-        V411, V420, V430, V44X, V450, V460, V470, V471, V472, V480, V481, V490, V491, V4100, V4110, V500, V520, V530;
+        @Deprecated V36("3.6"),
+        @Deprecated V40("4.0"),
+        @Deprecated V41("4.1.0"),
+        V411("4.1.1"),
+        V420("4.2.0"),
+        V430("4.3.0"),
+        V44X("4.4"),
+        V450("4.5.0"),
+        V460("4.6.0"),
+        V470("4.7.0"),
+        V471("4.7.1"),
+        V472("4.7.2"),
+        V480("4.8.0"),
+        V481("4.8.1"),
+        V490("4.9.0"),
+        V491("4.9.1"),
+        V4100("4.10.0"),
+        V4110("4.11.0"),
+        V500("5.0.0"),
+        V520("5.2.0"),
+        V530("5.3.0");
+
+        private final String prefix;
+
+        ApiVersion(String prefix) {
+            this.prefix = prefix;
+        }
 
         @SneakyThrows
         public static boolean isDeprecated(@NonNull final ApiVersion version) {
@@ -35,6 +55,13 @@ public class ScanBrief {
 
         public boolean isDeprecated() {
             return isDeprecated(this);
+        }
+
+        public static ApiVersion fromString(String version) {
+            return Arrays.stream(values())
+                    .filter(v -> version.startsWith(v.prefix))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown version: " + version));
         }
     }
 
