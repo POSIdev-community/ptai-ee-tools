@@ -6,9 +6,8 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -176,16 +175,13 @@ public class SonarGiif extends Export {
     protected final Reports.SonarGiif sonar;
 
     @Override
-    public void validate() throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
-        reportsTasks.check(sonar);
-    }
+    public void validate() throws GenericException {}
 
     @Override
     public void execute(@NonNull ScanBrief scanBrief) throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
+        ReportsTask reportsTask = new ReportsTask(owner.getClient());
         try {
-            reportsTasks.exportSonarGiif(scanBrief.getProjectId(), scanBrief.getId(), sonar, owner.getFileOps());
+            reportsTask.exportSonarGiif(scanBrief.getProjectId(), scanBrief.getId(), sonar, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

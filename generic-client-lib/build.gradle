@@ -60,7 +60,6 @@ dependencies {
     // like issues model, scan settings etc.
     testImplementation(testFixtures(project(":pt-misc-tools")))
     testImplementation(testFixtures(project(":ptai-data-structures")))
-    testImplementation(testFixtures(project(":ptai-rest-api")))
 
     testImplementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     testRuntimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -68,7 +67,6 @@ dependencies {
 
     testFixturesImplementation(testFixtures(project(":pt-misc-tools")))
     testFixturesImplementation(testFixtures(project(":ptai-data-structures")))
-    testFixturesImplementation(testFixtures(project(":ptai-rest-api")))
 }
 
 processResources {

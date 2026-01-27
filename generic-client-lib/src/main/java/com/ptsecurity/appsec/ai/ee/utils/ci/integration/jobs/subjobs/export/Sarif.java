@@ -5,8 +5,7 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -32,16 +31,13 @@ public class Sarif extends Export {
     protected final Reports.Sarif sarif;
 
     @Override
-    public void validate() throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
-        reportsTasks.check(sarif);
-    }
+    public void validate() throws GenericException {}
 
     @Override
     public void execute(@NonNull ScanBrief scanBrief) throws GenericException {
-        ReportsTasks reportsTasks = new Factory().reportsTasks(owner.getClient());
+        ReportsTask reportsTask = new ReportsTask(owner.getClient());
         try {
-            reportsTasks.exportSarif(scanBrief.getProjectId(), scanBrief.getId(), sarif, owner.getFileOps());
+            reportsTask.exportSarif(scanBrief.getProjectId(), scanBrief.getId(), sarif, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

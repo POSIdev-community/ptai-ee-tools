@@ -5,16 +5,14 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.TempFile;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.JenkinsAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions.AstJobSingleResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.RemoteFileUtils;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.FileCollector;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
+import com.ptsecurity.misc.tools.TempFile;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import hudson.FilePath;
 import lombok.Builder;
 import lombok.NonNull;
@@ -75,10 +73,10 @@ public class JenkinsAstOperations implements AstOperations {
         if (scanBrief.getUseAsyncScan())
             scanBriefDetailed = ScanBriefDetailed.create(scanBrief, performance);
         else {
-            GenericAstTasks genericAstTasks = new Factory().genericAstTasks(owner.getClient());
+            GenericAstTask genericAstTask = new GenericAstTask(owner.getClient());
             log.debug("Getting full scan results for project id: {}, scan id: {}", scanBrief.getProjectId(), scanBrief.getId());
             try {
-                ScanResult scanResult = genericAstTasks.getScanResult(scanBrief);
+                ScanResult scanResult = genericAstTask.getScanResult(scanBrief);
                 log.debug("Converting full scan results to detailed scan brief and storing it as job result");
                 scanBriefDetailed = ScanBriefDetailed.create(scanResult, performance);
             } catch (GenericException e) {

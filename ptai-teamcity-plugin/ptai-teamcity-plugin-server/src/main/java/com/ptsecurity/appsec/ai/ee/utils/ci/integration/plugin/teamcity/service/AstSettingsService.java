@@ -5,11 +5,14 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
@@ -354,7 +357,7 @@ public class AstSettingsService {
         }
     }
 
-    private static AbstractApiClient createApiClient(@NonNull PropertiesBean bean) {
+    private static AictlClient createApiClient(@NonNull PropertiesBean bean) {
         return Factory.client(ConnectionSettings.builder()
                 .url(bean.get(URL))
                 .credentials(TokenCredentials.builder().token(bean.get(TOKEN)).build())
@@ -371,8 +374,9 @@ public class AstSettingsService {
     protected static void checkConnectionSettings(@NonNull PropertiesBean bean, @NonNull final VerificationResults results) {
         // Check connection
         try {
-            AbstractApiClient client = createApiClient(bean);
-            ServerCheckResult res = new Factory().checkServerTasks(client).check();
+            AictlClient client = createApiClient(bean);
+
+            ServerCheckResult res = new CheckServerTask(client).check();
             res.forEach(results::add);
             log.info(res.text());
             results.setResult(res.getState().equals(ERROR) ? FAILURE : SUCCESS);
@@ -389,10 +393,10 @@ public class AstSettingsService {
      */
     protected static void checkAstSettings(@NonNull final PropertiesBean bean, @NonNull final VerificationResults results) {
         try {
-            AbstractApiClient client = createApiClient(bean);
+            AictlClient client = createApiClient(bean);
             // Check if project exists
             if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI)) {
-                UUID projectId = new Factory().projectTasks(client).searchProject(bean.get(PROJECT_NAME));
+                UUID projectId = new ProjectTask(client).searchProjectId(bean.get(PROJECT_NAME));
                 if (null != projectId)
                     results.add("Project " + bean.get(PROJECT_NAME) + " found, ID = " + projectId.toString());
                 else {
@@ -423,7 +427,7 @@ public class AstSettingsService {
 
             Reports reports = bean.convert();
             reports = ReportUtils.validate(reports);
-            new Factory().reportsTasks(client).check(reports);
+            new ReportsTask(client).check(reports);
         } catch (GenericException e) {
             log.warn(e.getDetailedMessage(), e);
             results.add(e);

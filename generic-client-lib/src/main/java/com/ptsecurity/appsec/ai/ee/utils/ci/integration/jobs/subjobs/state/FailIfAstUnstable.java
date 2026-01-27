@@ -3,11 +3,10 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state;
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.MinorAstErrorsException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +27,8 @@ public class FailIfAstUnstable extends Base {
     public void execute(
             @NonNull final ScanBrief scanBrief) throws GenericException {
         // Let's process DONE stage warnings / errors
-        GenericAstTasks genericAstTasks = new Factory().genericAstTasks(owner.getClient());
-        List<Error> errors = genericAstTasks.getScanErrors(scanBrief.getProjectId(), scanBrief.getId());
+        GenericAstTask genericAstTask = new GenericAstTask(owner.getClient());
+        List<Error> errors = genericAstTask.getScanErrors(scanBrief.getProjectId(), scanBrief.getId());
 
         // Check errors / warnings
         if (null == errors || errors.isEmpty()) return;

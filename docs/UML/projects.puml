@@ -6,7 +6,6 @@ class ptai-i18n
 class ptai-rest-api
 class ptai-data-structures
 class generic-client-lib
-class ptai-cli-plugin
 class ptai-jenkins-plugin
 class ptai-report-tools
 
@@ -27,10 +26,6 @@ package ptai-teamcity-plugin {
 "ptai-data-structures" -> "ptai-i18n" : api
 "ptai-data-structures" -> "pt-misc-tools" : api
 "ptai-data-structures" -up-> "ptai-test-tools" : test
-
-"ptai-cli-plugin" -up-> "generic-client-lib"
-"ptai-cli-plugin" -up-> "ptai-data-structureb"
-"ptai-cli-plugin" -up-> "ptai-rest-api"
 
 "generic-client-lib" -up-> "pt-misc-tools"
 "generic-client-lib" -up-> "ptai-data-structureb"

@@ -1,15 +1,17 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration;
 
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.client.BaseClientIT;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTasks;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import static com.ptsecurity.misc.tools.helpers.ResourcesHelper.getResourceString;
 
@@ -19,22 +21,15 @@ import static com.ptsecurity.misc.tools.helpers.ResourcesHelper.getResourceStrin
 public class VersionInfoIT extends BaseClientIT {
     protected ConnectionSettings connectionSettings = null;
 
-    @BeforeEach
-    public void pre(@NonNull final TestInfo testInfo) {
-        super.pre(testInfo);
-        connectionSettings = CONNECTION_SETTINGS();
-    }
-
     @Test
     @DisplayName("Check PT AI server status using insecure connection without trusted CA certificates")
     public void checkInsecureConnection() {
         // As we do not know if JRE's truststore contains integration test CA certificates, let's use dummy one
-        connectionSettings.setCaCertsPem(DUMMY());
         connectionSettings.setInsecure(true);
-        AbstractApiClient client = Assertions.assertDoesNotThrow(() -> Factory.client(connectionSettings));
+        AictlClient client = Assertions.assertDoesNotThrow(() -> Factory.client(connectionSettings));
 
-        CheckServerTasks checkServerTasks = new Factory().checkServerTasks(client);
-        ServerCheckResult serverCheckResult = checkServerTasks.check();
+        CheckServerTask checkServerTask = new CheckServerTask(client);
+        ServerCheckResult serverCheckResult = checkServerTask.check();
         Assertions.assertEquals(ServerCheckResult.State.OK, serverCheckResult.getState());
 
         connectionSettings.setInsecure(false);
@@ -45,10 +40,10 @@ public class VersionInfoIT extends BaseClientIT {
     @DisplayName("Check PT AI server status using secure connection")
     public void checkSecureConnection() {
         connectionSettings.setInsecure(false);
-        AbstractApiClient client = Assertions.assertDoesNotThrow(() -> Factory.client(connectionSettings));
+        AictlClient client = Assertions.assertDoesNotThrow(() -> Factory.client(connectionSettings));
 
-        CheckServerTasks checkServerTasks = new Factory().checkServerTasks(client);
-        ServerCheckResult serverCheckResult = checkServerTasks.check();
+        CheckServerTask checkServerTask = new CheckServerTask(client);
+        ServerCheckResult serverCheckResult = checkServerTask.check();
         Assertions.assertEquals(ServerCheckResult.State.OK, serverCheckResult.getState());
 
         connectionSettings.setCaCertsPem(getResourceString("keys/root-ca.dummy.org.pem"));

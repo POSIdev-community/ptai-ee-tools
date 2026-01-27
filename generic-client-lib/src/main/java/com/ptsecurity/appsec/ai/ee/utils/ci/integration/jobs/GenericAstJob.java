@@ -5,15 +5,12 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanDiagnostic;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Export;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.SetupOperations;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.BranchTask;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
@@ -51,6 +48,9 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Setter
     protected boolean fullScanMode;
 
+    @Builder.Default
+    protected String jsonSettings = null;
+
     @Getter
     @Setter
     protected String projectName;
@@ -85,11 +85,6 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Getter
     @Builder.Default
     @ToString.Exclude
-    protected SetupOperations setupOps = null;
-
-    @Getter
-    @Builder.Default
-    @ToString.Exclude
     protected ScanBrief scanBrief = null;
 
     @Builder.Default
@@ -98,10 +93,6 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     public void addSubJob(@NonNull final Base job) {
         job.setOwner(this);
         subJobs.add(job);
-    }
-
-    public void clearSubJobs() {
-        subJobs.clear();
     }
 
     /**
@@ -117,31 +108,29 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
      * @throws GenericException Error details
      */
     protected void unsafeExecute() throws GenericException {
-        client.setEventConsumer(this);
         process(Stage.SETUP);
         // Check if all the reports exist. Throw an exception if there are problems
         // Validate postprocessing tasks
-        for (Base job : subJobs)
+        for (Base job : subJobs) {
             job.validate();
-
-        // Setup project
-        projectId = setupOps.setupProject();
-        info("PT AI project ID is " + projectId);
+        }
 
         // Start scan
         process(Stage.ENQUEUED);
-        GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
-        boolean isBranchTask = genericAstTasks instanceof BranchTask;
-
-        if (isBranchTask && branchName == null) {
-            branchName = ((BranchTask) genericAstTasks).getWorkingOrDefaultBranchName(projectId);
+        GenericAstTask genericAstTask = new GenericAstTask(client);
+        if (branchName == null) {
+            branchName = genericAstTask.getWorkingOrDefaultBranchName(projectId);
         }
 
-        if (isBranchTask && branchId == null) {
-            branchId = ((BranchTask) genericAstTasks).getBranchIdByName(projectId, branchName);
+        if (branchId == null) {
+            branchId = genericAstTask.getBranchIdByName(projectId, branchName);
         }
 
-        scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
+        if (jsonSettings != null) {
+            genericAstTask.setProjectSettings(projectId, jsonSettings);
+        }
+
+        scanResultId = genericAstTask.startScan(projectId, fullScanMode, branchName, scanLabel);
 
         boolean isScanLabelEmpty =  scanLabel == null || scanLabel.trim().isEmpty();
         String scanEnqueuedFormat = "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s" +
@@ -155,7 +144,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         info(scanEnqueuedFormat, scanEnqueuedArgs);
 
         // Now we know scan result ID, so create initial scan brief with ID's and scan settings
-        scanBrief = genericAstTasks.createScanBrief(projectId, scanResultId);
+        scanBrief = genericAstTask.createScanBrief(projectId, scanResultId, branchId, scanLabel);
         scanBrief.setUseAsyncScan(async);
 
         // Notify descendants about scan started event
@@ -164,7 +153,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         String restUrlFileName = client.getAdvancedSettings().getString(AST_RESULT_REST_URL_FILENAME);
         if (StringUtils.isNotEmpty(restUrlFileName)) {
             // Save result URL to artifacts
-            final String url = genericAstTasks.getScanResultUrl(projectId, scanResultId);
+            final String url = client.getScanResultUrl(projectId, scanResultId);
             log.debug("Save AST result REST API URL {} to file", url);
             call(
                     () -> fileOps.saveArtifact(restUrlFileName, url.getBytes()),
@@ -180,23 +169,12 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             return;
         }
 
-        // Wait for AST to complete and process results
-        // On this line execution we may get:
-        // DONE / FAILED if AST job finished
-        // ABORTED - AST job was terminated by PT AI viewer
-        // InterruptedException - job was terminated from JVM side, i.e. from CI.
-        try {
-            genericAstTasks.waitForComplete(scanBrief);
-        } catch (InterruptedException e) {
-            process(Stage.ABORTED);
-            scanBrief.setState(ABORTED_FROM_CI);
-            stop();
-        }
+        genericAstTask.waitForComplete(projectId, scanResultId);
         String diagnosticFileName = client.getAdvancedSettings().getString(AST_DIAGNOSTIC_JSON_FILENAME);
         // Remember that at this point diagnostic still have policy state set to NONE regardless of actual value
         ScanDiagnostic diagnostic = StringUtils.isEmpty(diagnosticFileName)
                 ? null
-                : ScanDiagnostic.create(scanBrief, genericAstTasks.getScanErrors(projectId, scanResultId), performance());
+                : ScanDiagnostic.create(scanBrief, genericAstTask.getScanErrors(projectId, scanResultId), performance());
 
         String scanFinishedFormat = "Scan finished, project name: %s, project id: %s, branch name: %s, branch id: %s" +
                 (!isScanLabelEmpty ? ", scan label: %s" : "") +
@@ -228,7 +206,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // vulnerabilities are found already
         boolean resultsAvailable = true;
         try {
-            genericAstTasks.appendStatistics(scanBrief);
+            genericAstTask.appendStatistics(scanBrief);
             log.debug("Scan brief for project / scan ID {} / {} loaded successfully", projectId, scanResultId);
             fine("Resulting statistics is " + scanBrief.getStatistics());
         } catch (GenericException e) {
@@ -246,11 +224,11 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         }
         astOps.scanCompleteCallback(scanBrief, ScanBriefDetailed.Performance.builder().stages(durations()).build());
 
-        // TODO: Check if partial scan results may be retrieved for failed scans
-        if (FAILED == scanBrief.getState())
+        if (FAILED == scanBrief.getState()) {
             throw GenericException.raise(
                     Resources.i18n_ast_result_status_failed_server_label(),
                     new IllegalArgumentException("AST job state " + scanBrief.getState()));
+        }
 
         if (ABORTED == scanBrief.getState() || ABORTED_FROM_CI == scanBrief.getState()) {
             info(ABORTED_FROM_CI == scanBrief.getState()
@@ -263,7 +241,9 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
         // Call postprocessing tasks
         for (Base job : subJobs) {
-            if (job instanceof Export && !resultsAvailable) continue;
+            if (job instanceof Export && !resultsAvailable){
+                continue;
+            }
             job.execute(scanBrief);
         }
 
@@ -271,8 +251,8 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     }
 
     public void stop() throws GenericException {
-        GenericAstTasks projectTasks = new Factory().genericAstTasks(client);
-        call(() -> projectTasks.stop(scanResultId), "PT AI project scan stop failed");
+        GenericAstTask projectTasks = new GenericAstTask(client);
+        projectTasks.stop(projectId, scanResultId);
     }
 
     /**
@@ -288,8 +268,9 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         log.debug("Processing event: {}", event);
         if (event instanceof com.ptsecurity.appsec.ai.ee.scan.progress.Stage) {
             Stage stage = (Stage) event;
-            if (stages.isEmpty() || stages.get(stages.size() - 1).getKey() != stage)
+            if (stages.isEmpty() || stages.get(stages.size() - 1).getKey() != stage) {
                 stages.add(new ImmutablePair<>(stage, ZonedDateTime.now()));
+            }
         }
     }
 
@@ -299,8 +280,9 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // Iterate through scan stage timestamps skipping very first
         for (int i = 0 ; i < stages.size() - 1 ; i++) {
             Duration duration = Duration.between(stages.get(i).getValue(), stages.get(i + 1).getValue());
-            if (result.containsKey(stages.get(i).getKey()))
+            if (result.containsKey(stages.get(i).getKey())) {
                 duration = duration.plus(result.get(stages.get(i).getKey()).getValue());
+            }
             result.put(stages.get(i).getKey(), ImmutablePair.of(stages.get(i).getValue(), duration));
         }
         return result;
@@ -309,13 +291,9 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     protected Map<Stage, String> durations() {
         Map<Stage, Pair<ZonedDateTime, Duration>> performance = performance();
         Map<Stage, String> result = new LinkedHashMap<>();
-        for (Map.Entry<Stage, Pair<ZonedDateTime, Duration>> entry : performance.entrySet())
+        for (Map.Entry<Stage, Pair<ZonedDateTime, Duration>> entry : performance.entrySet()) {
             result.put(entry.getKey(), entry.getValue().getValue().toString());
+        }
         return result;
-    }
-
-    @Override
-    protected void validate() throws GenericException {
-        super.validate();
     }
 }

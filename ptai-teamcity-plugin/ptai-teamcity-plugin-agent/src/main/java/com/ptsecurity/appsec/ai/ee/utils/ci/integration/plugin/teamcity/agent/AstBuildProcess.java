@@ -120,7 +120,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
-                .settings(selectedScanSettingsUi ? null : settings)
+                .jsonSettings(selectedScanSettingsUi ? null : settings)
                 .policy(selectedScanSettingsUi ?  null : policy)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(activeConnectionParams.get(Params.URL))

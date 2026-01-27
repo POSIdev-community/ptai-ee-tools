@@ -11,10 +11,8 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.JsonAstJobSetupOperationsImpl;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import com.ptsecurity.misc.tools.helpers.ArchiveHelper;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
@@ -32,12 +30,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ApiVersion.V411;
 import static com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue.Level.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ScanModule.*;
-import static com.ptsecurity.appsec.ai.ee.server.integration.rest.Connection.CONNECTION;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.randomClone;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.ResourcesHelper.getResourceString;
 import static java.util.Collections.singleton;
@@ -62,11 +59,6 @@ public class JsonAstJobIT extends BaseAstIT {
                     .owner(this)
                     .destination(destination)
                     .build();
-            setupOps = JsonAstJobSetupOperationsImpl.builder()
-                    .owner(this)
-                    .jsonPolicy(jsonPolicy)
-                    .jsonSettings(jsonSettings)
-                    .build();
         }
     }
 
@@ -76,13 +68,11 @@ public class JsonAstJobIT extends BaseAstIT {
             GenericAstJob astJob = JsonAstJobImpl.builder()
                     .async(false)
                     .fullScanMode(true)
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(projectTemplate.getCode())
                     .destination(destination.toPath())
                     .jsonSettings(projectTemplate.getSettings()
                             .setUsePublicAnalysisMethod(true)
-                            .setProjectName(randomProjectName())
                             .toJson())
                     .jsonPolicy(getResourceString("json/scan/settings/policy.generic.json"))
                     .build();
@@ -105,7 +95,6 @@ public class JsonAstJobIT extends BaseAstIT {
             GenericAstJob astJob = JsonAstJobImpl.builder()
                     .async(false)
                     .fullScanMode(true)
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(randomClone.getCode())
                     .destination(destination.toPath())
@@ -238,7 +227,6 @@ public class JsonAstJobIT extends BaseAstIT {
             GenericAstJob astJob = JsonAstJobImpl.builder()
                     .async(false)
                     .fullScanMode(true)
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(randomClone.getCode())
                     .destination(destination.toPath())
@@ -254,8 +242,7 @@ public class JsonAstJobIT extends BaseAstIT {
             Map<Optional<String>, Long> groups = scanResult.getIssues().stream()
                     .collect(Collectors.groupingBy(issue -> Optional.ofNullable(issue.getGroupId()), Collectors.counting()));
             log.trace("Skip issues group test as 4.1.1 doesn't provide group Id data");
-            if (V411 != CONNECTION().getVersion())
-                Assertions.assertTrue(groups.values().stream().anyMatch(l -> l > 1));
+            Assertions.assertTrue(groups.values().stream().anyMatch(l -> l > 1));
         }
     }
 
@@ -278,7 +265,6 @@ public class JsonAstJobIT extends BaseAstIT {
         GenericAstJob astJob = JsonAstJobImpl.builder()
                 .async(false)
                 .fullScanMode(true)
-                .connectionSettings(CONNECTION_SETTINGS())
                 .console(System.out)
                 .sources(webGoat.getCode())
                 .jsonSettings(webGoat.getSettings().toJson())
@@ -299,7 +285,6 @@ public class JsonAstJobIT extends BaseAstIT {
             GenericAstJob astJob = JsonAstJobImpl.builder()
                     .async(false)
                     .fullScanMode(true)
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(randomClone.getCode())
                     .destination(destination.toPath())

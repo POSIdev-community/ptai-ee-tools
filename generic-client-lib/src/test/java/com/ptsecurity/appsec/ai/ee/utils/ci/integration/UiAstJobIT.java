@@ -6,7 +6,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Report;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.UiAstJobSetupOperationsImpl;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.SneakyThrows;
@@ -44,9 +43,6 @@ public class UiAstJobIT extends BaseAstIT {
                     .owner(this)
                     .destination(destination)
                     .build();
-            setupOps = UiAstJobSetupOperationsImpl.builder()
-                    .owner(this)
-                    .build();
         }
     }
 
@@ -62,7 +58,6 @@ public class UiAstJobIT extends BaseAstIT {
                     .async(false)
                     .fullScanMode(true)
                     .projectName(project.getName())
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(project.getCode())
                     .destination(destination.toPath())
@@ -89,7 +84,6 @@ public class UiAstJobIT extends BaseAstIT {
                     .async(false)
                     .fullScanMode(true)
                     .projectName(project.getName())
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(project.getCode())
                     .destination(destination.toPath())
@@ -116,7 +110,6 @@ public class UiAstJobIT extends BaseAstIT {
                     .async(false)
                     .fullScanMode(true)
                     .projectName(project.getName())
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(project.getCode())
                     .destination(destination.toPath())
@@ -140,7 +133,6 @@ public class UiAstJobIT extends BaseAstIT {
                     .async(false)
                     .fullScanMode(true)
                     .projectName(project.getName())
-                    .connectionSettings(CONNECTION_SETTINGS())
                     .console(System.out)
                     .sources(project.getCode())
                     .destination(destination.toPath())

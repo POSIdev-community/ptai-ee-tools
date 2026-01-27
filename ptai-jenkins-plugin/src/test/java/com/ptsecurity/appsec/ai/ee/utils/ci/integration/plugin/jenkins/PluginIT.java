@@ -1,7 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -11,7 +10,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.client.BaseAstIT;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.ptsecurity.appsec.ai.ee.server.integration.rest.Connection.CONNECTION;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool.DEFAULT_LOG_PREFIX;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID.PHP_SMOKE;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob.DEFAULT_OUTPUT_FOLDER;
@@ -61,9 +58,6 @@ public class PluginIT extends BaseAstIT {
         SystemCredentialsProvider.ProviderImpl system = ExtensionList.lookup(CredentialsProvider.class).get(SystemCredentialsProvider.ProviderImpl.class);
         assertNotNull(system);
         systemStore = system.getStore(jenkinsRule.getInstance());
-        // Create PT AI credentials
-        credentials = new CredentialsImpl(CredentialsScope.GLOBAL, UUID.randomUUID().toString(), "", CONNECTION().getToken(), "");
-        systemStore.addCredentials(Domain.global(), credentials);
     }
 
     @SneakyThrows
@@ -96,7 +90,7 @@ public class PluginIT extends BaseAstIT {
         CustomNameBranchSettings customNameBranchSettings = new CustomNameBranchSettings(phpSmoke.getName());
         ScanLabelSettings scanLabelSettings = new ScanLabelSettings(phpSmoke.getName());
 
-        ServerSettings serverSettings = new ServerSettings(CONNECTION().getUrl(), credentials.getId(), true);
+        ServerSettings serverSettings = new ServerSettings("", credentials.getId(), true);
         ConfigCustom configCustom = new ConfigCustom(serverSettings);
 
         ArrayList<Base> subJobs = new ArrayList<>();

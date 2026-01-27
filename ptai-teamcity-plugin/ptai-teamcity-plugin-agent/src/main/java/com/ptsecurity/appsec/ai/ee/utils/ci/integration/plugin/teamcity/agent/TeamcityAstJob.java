@@ -1,13 +1,11 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent;
 
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.JsonAstJobSetupOperationsImpl;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.UiAstJobSetupOperationsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.operations.TeamcityAstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.operations.TeamcityFileOperations;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import lombok.Getter;
@@ -37,8 +35,6 @@ public class TeamcityAstJob extends GenericAstJob implements TextOutput {
     @NonNull
     private ArtifactsWatcher artifactsWatcher;
 
-    protected String settings;
-
     protected String policy;
 
     @Override
@@ -49,16 +45,6 @@ public class TeamcityAstJob extends GenericAstJob implements TextOutput {
         fileOps = TeamcityFileOperations.builder()
                 .owner(this)
                 .build();
-        if (null != settings)
-            setupOps = JsonAstJobSetupOperationsImpl.builder()
-                    .jsonSettings(settings)
-                    .jsonPolicy(policy)
-                    .owner(this)
-                    .build();
-        else
-            setupOps = UiAstJobSetupOperationsImpl.builder()
-                    .owner(this)
-                    .build();
     }
 
     @Override
