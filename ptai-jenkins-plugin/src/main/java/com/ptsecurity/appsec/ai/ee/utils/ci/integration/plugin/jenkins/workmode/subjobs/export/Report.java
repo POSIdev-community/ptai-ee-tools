@@ -2,18 +2,15 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.JenkinsAstJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import hudson.Extension;
-import hudson.util.ListBoxModel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.Arrays;
 
 @ToString
 public class Report extends Export {
@@ -32,15 +29,21 @@ public class Report extends Export {
     @Getter
     protected boolean includeGlossary;
 
+    @Getter
+    private final Reports.Locale locale;
+
     @DataBoundConstructor
     public Report(final String template, final String fileName,
                   final String filter,
-                  final boolean includeDfd, final boolean includeGlossary) {
+                  final boolean includeDfd,
+                  final boolean includeGlossary,
+                  final String locale) {
         this.template = template;
         this.fileName = fileName;
         this.filter = filter;
         this.includeDfd = includeDfd;
         this.includeGlossary = includeGlossary;
+        this.locale = Reports.Locale.from(locale);
     }
 
     @Override
@@ -51,6 +54,7 @@ public class Report extends Export {
         Reports.Report report = Reports.Report.builder()
                 .fileName(fileName)
                 .template(template)
+                .locale(locale)
                 .includeDfd(includeDfd)
                 .includeGlossary(includeGlossary)
                 .filters(StringUtils.isNotEmpty(filter) ? ReportUtils.validateJsonFilter(filter) : null)
