@@ -21,6 +21,12 @@ f.entry(
 }
 
 f.entry(
+        title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label(),
+        field: 'locale') {
+    f.textbox()
+}
+
+f.entry(
         title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_includedfd_label(),
         field: 'includeDfd',
         default: 'true') {
