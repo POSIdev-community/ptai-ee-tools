@@ -2,8 +2,8 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.Validator;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.Base;
 import hudson.util.FormValidation;
 import org.jvnet.localizer.LocaleProvider;
 import org.kohsuke.stapler.QueryParameter;
@@ -26,6 +26,11 @@ public abstract class Export extends Base {
                 return Validator.doCheckFieldJsonIssuesFilter(value, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid());
             else
                 return FormValidation.ok();
+        }
+
+        @SuppressWarnings("unused")
+        public FormValidation doCheckLocale(@QueryParameter String value) {
+            return Validator.doCheckLocale(value);
         }
 
         public static com.ptsecurity.appsec.ai.ee.scan.reports.Reports.Locale getDefaultLocale() {

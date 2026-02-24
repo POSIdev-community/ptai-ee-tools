@@ -30,7 +30,7 @@ public class Report extends Export {
     protected boolean includeGlossary;
 
     @Getter
-    private final Reports.Locale locale;
+    private final String locale;
 
     @DataBoundConstructor
     public Report(final String template, final String fileName,
@@ -43,7 +43,7 @@ public class Report extends Export {
         this.filter = filter;
         this.includeDfd = includeDfd;
         this.includeGlossary = includeGlossary;
-        this.locale = Reports.Locale.from(locale);
+        this.locale = locale;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class Report extends Export {
         Reports.Report report = Reports.Report.builder()
                 .fileName(fileName)
                 .template(template)
-                .locale(locale)
+                .locale(Reports.Locale.from(locale))
                 .includeDfd(includeDfd)
                 .includeGlossary(includeGlossary)
                 .filters(StringUtils.isNotEmpty(filter) ? ReportUtils.validateJsonFilter(filter) : null)

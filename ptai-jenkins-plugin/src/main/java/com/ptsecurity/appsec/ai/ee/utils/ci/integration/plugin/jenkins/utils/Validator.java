@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils;
 
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
@@ -78,6 +79,20 @@ public class Validator {
 
     public static FormValidation doCheckFieldRegEx(String value, String errorMessage) {
         return doCheckFieldRegEx(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
+    }
+
+    public static FormValidation doCheckLocale(String value) {
+        if (value.isEmpty() || value.trim().isEmpty()) {
+            return FormValidation.ok();
+        }
+
+        if (Reports.Locale.from(value) == null) {
+            return FormValidation.error(
+                    Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_message_error()
+            );
+        }
+
+        return FormValidation.ok();
     }
 
     public static FormValidation doCheckFieldJsonPolicy(String value) {
