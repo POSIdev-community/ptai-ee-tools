@@ -4,7 +4,7 @@ COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle :ptai-cli-plugin:build --no-daemon
 
-FROM openjdk:8-jre
+FROM openjdk:11.0.11-jre
 
 WORKDIR /opt/ptai/bin
 COPY --from=builder /home/gradle/src/ptai-cli-plugin/build/libs/ptai-cli-plugin.jar .
