@@ -1,22 +1,25 @@
-package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v530;
+package com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600;
 
 import com.google.gson.reflect.TypeToken;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
-import com.ptsecurity.appsec.ai.ee.server.v530.api.api.*;
-import com.ptsecurity.appsec.ai.ee.server.v530.api.model.ScanAgentModel;
-import com.ptsecurity.appsec.ai.ee.server.v530.auth.ApiResponse;
-import com.ptsecurity.appsec.ai.ee.server.v530.auth.api.AuthApi;
-import com.ptsecurity.appsec.ai.ee.server.v530.auth.model.AuthResultModel;
-import com.ptsecurity.appsec.ai.ee.server.v530.auth.model.UserLoginModel;
-import com.ptsecurity.appsec.ai.ee.server.v530.notifications.model.*;
+import com.ptsecurity.appsec.ai.ee.server.v600.api.api.*;
+import com.ptsecurity.appsec.ai.ee.server.v600.api.model.ScanAgentModel;
+import com.ptsecurity.appsec.ai.ee.server.v600.auth.ApiResponse;
+import com.ptsecurity.appsec.ai.ee.server.v600.auth.api.AuthApi;
+import com.ptsecurity.appsec.ai.ee.server.v600.auth.model.AuthResultModel;
+import com.ptsecurity.appsec.ai.ee.server.v600.auth.model.UserLoginModel;
+import com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.ScanCompleted;
+import com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.ScanProgress;
+import com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.ScanProgressModel;
+import com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.ScanResultRemoved;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.VersionRange;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v530.converters.EnumsConverter;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v530.tasks.GenericAstTasksImpl;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v530.tasks.ServerVersionTasksImpl;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.EnumsConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.tasks.GenericAstTasksImpl;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.tasks.ServerVersionTasksImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ServerVersionTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.LoggingInterceptor;
@@ -41,67 +44,67 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-import static com.ptsecurity.appsec.ai.ee.server.v530.auth.model.AuthScope.WEB;
-import static com.ptsecurity.appsec.ai.ee.server.v530.notifications.model.Stage.*;
+import static com.ptsecurity.appsec.ai.ee.server.v600.auth.model.AuthScope.WEB;
+import static com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.Stage.*;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 
 @Slf4j
-@VersionRange(min = {5, 3, 0, 0}, max = {5, 5, 99999, 99999})
+@VersionRange(min = {6, 0, 0, 0}, max = {6, 0, 99999, 99999})
 public class ApiClient extends AbstractApiClient {
     @Getter
     protected final String id = UUID.randomUUID().toString();
 
     @Getter
     @ToString.Exclude
-    protected final AuthApi authApi = new AuthApi(new com.ptsecurity.appsec.ai.ee.server.v530.auth.ApiClient());
+    protected final AuthApi authApi = new AuthApi(new com.ptsecurity.appsec.ai.ee.server.v600.auth.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final ProjectsApi projectsApi = new ProjectsApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final ProjectsApi projectsApi = new ProjectsApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final BranchesApi branchesApi = new BranchesApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final BranchesApi branchesApi = new BranchesApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final PmGroupsApi pmGroupsApi = new PmGroupsApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final PmGroupsApi pmGroupsApi = new PmGroupsApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final ReportsApi reportsApi = new ReportsApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final ReportsApi reportsApi = new ReportsApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final ConfigsApi configsApi = new ConfigsApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final ConfigsApi configsApi = new ConfigsApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final LicenseApi licenseApi = new LicenseApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final LicenseApi licenseApi = new LicenseApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final ScanQueueApi scanQueueApi = new ScanQueueApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final ScanQueueApi scanQueueApi = new ScanQueueApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final ScanAgentApi scanAgentApi = new ScanAgentApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final ScanAgentApi scanAgentApi = new ScanAgentApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final StoreApi storeApi = new StoreApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final StoreApi storeApi = new StoreApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final MailingApi mailingApi = new MailingApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final MailingApi mailingApi = new MailingApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final HealthCheckApi healthCheckApi = new HealthCheckApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final HealthCheckApi healthCheckApi = new HealthCheckApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     @Getter
     @ToString.Exclude
-    protected final VersionApi versionApi = new VersionApi(new com.ptsecurity.appsec.ai.ee.server.v530.api.ApiClient());
+    protected final VersionApi versionApi = new VersionApi(new com.ptsecurity.appsec.ai.ee.server.v600.api.ApiClient());
 
     public ApiClient(@NonNull final ConnectionSettings connectionSettings) {
         super(connectionSettings, AdvancedSettings.getDefault());
@@ -140,7 +143,7 @@ public class ApiClient extends AbstractApiClient {
 
     @Override
     public ScanBrief.ApiVersion getApiVersion() {
-        return ScanBrief.ApiVersion.V530;
+        return ScanBrief.ApiVersion.V600;
     }
 
     public Jwt authenticate() throws GenericException {
@@ -299,7 +302,7 @@ public class ApiClient extends AbstractApiClient {
                 builder.append(Optional.of(data)
                         .map(ScanProgress::getProgress)
                         .map(ScanProgressModel::getStage)
-                        .map(com.ptsecurity.appsec.ai.ee.server.v530.notifications.model.Stage::getValue)
+                        .map(com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.Stage::getValue)
                         .orElse("data.progress.stage missing"));
                 Optional.of(data)
                         .map(ScanProgress::getProgress)
@@ -312,7 +315,7 @@ public class ApiClient extends AbstractApiClient {
                 if (null != console) console.info(builder.toString());
                 // Failed or aborted scans do not generate ScanCompleted event but
                 // send ScanProgress event with stage failed or aborted
-                Optional<com.ptsecurity.appsec.ai.ee.server.v530.notifications.model.Stage> stage = Optional.of(data).map(ScanProgress::getProgress).map(ScanProgressModel::getStage);
+                Optional<com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.Stage> stage = Optional.of(data).map(ScanProgress::getProgress).map(ScanProgressModel::getStage);
                 if (stage.isPresent()) {
                     if (null != eventConsumer) eventConsumer.process(EnumsConverter.convert(stage.get()));
                     if (null != queue && (ABORTED == stage.get() || FAILED == stage.get())) {
