@@ -59,8 +59,7 @@
             let mode = $('${BRANCH_SETTINGS}').value;
             if (mode === '${BRANCH_SETTINGS_CUSTOM}') {
                 BS.Util.show(...ptaiCustomBranchFieldRows);
-            }
-            if (mode === '${BRANCH_SETTINGS_FROM_ENVIRONMENT}') {
+            } else {
                 BS.Util.hide(...ptaiCustomBranchFieldRows);
             }
             BS.MultilineProperties.updateVisible();
@@ -289,9 +288,12 @@
                               currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${LABEL_BRANCH_SETTINGS_FROM_ENVIRONMENT}</props:option>
                 <props:option value="${BRANCH_SETTINGS_CUSTOM}"
                               currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${LABEL_BRANCH_SETTINGS_CUSTOM}</props:option>
+                <props:option value="${BRANCH_SETTINGS_FROM_JSON}"
+                              currValue="${propertiesBean.properties[BRANCH_SETTINGS]}">${LABEL_BRANCH_SETTINGS_FROM_JSON}</props:option>
             </props:selectProperty>
             <span class="smallNote">${HINT_BRANCH_SETTINGS}</span>
             <span class="error" id="error_${BRANCH_SETTINGS}"></span>
+            <span class="error" id="error_${BRANCH_SETTINGS_FROM_JSON}"></span>
         </td>
     </tr>
 

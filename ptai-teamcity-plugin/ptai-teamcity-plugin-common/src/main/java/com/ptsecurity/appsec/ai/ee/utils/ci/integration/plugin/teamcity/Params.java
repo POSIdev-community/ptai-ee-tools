@@ -31,7 +31,9 @@ public class Params {
      * Defines how branch name settings are defined. If this field equals to
      * {@link Constants#BRANCH_SETTINGS_FROM_ENVIRONMENT} then settings are defined from
      * pipeline environment, if equals to {@link Constants#BRANCH_SETTINGS_CUSTOM} then
-     * settings are defined from the value entered by the user
+     * settings are defined from the value entered by the user,
+     * if equals to {@link Constants#BRANCH_SETTINGS_FROM_JSON} then settings
+     * are defined from JSON-defined settings
      */
     public static final String BRANCH_SETTINGS = PARAM("BranchSettings");
 

@@ -11,6 +11,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTok
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.FromJsonBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor.PluginDescriptor;
@@ -53,6 +54,7 @@ import java.util.*;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.ERROR;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.WARNING;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_empty;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
@@ -158,6 +160,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
         String jsonPolicy = selectedScanSettingsUi ? null : ((ScanSettingsManual) scanSettings).getJsonPolicy();
 
         String projectName;
+        UnifiedAiProjScanSettings settings = null;
         if (selectedScanSettingsUi) {
             projectName = ((ScanSettingsUi) scanSettings).getProjectName();
             log.trace("UI-defined project name before macro replacement is {}", projectName);
@@ -178,7 +181,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
             check = scanSettingsManualDescriptor.doCheckJsonPolicy(jsonPolicy);
             if (FormValidation.Kind.ERROR == check.kind)
                 throw new AbortException(check.getMessage());
-            UnifiedAiProjScanSettings settings = parseResult.getSettings();
+            settings = parseResult.getSettings();
 
             if (settings == null) {
                 throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
@@ -222,7 +225,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
         advancedSettings.apply(descriptor.getAdvancedSettings());
         advancedSettings.apply(this.advancedSettings);
 
-        String branchName = getBranchName(buildInfo, projectName);
+        String branchName = getBranchName(buildInfo, projectName, settings);
         String scanLabel = scanLabelSettings.getScanLabel();
 
         check = descriptor.doTestProjectFields(
@@ -335,8 +338,13 @@ public class Plugin extends Builder implements SimpleBuildStep {
         return projectActions;
     }
 
-    private String getBranchName(BuildInfo buildInfo, String projectName) {
+    private String getBranchName(
+            BuildInfo buildInfo,
+            String projectName,
+            UnifiedAiProjScanSettings jsonSettings) throws SettingsMustBeSetUpException {
         boolean selectedCustomBranchName = branchSettings instanceof CustomNameBranchSettings;
+        boolean selectedFromJsonBranchSettings = branchSettings instanceof FromJsonBranchSettings;
+        boolean selectedScanSettingsManual = scanSettings instanceof ScanSettingsManual;
 
         if (selectedCustomBranchName) {
             String branchName = ((CustomNameBranchSettings) branchSettings).getBranchName();
@@ -344,6 +352,14 @@ public class Plugin extends Builder implements SimpleBuildStep {
             branchName = Util.replaceMacro(branchName, buildInfo.getEnvVars());
             log.trace("Custom branch name after macro replacement is {}", projectName);
             return branchName;
+        } else if (selectedFromJsonBranchSettings) {
+            if (!selectedScanSettingsManual) {
+                throw new SettingsMustBeSetUpException(i18n_ast_settings_branch_from_json_message_empty());
+            }
+
+            return Optional.ofNullable(jsonSettings)
+                    .map(UnifiedAiProjScanSettings::getBranchName)
+                    .orElseThrow(() -> new SettingsMustBeSetUpException(i18n_ast_settings_branch_from_json_message_empty()));
         }
 
         log.trace("Getting git branch name from environment");

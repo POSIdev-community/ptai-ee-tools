@@ -2,6 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.RawData;
+import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
@@ -15,6 +16,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailI
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.ReportsHelper;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import jetbrains.buildServer.RunBuildException;
 import jetbrains.buildServer.agent.AgentRunningBuild;
@@ -31,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Messages.MESSAGE_BRANCH_NAME_MISSING_JSON;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -187,13 +190,26 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         }
     }
 
-    private String getBranchName(Map<String, String> params ) {
-        boolean selectedCustomBranchSettings = BRANCH_SETTINGS_CUSTOM.equals(params.get(Params.BRANCH_SETTINGS));
-
-        if (selectedCustomBranchSettings) {
+    private String getBranchName(Map<String, String> params) {
+        if (BRANCH_SETTINGS_CUSTOM.equals(params.get(Params.BRANCH_SETTINGS))) {
             return params.get(Params.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
         }
 
-        return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
+        if (BRANCH_SETTINGS_FROM_ENVIRONMENT.equals(params.get(Params.BRANCH_SETTINGS))) {
+            return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
+        }
+
+        if (!AST_SETTINGS_JSON.equals(params.get(Params.AST_SETTINGS))) {
+            throw GenericException.raise(MESSAGE_BRANCH_NAME_MISSING_JSON, new IllegalArgumentException());
+        }
+
+        UnifiedAiProjScanSettings jsonSettings = UnifiedAiProjScanSettings.loadSettings(params.get(Params.JSON_SETTINGS));
+
+        String branchName = jsonSettings.getBranchName();
+        if (branchName == null) {
+            throw GenericException.raise(MESSAGE_BRANCH_NAME_MISSING_JSON, new IllegalArgumentException());
+        }
+
+        return branchName;
     }
 }

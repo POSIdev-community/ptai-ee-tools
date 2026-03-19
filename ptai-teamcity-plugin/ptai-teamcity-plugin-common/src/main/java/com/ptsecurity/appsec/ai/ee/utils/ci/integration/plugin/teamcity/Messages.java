@@ -6,6 +6,7 @@ public class Messages {
     public static final String MESSAGE_CUSTOM_BRANCH_NAME_EMPTY = "Custom branch name must not be empty";
     public static final String MESSAGE_JSON_SETTINGS_EMPTY = "JSON-defined scan settings must not be empty";
     public static final String MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG = "Custom branch name exceeds the length of 512 characters";
+    public static final String MESSAGE_BRANCH_NAME_MISSING_JSON = "Branch name missing in JSON settings";
     public static final String MESSAGE_JSON_SETTINGS_INVALID = "JSON-defined scan settings are invalid";
     public static final String MESSAGE_JSON_POLICY_INVALID = "JSON-defined scan policy is invalid";
     public static final String MESSAGE_PROJECT_NAME_EMPTY = "Project name must not be empty";

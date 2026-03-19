@@ -229,6 +229,8 @@ public class AstSettingsService {
      * @param results List of validation results
      */
     protected static void validateAstSettings(@NonNull final PropertiesBean bean, @NonNull final VerificationResults results) {
+        UnifiedAiProjScanSettings jsonSettings = null;
+
         // JavaScript handlers are named as on[Error ID]Error like "onEmptyUrlError"
         if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI) && bean.empty(PROJECT_NAME))
             results.add(PROJECT_NAME, MESSAGE_PROJECT_NAME_EMPTY);
@@ -239,6 +241,7 @@ public class AstSettingsService {
             else {
                 try {
                     UnifiedAiProjScanSettings.parse(bean.get(JSON_SETTINGS));
+                    jsonSettings = UnifiedAiProjScanSettings.loadSettings(bean.get(JSON_SETTINGS));
                 } catch (GenericException e) {
                     results.add(JSON_SETTINGS, e.getDetailedMessage());
                     log.warn(e.getDetailedMessage(), e);
@@ -253,7 +256,7 @@ public class AstSettingsService {
             }
         }
 
-        validateBranchSettings(bean, results);
+        validateBranchSettings(bean, results, jsonSettings);
         validateScanLabel(bean, results);
 
         if (bean.empty(INCLUDES))
@@ -323,21 +326,35 @@ public class AstSettingsService {
 
     private static void validateBranchSettings(
             @NonNull final PropertiesBean bean,
-            @NonNull final VerificationResults results
+            @NonNull final VerificationResults results,
+            final UnifiedAiProjScanSettings jsonSettings
     ) {
-        if (!bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
+        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_FROM_ENVIRONMENT)) {
             return;
         }
 
-        if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
-            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
+        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
+            if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
+                results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
+                return;
+            }
+
+            String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
+            int maxNameLength = 512;
+            if (customBranchName.length() > maxNameLength) {
+                results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
+            }
             return;
         }
 
-        String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
-        int maxNameLength = 512;
-        if (customBranchName.length() > maxNameLength) {
-            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
+        if (!bean.eq(AST_SETTINGS, AST_SETTINGS_JSON) || jsonSettings == null) {
+            results.add(BRANCH_SETTINGS_FROM_JSON, MESSAGE_BRANCH_NAME_MISSING_JSON);
+            return;
+        }
+
+        String branchName = jsonSettings.getBranchName();
+        if (branchName == null) {
+            results.add(BRANCH_SETTINGS_FROM_JSON, MESSAGE_BRANCH_NAME_MISSING_JSON);
         }
     }
 

@@ -238,6 +238,10 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiBranchSettingsCustomBranchName", elem)
             },
 
+            onPtaiBranchSettingsFromJsonError: function (elem) {
+                this.handle("ptaiBranchSettings", elem)
+            },
+
             onPtaiScanLabelError: function (elem) {
                 this.handle("ptaiScanLabel", elem)
             },

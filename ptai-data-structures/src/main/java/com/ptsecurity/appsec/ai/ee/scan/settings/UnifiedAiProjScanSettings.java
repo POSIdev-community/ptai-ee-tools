@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.*;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
@@ -122,34 +123,8 @@ public abstract class UnifiedAiProjScanSettings {
                 break;
             }
 
-            log.trace("Check Version attribute");
-            JsonNode versionNode = root.path("Version");
-            UnifiedAiProjScanSettings settings;
-            if (versionNode.isMissingNode())
-                settings = (root.path("ScanModules").isMissingNode())
-                        ? new AiProjLegacyScanSettings(root)
-                        : new AiProjV10ScanSettings(root);
-            else if (_1_9.value().equals(versionNode.textValue()))
-                settings = new AiProjV19ScanSettings(root);
-            else if (_1_8.value().equals(versionNode.textValue()))
-                settings = new AiProjV18ScanSettings(root);
-            else if (_1_7.value().equals(versionNode.textValue()))
-                settings = new AiProjV17ScanSettings(root);
-            else if (_1_6.value().equals(versionNode.textValue()))
-                settings = new AiProjV16ScanSettings(root);
-            else if (_1_5.value().equals(versionNode.textValue()))
-                settings = new AiProjV15ScanSettings(root);
-            else if (_1_4.value().equals(versionNode.textValue()))
-                settings = new AiProjV14ScanSettings(root);
-            else if (_1_3.value().equals(versionNode.textValue()))
-                settings = new AiProjV13ScanSettings(root);
-            else if (_1_2.value().equals(versionNode.textValue()))
-                settings = new AiProjV12ScanSettings(root);
-            else if (_1_1.value().equals(versionNode.textValue()))
-                settings = new AiProjV11ScanSettings(root);
-            else if (_1_0.value().equals(versionNode.textValue()))
-                settings = new AiProjV10ScanSettings(root);
-            else {
+            UnifiedAiProjScanSettings settings = getInstance(root);
+            if (settings == null) {
                 addErrorMessageToResult(result, i18n_ast_settings_type_manual_json_settings_message_version_unknown());
                 break;
             }
@@ -211,6 +186,57 @@ public abstract class UnifiedAiProjScanSettings {
         }
 
         throw new JsonMappingException("Root must be a JSON object, but got: " + node.getNodeType());
+    }
+
+    private static UnifiedAiProjScanSettings getInstance(JsonNode root) {
+        log.trace("Check Version attribute");
+        JsonNode versionNode = root.path("Version");
+        UnifiedAiProjScanSettings settings;
+        if (versionNode.isMissingNode())
+            settings = (root.path("ScanModules").isMissingNode())
+                    ? new AiProjLegacyScanSettings(root)
+                    : new AiProjV10ScanSettings(root);
+        else if (_1_9.value().equals(versionNode.textValue()))
+            settings = new AiProjV19ScanSettings(root);
+        else if (_1_8.value().equals(versionNode.textValue()))
+            settings = new AiProjV18ScanSettings(root);
+        else if (_1_7.value().equals(versionNode.textValue()))
+            settings = new AiProjV17ScanSettings(root);
+        else if (_1_6.value().equals(versionNode.textValue()))
+            settings = new AiProjV16ScanSettings(root);
+        else if (_1_5.value().equals(versionNode.textValue()))
+            settings = new AiProjV15ScanSettings(root);
+        else if (_1_4.value().equals(versionNode.textValue()))
+            settings = new AiProjV14ScanSettings(root);
+        else if (_1_3.value().equals(versionNode.textValue()))
+            settings = new AiProjV13ScanSettings(root);
+        else if (_1_2.value().equals(versionNode.textValue()))
+            settings = new AiProjV12ScanSettings(root);
+        else if (_1_1.value().equals(versionNode.textValue()))
+            settings = new AiProjV11ScanSettings(root);
+        else if (_1_0.value().equals(versionNode.textValue()))
+            settings = new AiProjV10ScanSettings(root);
+        else {
+            settings = null;
+        }
+
+        return settings;
+    }
+
+    public static void validateBranchNameFromJson(@NonNull final String data) {
+        final JsonNode root = call(
+                () -> parseRootNode(data),
+                i18n_ast_settings_type_manual_json_settings_message_invalid()
+        );
+
+        UnifiedAiProjScanSettings settings = getInstance(root);
+        if (settings == null) {
+            throw GenericException.raise(
+                    Resources.i18n_ast_settings_type_manual_json_settings_message_version_unknown(),
+                    new IllegalArgumentException());
+        }
+
+        settings.validateBranchName();
     }
 
     protected static void addErrorMessageToResult(ParseResult result, String errorMessage) {
@@ -336,7 +362,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19 }
     public abstract Version getVersion();
 
     /**
@@ -346,6 +372,8 @@ public abstract class UnifiedAiProjScanSettings {
     public abstract String getProjectName();
 
     public abstract String getBranchName();
+
+    protected abstract void validateBranchName();
 
     public UnifiedAiProjScanSettings setProjectName(@NonNull final String name) {
         rootNode.put("ProjectName", name);
