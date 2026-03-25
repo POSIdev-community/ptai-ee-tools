@@ -152,6 +152,13 @@ public class AiProjConverter {
             log.error(message);
             throw new IllegalArgumentException(message);
         }
+
+        result.setPriority(Priority.MEDIUM);
+
+        PreferredAgentsSettings preferredAgentsSettings = new PreferredAgentsSettings();
+        preferredAgentsSettings.setPreferredAgentsOnly(false);
+        result.setPreferredAgentsSettings(preferredAgentsSettings);
+
         return result;
     }
 

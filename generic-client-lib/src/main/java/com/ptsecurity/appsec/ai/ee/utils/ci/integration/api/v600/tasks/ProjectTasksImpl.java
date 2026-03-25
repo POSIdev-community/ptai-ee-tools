@@ -228,7 +228,8 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
                 .rubySettings(projectSettingsModel.getRubySettings())
                 .scaSettings(projectSettingsModel.getScaSettings())
                 .reportAfterScan(projectSettingsModel.getReportAfterScan())
-                .skipGitIgnoreFiles(projectSettingsModel.getSkipGitIgnoreFiles());
+                .skipGitIgnoreFiles(projectSettingsModel.getSkipGitIgnoreFiles())
+                .priority(projectSettingsModel.getPriority());
         call(() -> client.getProjectsApi().apiProjectsProjectIdSettingsPut(projectId, projectSettingsUpdatedModel),
                 "Update PT AI project generic settings failed");
 
