@@ -274,3 +274,5 @@ options:
 + [Feature] Added scan-label (A commit hash can be used as a scan label)
 ### 20260218
 + [Feature] PT AI v.5.4.0 support approved
+### 20260325
++ [Feature] PT AI v.6.0.0 support approved
