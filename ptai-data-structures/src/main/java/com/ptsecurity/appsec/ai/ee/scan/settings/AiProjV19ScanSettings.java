@@ -2,7 +2,7 @@ package com.ptsecurity.appsec.ai.ee.scan.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage_____;
@@ -17,7 +17,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
-import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__6.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule__.*;
@@ -108,11 +107,11 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
-    public Set<ParseResult.Message> processErrorMessages(Set<ValidationMessage> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
-        for (ValidationMessage error : errors) {
-            ParseResult.Message.Type type = error.getCode().equals(FORMAT.getErrorCode()) &&
-                    error.getSchemaPath().equals("#/properties/MailingProjectSettings/properties/EmailRecipients/items")
+        for (Error error : errors) {
+            ParseResult.Message.Type type = error.getKeyword().equals("format") &&
+                    error.getSchemaLocation().toString().equals("#/properties/MailingProjectSettings/properties/EmailRecipients/items")
                     ? ParseResult.Message.Type.WARNING
                     : ParseResult.Message.Type.ERROR;
             result.add(ParseResult.Message.builder()
