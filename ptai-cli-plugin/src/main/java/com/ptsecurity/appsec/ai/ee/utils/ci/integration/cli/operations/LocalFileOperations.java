@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 
 @Slf4j
 @SuperBuilder
@@ -28,14 +29,19 @@ public class LocalFileOperations extends AbstractFileOperations implements FileO
     @SneakyThrows
     protected void saveInMemoryData(@NonNull String name, byte[] data) {
         byte[] safeData = (null == data) ? new byte[0] : data;
-        if (saver.getOutput().resolve(name).toFile().exists()) {
+        Path out = resolveAndValidate(saver.getOutput(), name, console);
+        if (out == null) {
+            return;
+        }
+
+        if (out.toFile().exists()) {
             console.warning("Existing file " + name + " will be overwritten");
-            if (!saver.getOutput().resolve(name).toFile().delete()) {
+            if (!out.toFile().delete()) {
                 console.severe("Existing file " + name + " delete failed");
                 return;
             }
         }
-        FileUtils.writeByteArrayToFile(saver.getOutput().resolve(name).toFile(), safeData);
+        FileUtils.writeByteArrayToFile(out.toFile(), safeData);
     }
 
     public void saveArtifact(@NonNull String name, @NonNull File file) {
