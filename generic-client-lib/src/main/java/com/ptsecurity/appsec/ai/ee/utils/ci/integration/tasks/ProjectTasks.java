@@ -38,17 +38,21 @@ public interface ProjectTasks {
      * Setup new or existing project on PT AI server. Currently (2022.08.12) C# solution-based
      * projects require sources to be uploaded before solution file set so we need to pass
      * uploader lambda that will be executed between project creation and setting scan parameters
+     *
      * @param jsonSettings
      * @param jsonPolicy
+     * @param projectPriority
      * @param uploader
      * @return
      * @throws GenericException
      */
-    JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, @NonNull final Consumer<UUID> uploader) throws GenericException;
+    JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, final String projectPriority, @NonNull final Consumer<UUID> uploader) throws GenericException;
 
     void deleteProject(@NonNull final UUID id) throws GenericException;
 
     List<Pair<UUID, String>> listProjects() throws GenericException;
 
     UnifiedAiProjScanSettings loadProjectScanSettings(@NonNull final UUID projectId, @NonNull final UUID scanSettingsId) throws GenericException;
+
+    void setProjectPriority(@NonNull final UUID projectId, final String projectPriority);
 }

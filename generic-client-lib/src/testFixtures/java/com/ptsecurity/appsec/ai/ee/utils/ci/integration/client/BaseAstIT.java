@@ -63,7 +63,7 @@ public abstract class BaseAstIT extends BaseClientIT {
         AbstractApiClient client = Factory.client(CONNECTION_SETTINGS());
         ProjectTasks projectTasks = new Factory().projectTasks(client);
         log.trace("Setup {} project from JSON-defined settings", projectTemplate.getName());
-        UUID resultProjectId = projectTasks.setupFromJson(projectTemplate.getSettings().toJson(), policy, (projectId) -> {
+        UUID resultProjectId = projectTasks.setupFromJson(projectTemplate.getSettings().toJson(), policy, null, (projectId) -> {
             GenericAstTasks genericAstTasks = new Factory().genericAstTasks(client);
             genericAstTasks.upload(projectId, projectTemplate.getZip().toFile(), null);
         }).getProjectId();
