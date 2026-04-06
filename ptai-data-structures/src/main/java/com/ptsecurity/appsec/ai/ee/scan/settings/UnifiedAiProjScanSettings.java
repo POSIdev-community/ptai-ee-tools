@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.*;
+import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
@@ -19,7 +20,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV19.Version.*;
@@ -31,7 +35,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Slf4j
 @Accessors
 public abstract class UnifiedAiProjScanSettings {
-    private static final List<NonValidationKeyword> NON_VALIDATION_KEYS = Collections.singletonList(new NonValidationKeyword("javaType"));
     protected final ObjectNode rootNode;
 
     public UnifiedAiProjScanSettings(@NonNull final JsonNode jsonNode) {
@@ -155,14 +158,17 @@ public abstract class UnifiedAiProjScanSettings {
             }
 
             log.trace("Check AIPROJ for schema compliance");
-            JsonSchemaFactory factory = JsonSchemaFactory
-                    .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                    .addMetaSchema(JsonMetaSchema
-                            .builder(JsonMetaSchema.getV4().getUri(), JsonMetaSchema.getV4())
-                            .addKeywords(NON_VALIDATION_KEYS).build()).build();
+            SchemaRegistryConfig schemaRegistryConfig = SchemaRegistryConfig.builder()
+                    .formatAssertionsEnabled(false)
+                    .build();
+
+            SchemaRegistry schemaRegistry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_4,
+                    builder -> builder.schemaRegistryConfig(schemaRegistryConfig));
+
             log.trace("Validate JSON for AIPROJ schema compliance");
-            JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
-            Set<ValidationMessage> errors = jsonSchema.validate(root);
+            Schema schema = schemaRegistry.getSchema(settings.getJsonSchema());
+            String inputJson = root.toString();
+            List<Error> errors = schema.validate(inputJson, InputFormat.JSON);
 
             log.trace("Validate Programming Languages");
             settings.validateProgrammingLanguages(result);
@@ -249,13 +255,14 @@ public abstract class UnifiedAiProjScanSettings {
      * domain names etc.). This method removes low-severity errors from validation results
      * @param errors List of errors to be processed
      */
-    public Set<ParseResult.Message> processErrorMessages(Set<ValidationMessage> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
-        for (ValidationMessage error : errors)
+        for (Error error : errors) {
             result.add(ParseResult.Message.builder()
                     .type(ParseResult.Message.Type.ERROR)
                     .text(error.getMessage())
                     .build());
+        }
         return result;
     }
 

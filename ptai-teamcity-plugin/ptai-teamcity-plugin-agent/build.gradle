@@ -7,7 +7,7 @@ group = "${rootGroup}.ptai-teamcity-plugin"
 dependencies {
     implementation project(':ptai-teamcity-plugin:ptai-teamcity-plugin-common')
     // https://mvnrepository.com/artifact/commons-io/commons-io
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.20'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 }

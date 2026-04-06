@@ -1,6 +1,9 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
-import com.networknt.schema.*;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SpecificationVersion;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -11,23 +14,19 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ScanSettings.Language.JAVA;
-import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ScanSettings.Language.PHP;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.AddressListItem.Format.EXACTMATCH;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.AddressListItem.Format.WILDCARD;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType.MANUAL;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.ScanLevel.FULL;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.ScanScope.DOMAIN;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ScanModule.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ScanModule.BLACKBOX;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.Version.LEGACY;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.Version.V11;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.ResourcesHelper.getResourceString;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UnifiedAiProjScanSettingsTest {
     @Test
@@ -61,13 +60,9 @@ class UnifiedAiProjScanSettingsTest {
                 "    \"title\": \"test\",\n" +
                 "    \"type\": \"object\"\n" +
                 "}\n";
-        JsonSchemaFactory factory = JsonSchemaFactory
-                .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                .addMetaSchema(JsonMetaSchema
-                        .builder(JsonMetaSchema.getV4().getUri(), JsonMetaSchema.getV4())
-                        .build()).build();
-        JsonSchema jsonSchema = factory.getSchema(schema);
-        Set<ValidationMessage> errors = jsonSchema.validate(createObjectMapper().readTree("{ \"Version\": \"First\" }"));
+        SchemaRegistry schemaRegistry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_4);
+        Schema jsonSchema = schemaRegistry.getSchema(schema);
+        List<Error> errors = jsonSchema.validate(createObjectMapper().readTree("{ \"Version\": \"First\" }"));
         Assertions.assertTrue(errors.isEmpty());
         errors = jsonSchema.validate(createObjectMapper().readTree("{ \"Version\": \"First\", \"Unknown\": \"Some data\" }"));
         Assertions.assertFalse(errors.isEmpty());

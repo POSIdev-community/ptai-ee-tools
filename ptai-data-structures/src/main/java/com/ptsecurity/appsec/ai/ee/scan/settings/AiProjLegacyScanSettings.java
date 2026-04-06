@@ -1,7 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.scan.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.legacy.JavaVersion;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.legacy.ProgrammingLanguage;
@@ -19,7 +19,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.networknt.schema.ValidatorTypeCode.ADDITIONAL_PROPERTIES;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType.AUTO;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType.MANUAL;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.v1_11;
@@ -406,10 +405,10 @@ public class AiProjLegacyScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
-    public Set<ParseResult.Message> processErrorMessages(Set<ValidationMessage> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
-        for (ValidationMessage error : errors) {
-            ParseResult.Message.Type type = error.getCode().equals(ADDITIONAL_PROPERTIES.getErrorCode())
+        for (Error error : errors) {
+            ParseResult.Message.Type type = "additionalProperties".equals(error.getKeyword())
                     ? ParseResult.Message.Type.WARNING
                     : ParseResult.Message.Type.ERROR;
             result.add(ParseResult.Message.builder()

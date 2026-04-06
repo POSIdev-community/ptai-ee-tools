@@ -8,7 +8,7 @@ group = "${rootGroup}"
 dependencies {
     // Support zip archives
     // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
-    api 'org.apache.commons:commons-compress:1.21'
+    api 'org.apache.commons:commons-compress:1.28.0'
     // 7zip archives support
     // https://mvnrepository.com/artifact/org.tukaani/xz
     api 'org.tukaani:xz:1.9'
