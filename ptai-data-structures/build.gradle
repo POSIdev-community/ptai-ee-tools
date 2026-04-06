@@ -22,7 +22,7 @@ dependencies {
     // uses oneOf / allOf that aren't fully supported, but at least we may check JSON
     // and use JsonPath after that
     // https://mvnrepository.com/artifact/com.networknt/json-schema-validator
-    implementation group: 'com.networknt', name: 'json-schema-validator', version: '1.0.82'
+    implementation group: 'com.networknt', name: 'json-schema-validator', version: '2.0.1'
 
     // Use JUnit 5 for test fixtures
     testFixturesImplementation(platform("org.junit:junit-bom:$junitVersion"))
