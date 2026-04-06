@@ -57,6 +57,11 @@ public class Defaults {
     public static final String SCAN_LABEL = "";
 
     /**
+     * See {@link Params#PROJECT_PRIORITY} and {@link Constants#PROJECT_PRIORITY_MEDIUM}
+     */
+    public static final String PROJECT_PRIORITY = PROJECT_PRIORITY_MEDIUM;
+
+    /**
      * See {@link Params#AST_SETTINGS} and {@link Constants#AST_SETTINGS_UI}
      */
     public static final String AST_SETTINGS = AST_SETTINGS_UI;

@@ -37,6 +37,11 @@ public class Constants {
     public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "BranchSettingsFromEnvironment";
     public static final String BRANCH_SETTINGS_CUSTOM = "BranchSettingsCustom";
 
+    public static final String PROJECT_PRIORITY_LOW = "ProjectPriorityLow";
+    public static final String PROJECT_PRIORITY_MEDIUM = "ProjectPriorityMedium";
+    public static final String PROJECT_PRIORITY_HIGH = "ProjectPriorityHigh";
+    public static final String PROJECT_PRIORITY_CRITICAL = "ProjectPriorityCritical";
+
     public static final String AST_SETTINGS_JSON = "SettingsJson";
     public static final String AST_SETTINGS_UI = "SettingsUI";
 
