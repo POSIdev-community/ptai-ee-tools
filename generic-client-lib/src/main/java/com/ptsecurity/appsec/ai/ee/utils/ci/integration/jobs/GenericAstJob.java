@@ -63,6 +63,10 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Setter
     protected String scanLabel;
 
+    @Getter
+    @Builder.Default
+    protected String projectPriority = null;
+
     @Builder.Default
     protected UUID branchId = null;
 

@@ -62,6 +62,22 @@
 <c:set var="LABEL_SCAN_LABEL" value="<%=Labels.SCAN_LABEL%>"/>
 <c:set var="HINT_SCAN_LABEL" value="<%=Hints.SCAN_LABEL%>"/>
 
+<c:set var="PROJECT_PRIORITY" value="<%=Params.PROJECT_PRIORITY%>"/>
+<c:set var="LABEL_PROJECT_PRIORITY" value="<%=Labels.PROJECT_PRIORITY%>"/>
+<c:set var="HINT_PROJECT_PRIORITY" value="<%=Hints.PROJECT_PRIORITY%>"/>
+
+<c:set var="PROJECT_PRIORITY_LOW" value="<%=Constants.PROJECT_PRIORITY_LOW%>"/>
+<c:set var="LABEL_PROJECT_PRIORITY_LOW" value="<%=Labels.PROJECT_PRIORITY_LOW%>"/>
+
+<c:set var="PROJECT_PRIORITY_MEDIUM" value="<%=Constants.PROJECT_PRIORITY_MEDIUM%>"/>
+<c:set var="LABEL_PROJECT_PRIORITY_MEDIUM" value="<%=Labels.PROJECT_PRIORITY_MEDIUM%>"/>
+
+<c:set var="PROJECT_PRIORITY_HIGH" value="<%=Constants.PROJECT_PRIORITY_HIGH%>"/>
+<c:set var="LABEL_PROJECT_PRIORITY_HIGH" value="<%=Labels.PROJECT_PRIORITY_HIGH%>"/>
+
+<c:set var="PROJECT_PRIORITY_CRITICAL" value="<%=Constants.PROJECT_PRIORITY_CRITICAL%>"/>
+<c:set var="LABEL_PROJECT_PRIORITY_CRITICAL" value="<%=Labels.PROJECT_PRIORITY_CRITICAL%>"/>
+
 <c:set var="AST_SETTINGS" value="<%=Params.AST_SETTINGS%>"/>
 <c:set var="LABEL_AST_SETTINGS" value="<%=Labels.AST_SETTINGS%>"/>
 <c:set var="HINT_AST_SETTINGS" value="<%=Hints.AST_SETTINGS%>"/>

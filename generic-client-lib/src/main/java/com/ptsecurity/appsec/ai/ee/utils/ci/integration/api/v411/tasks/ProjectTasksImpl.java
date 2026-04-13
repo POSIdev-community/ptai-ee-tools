@@ -103,7 +103,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         return result.getId();
     }
 
-    public JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, @NonNull final Consumer<UUID> uploader) throws GenericException {
+    public JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, String projectPriority, @NonNull final Consumer<UUID> uploader) throws GenericException {
         log.trace("Parse settings and policy");
         // Check if JSON settings and policy are defined correctly. Throw an exception if there are problems
         UnifiedAiProjScanSettings settings = (StringUtils.isEmpty(jsonSettings))
@@ -194,4 +194,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
     public UnifiedAiProjScanSettings loadProjectScanSettings(@NonNull UUID projectId, @NonNull UUID scanSettingsId) throws GenericException {
         throw GenericException.raise("No AIPROJ scan settings download support in PT AI 4.1.1", new UnsupportedOperationException());
     }
+
+    @Override
+    public void setProjectPriority(@NonNull UUID projectId, String projectPriority) {}
 }

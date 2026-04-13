@@ -151,7 +151,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
         return result.getId();
     }
 
-    public JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, @NonNull final Consumer<UUID> uploader) throws GenericException {
+    public JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, String projectPriority, @NonNull final Consumer<UUID> uploader) throws GenericException {
         log.trace("Parse settings and policy");
         // Check if JSON settings and policy are defined correctly. Throw an exception if there are problems
         UnifiedAiProjScanSettings settings = (StringUtils.isEmpty(jsonSettings))
@@ -170,6 +170,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
                 client.getProjectsApi()::apiProjectsDefaultSettingsGet,
                 "Failed to get default PT AI project settings");
         BaseCreateProjectModel projectSettings = AiProjConverter.convert(settings, defaultSettings);
+        projectSettings.setPriority(Priority.fromValue(projectPriority));
 
         final UUID projectId;
         final ProjectModel projectModel = searchProjectLight(settings.getProjectName());
@@ -212,24 +213,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
         log.trace("Apply AIPROJ-defined project generic settings");
         AiProjConverter.apply(settings, projectSettingsModel, client);
         log.trace("Save modified settings");
-        ProjectSettingsUpdateModel projectSettingsUpdatedModel = new ProjectSettingsUpdateModel()
-                .projectName(projectSettingsModel.getProjectName())
-                .languages(projectSettingsModel.getLanguages())
-                .whiteBoxSettings(projectSettingsModel.getWhiteBoxSettings())
-                .dotNetSettings(projectSettingsModel.getDotNetSettings())
-                .goSettings(projectSettingsModel.getGoSettings())
-                .javaScriptSettings(projectSettingsModel.getJavaScriptSettings())
-                .javaSettings(projectSettingsModel.getJavaSettings())
-                .phpSettings(projectSettingsModel.getPhpSettings())
-                .rubySettings(projectSettingsModel.getRubySettings())
-                .pmTaintSettings(projectSettingsModel.getPmTaintSettings())
-                .pygrepSettings(projectSettingsModel.getPygrepSettings())
-                .pythonSettings(projectSettingsModel.getPythonSettings())
-                .rubySettings(projectSettingsModel.getRubySettings())
-                .scaSettings(projectSettingsModel.getScaSettings())
-                .reportAfterScan(projectSettingsModel.getReportAfterScan())
-                .skipGitIgnoreFiles(projectSettingsModel.getSkipGitIgnoreFiles())
-                .priority(projectSettingsModel.getPriority());
+        ProjectSettingsUpdateModel projectSettingsUpdatedModel = mapToProjectSettingsUpdateModel(projectSettingsModel);
         call(() -> client.getProjectsApi().apiProjectsProjectIdSettingsPut(projectId, projectSettingsUpdatedModel),
                 "Update PT AI project generic settings failed");
 
@@ -298,6 +282,40 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
             throw e;
         }
         return res;
+    }
+
+    @Override
+    public void setProjectPriority(@NonNull final UUID projectId, final String projectPriority) {
+        ProjectSettingsModel projectSettingsModel = call(
+                () -> client.getProjectsApi().apiProjectsProjectIdSettingsGet(projectId),
+                "Failed to get PT AI project settings");
+
+        projectSettingsModel.setPriority(Priority.fromValue(projectPriority));
+        ProjectSettingsUpdateModel projectSettingsUpdatedModel = mapToProjectSettingsUpdateModel(projectSettingsModel);
+
+        call(() -> client.getProjectsApi().apiProjectsProjectIdSettingsPut(projectId,projectSettingsUpdatedModel),
+                "Failed to update PT AI project settings");
+    }
+
+    private ProjectSettingsUpdateModel mapToProjectSettingsUpdateModel(final @NonNull ProjectSettingsModel projectSettingsModel) {
+        return new ProjectSettingsUpdateModel()
+                .projectName(projectSettingsModel.getProjectName())
+                .languages(projectSettingsModel.getLanguages())
+                .whiteBoxSettings(projectSettingsModel.getWhiteBoxSettings())
+                .dotNetSettings(projectSettingsModel.getDotNetSettings())
+                .goSettings(projectSettingsModel.getGoSettings())
+                .javaScriptSettings(projectSettingsModel.getJavaScriptSettings())
+                .javaSettings(projectSettingsModel.getJavaSettings())
+                .phpSettings(projectSettingsModel.getPhpSettings())
+                .rubySettings(projectSettingsModel.getRubySettings())
+                .pmTaintSettings(projectSettingsModel.getPmTaintSettings())
+                .pygrepSettings(projectSettingsModel.getPygrepSettings())
+                .pythonSettings(projectSettingsModel.getPythonSettings())
+                .rubySettings(projectSettingsModel.getRubySettings())
+                .scaSettings(projectSettingsModel.getScaSettings())
+                .reportAfterScan(projectSettingsModel.getReportAfterScan())
+                .skipGitIgnoreFiles(projectSettingsModel.getSkipGitIgnoreFiles())
+                .priority(projectSettingsModel.getPriority());
     }
 
     private List<LegacyProgrammingLanguageGroup> getLanguagesFromDetectionObject(DefaultProjectSettingsModelLangPercentDistribution detection) {

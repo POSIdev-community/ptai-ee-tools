@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -55,6 +56,13 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
     private final ArtifactsWatcher artifactsWatcher;
 
     private TeamcityAstJob job = null;
+
+    private static final Map<String, String> PRIORITY_MAPPING = new HashMap<String, String>() {{
+        put(PROJECT_PRIORITY_LOW, "Low");
+        put(PROJECT_PRIORITY_MEDIUM, "Medium");
+        put(PROJECT_PRIORITY_HIGH, "High");
+        put(PROJECT_PRIORITY_CRITICAL, "Critical");
+    }};
 
     @Override
     public BuildFinishedStatus call() {
@@ -113,6 +121,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
 
         String branchName = getBranchName(params);
         String scanLabel =  params.get(Params.SCAN_LABEL);
+        String projectPriority = getProjectPriority(params);
 
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
@@ -120,6 +129,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
+                .projectPriority(projectPriority)
                 .settings(selectedScanSettingsUi ? null : settings)
                 .policy(selectedScanSettingsUi ?  null : policy)
                 .connectionSettings(ConnectionSettings.builder()
@@ -187,7 +197,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         }
     }
 
-    private String getBranchName(Map<String, String> params ) {
+    private String getBranchName(Map<String, String> params) {
         boolean selectedCustomBranchSettings = BRANCH_SETTINGS_CUSTOM.equals(params.get(Params.BRANCH_SETTINGS));
 
         if (selectedCustomBranchSettings) {
@@ -195,5 +205,9 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         }
 
         return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
+    }
+
+    private String getProjectPriority(Map<String, String> params) {
+        return PRIORITY_MAPPING.getOrDefault(params.get(Params.PROJECT_PRIORITY), "Medium");
     }
 }

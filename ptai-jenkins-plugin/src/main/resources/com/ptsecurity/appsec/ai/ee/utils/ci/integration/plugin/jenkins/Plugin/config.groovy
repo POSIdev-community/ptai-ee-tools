@@ -14,6 +14,10 @@ f.dropdownDescriptorSelector(
 
 f.property(field: 'scanLabelSettings')
 
+f.entry(title: _('projectPrioritySettings'), field: 'projectPrioritySettings') {
+    f.select(default: descriptor.defaultProjectPrioritySettings)
+}
+
 f.dropdownDescriptorSelector(
         title: _('scanSettings'),
         field: 'scanSettings',
