@@ -29,19 +29,10 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
         jsonSettings = scanSettings.toJson();
         ProjectTasks projectTasks = new Factory().projectTasks(owner.getClient());
 
-        String branchName = scanSettings.getBranchName();
-
-        if (branchName == null) {
-            branchName = owner.getBranchName();
-        } else {
-            owner.setBranchName(branchName);
-        }
-
-        String finalBranchName = branchName;
         ProjectTasks.JsonParseBrief brief = projectTasks.setupFromJson(
                 jsonSettings,
                 jsonPolicy,
-                projectId -> uploadSources(projectId, finalBranchName)
+                projectId -> uploadSources(projectId, owner.getBranchName())
         );
 
         owner.setProjectName(brief.getProjectName());

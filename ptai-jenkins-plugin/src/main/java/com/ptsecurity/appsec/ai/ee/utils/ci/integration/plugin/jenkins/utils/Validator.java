@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.ERROR;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.WARNING;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 
 @Slf4j
 public class Validator {
@@ -135,6 +136,11 @@ public class Validator {
 
     public static FormValidation doCheckFieldJsonReports(String value, String errorMessage) {
         return doCheckFieldJsonReports(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
+    }
+
+    public static FormValidation doCheckBranchNameJsonSettings(String value) {
+        return checkViaException(() -> UnifiedAiProjScanSettings.validateBranchNameFromJson(value))
+                ? FormValidation.ok() : FormValidation.error(i18n_ast_settings_branch_from_json_message_empty());
     }
 
     public static FormValidation doCheckFieldAdvancedSettings(String value, String errorMessage) {

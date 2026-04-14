@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage_____
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__6.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule__.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
@@ -125,7 +127,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public Version getVersion() {
-        return Version.V18;
+        return Version.V19;
     }
 
     @Override
@@ -136,6 +138,16 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
     @Override
     public String getBranchName() {
         return S("BranchName");
+    }
+
+    @Override
+    protected void validateBranchName() {
+        String branchName = getBranchName();
+        if (branchName == null) {
+            throw GenericException.raise(
+                    i18n_ast_settings_branch_from_json_message_empty(),
+                    new IllegalArgumentException());
+        }
     }
 
     @Override

@@ -138,6 +138,11 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    protected void validateBranchName() {
+        getBranchName();
+    }
+
+    @Override
     public @NonNull ScanBrief.ScanSettings.Language getProgrammingLanguage() {
         log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.5");
         return this.getProgrammingLanguages().iterator().next();

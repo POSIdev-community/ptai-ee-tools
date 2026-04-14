@@ -4,6 +4,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.FromJsonBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.PipelineEnvironmentBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalconfig.Config;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
@@ -152,12 +153,20 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                     break;
                 }
             }
+
             if (branchSettings instanceof CustomNameBranchSettings) {
                 CustomNameBranchSettings.Descriptor customNameBranchDescriptor = Jenkins.get().getDescriptorByType(
                         CustomNameBranchSettings.Descriptor.class
                 );
                 res = customNameBranchDescriptor.doCheckBranchName(branchName);
                 if (FormValidation.Kind.ERROR == res.kind) break;
+            } else if (branchSettings instanceof FromJsonBranchSettings && scanSettings instanceof ScanSettingsManual) {
+                FromJsonBranchSettings.Descriptor fromJsonBranchSettingsDescriptor = Jenkins.get()
+                        .getDescriptorByType(FromJsonBranchSettings.Descriptor.class);
+                res = fromJsonBranchSettingsDescriptor.doCheckBranchNameJsonSettings(jsonSettings);
+                if (FormValidation.Kind.ERROR == res.kind) {
+                    break;
+                }
             }
 
             ScanLabelSettings.ScanLabelSettingsDescriptor scanLabelSettingsDescriptor = Jenkins.get().getDescriptorByType(

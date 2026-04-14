@@ -70,8 +70,8 @@ public class AstEditRunTypeControllerExtension implements EditRunTypeControllerE
             properties.put(SERVER_SETTINGS, Defaults.SERVER_SETTINGS);
 
         if (!BRANCH_SETTINGS_FROM_ENVIRONMENT.equals(properties.get(BRANCH_SETTINGS)) &&
-            !BRANCH_SETTINGS_CUSTOM.equals(properties.get(BRANCH_SETTINGS))
-        ) {
+                !BRANCH_SETTINGS_CUSTOM.equals(properties.get(BRANCH_SETTINGS)) &&
+                !BRANCH_SETTINGS_FROM_JSON.equals(properties.get(BRANCH_SETTINGS))) {
             properties.put(BRANCH_SETTINGS, Defaults.BRANCH_SETTINGS);
         }
 
