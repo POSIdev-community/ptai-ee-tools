@@ -270,6 +270,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
                 .usePublicAnalysisMethod(B("JavaScriptSettings.UsePublicAnalysisMethod"))
                 .downloadDependencies(B("JavaScriptSettings.DownloadDependencies"))
                 .customParameters(S("JavaScriptSettings.CustomParameters"))
+                .dependenciesPath(S("JavaScriptSettings.DependenciesPath"))
                 .useJsaAnalysis(B("JavaScriptSettings.UseJsaAnalysis"))
                 .useTaintAnalysis(B("JavaScriptSettings.UseTaintAnalysis"))
                 .build();

@@ -675,6 +675,12 @@ components:
         queueDateTime:
           type: string
           format: date-time
+        initiatorType:
+          $ref: '#/components/schemas/InitiatorType'
+        initiatorId:
+          type: string
+          format: uuid
+          nullable: true
         id:
           type: string
           format: uuid
@@ -1185,6 +1191,7 @@ components:
         - PROXY_HOST_CONNECTION_FORBIDDEN
         - PROXY_HOST_CONNECTION_INVALID
         - SMTP_HOST_CONNECTION_FORBIDDEN
+        - INVALID_LANGUAGE_FOR_SECRET_DETECTION
       type: string
     DequeueReason:
       enum:
@@ -1252,6 +1259,24 @@ components:
         elasticSearch:
           $ref: '#/components/schemas/ElasticSearchTargetModel'
       additionalProperties: false
+    InitiatorInfoModel:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InitiatorType'
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+      additionalProperties: false
+    InitiatorType:
+      enum:
+        - User
+        - AccessToken
+        - System
+      type: string
     IssueApprovalState:
       enum:
         - None
@@ -1396,6 +1421,8 @@ components:
           nullable: true
         progress:
           $ref: '#/components/schemas/ScanProgressModel'
+        initiator:
+          $ref: '#/components/schemas/InitiatorInfoModel'
       additionalProperties: false
     ScanStatisticModel:
       type: object

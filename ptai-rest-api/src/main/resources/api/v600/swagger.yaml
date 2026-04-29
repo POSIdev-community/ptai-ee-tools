@@ -10,7 +10,7 @@ paths:
         - Agents
       summary: Get agents list without scan info
       description: Get agents list without scan info
-      operationId: Agents_GetAllAgents
+      operationId: GetAll
       responses:
         '200':
           description: OK
@@ -32,7 +32,7 @@ paths:
         - Agents
       summary: Delete agent
       description: Delete agent
-      operationId: Agents_DeleteAgent
+      operationId: Delete
       parameters:
         - $ref: '#/components/parameters/agentId'
       responses:
@@ -49,7 +49,7 @@ paths:
         - Agents
       summary: Get agent without scan info
       description: Get agent without scan info
-      operationId: Agents_GetAgent
+      operationId: Get
       parameters:
         - $ref: '#/components/parameters/agentId'
       responses:
@@ -71,7 +71,7 @@ paths:
         - Agents
       summary: Get agents list with scan info
       description: Get agents list with scan info
-      operationId: Agents_GetAgentsWithScanInfo
+      operationId: GetAllWithScanInfo
       responses:
         '200':
           description: OK
@@ -93,7 +93,7 @@ paths:
         - Agents
       summary: Get agent with scan info
       description: Get agent with scan info
-      operationId: Agents_GetAgentWithScanInfo
+      operationId: GetWithScanInfo
       parameters:
         - $ref: '#/components/parameters/agentId'
       responses:
@@ -115,7 +115,7 @@ paths:
         - Agents
       summary: Cancel scanning process on agent
       description: Cancel scanning process on agent
-      operationId: Agents_CancelScan
+      operationId: CancelScan
       parameters:
         - $ref: '#/components/parameters/agentId'
       responses:
@@ -133,7 +133,7 @@ paths:
         - Agents
       summary: Disable agent from taking next scan tasks from queue
       description: Disable agent from taking next scan tasks from queue
-      operationId: Agents_Disable
+      operationId: Disable
       parameters:
         - $ref: '#/components/parameters/agentId'
         - $ref: '#/components/parameters/withScanCancellation'
@@ -152,7 +152,7 @@ paths:
         - Agents
       summary: Enable agent to take next scan tasks from queue
       description: Enable agent to take next scan tasks from queue
-      operationId: Agents_Enable
+      operationId: Enable
       parameters:
         - $ref: '#/components/parameters/agentId'
       responses:
@@ -170,7 +170,7 @@ paths:
         - Agents
       summary: Get agents status information
       description: Get agents status information
-      operationId: Agents_GetStatus
+      operationId: GetStatus
       responses:
         '200':
           description: OK
@@ -190,7 +190,7 @@ paths:
         - Agents
       summary: Get count of agents
       description: Get count of agents
-      operationId: Agents_GetCount
+      operationId: GetCount
       responses:
         '200':
           description: OK
@@ -5266,13 +5266,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PreferredAgentsSettingsModel'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/PreferredAgentsSettingsModel'
         '400':
           description: Bad Request
           content:
@@ -5866,12 +5859,14 @@ paths:
       summary: Delete items from scan queue
       description: Delete items from scan queue
       operationId: ScanQueue_DeleteScanQueueItems
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteQueueItems'
-        required: true
+      parameters:
+        - in: query
+          name: payload
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteQueueItems'
       responses:
         '200':
           description: OK
@@ -5886,7 +5881,7 @@ paths:
         - ScanQueue
       summary: Get scan queue items
       description: Get scan queue items
-      operationId: ScanQueue_GetAllScanQueueItems
+      operationId: GetAllItems
       responses:
         '200':
           description: OK
@@ -5907,7 +5902,7 @@ paths:
         - ScanQueue
       summary: Create scan queue item
       description: Create scan queue item
-      operationId: ScanQueue_CreateScanQueueItem
+      operationId: CreateItem
       requestBody:
         content:
           application/json:
@@ -5934,13 +5929,7 @@ paths:
         - ScanQueue
       summary: Delete item from scan queue
       description: Delete item from scan queue
-      operationId: ScanQueue_DeleteScanQueueItem
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteQueueItems'
-        required: true
+      operationId: DeleteItem
       responses:
         '200':
           description: OK
@@ -5955,7 +5944,7 @@ paths:
         - ScanQueue
       summary: Get scan queue item
       description: Get scan queue item
-      operationId: ScanQueue_GetScanQueueItem
+      operationId: GetItem
       responses:
         '200':
           description: OK
@@ -5983,7 +5972,7 @@ paths:
         - ScanQueue
       summary: Reorder scan queue items
       description: Reorder scan queue items
-      operationId: ScanQueue_ReorderScanQueueItems
+      operationId: ReorderItems
       requestBody:
         content:
           application/json:
@@ -6005,7 +5994,7 @@ paths:
         - ScanQueue
       summary: Stop all scans
       description: Stop all scans
-      operationId: ScanQueue_StopAllScans
+      operationId: StopAllScans
       responses:
         '200':
           description: OK
@@ -6021,7 +6010,7 @@ paths:
         - ScanQueue
       summary: Stop projects branch scan
       description: Stop projects branch scan
-      operationId: ScanQueue_StopScan
+      operationId: StopScan
       responses:
         '200':
           description: OK
@@ -7961,6 +7950,7 @@ components:
         - PROXY_HOST_CONNECTION_FORBIDDEN
         - PROXY_HOST_CONNECTION_INVALID
         - SMTP_HOST_CONNECTION_FORBIDDEN
+        - INVALID_LANGUAGE_FOR_SECRET_DETECTION
       type: string
     AuthProviderScheme:
       enum:
@@ -8764,7 +8754,6 @@ components:
       enum:
         - None
         - Solution
-        - WebSite
       type: string
     DotNetSettingsModel:
       type: object
@@ -8772,9 +8761,6 @@ components:
         projectType:
           $ref: '#/components/schemas/DotNetProjectType'
         solutionFile:
-          type: string
-          nullable: true
-        webSiteFolder:
           type: string
           nullable: true
         launchParameters:
@@ -9414,6 +9400,7 @@ components:
         - Pygrep
         - Sca
         - FingerprintSca
+        - Secret
       type: string
     JavaScriptSettingsModel:
       type: object
@@ -9469,6 +9456,7 @@ components:
         - v1_11
         - v1_17
         - v1_21
+        - v1_25
       type: string
     JiraTicketLinkModel:
       type: object
@@ -11004,6 +10992,7 @@ components:
         - Go
         - Pygrep
         - Sca
+        - Secret
       type: string
     ScanEnvironmentModel:
       type: object
@@ -11062,6 +11051,7 @@ components:
         - BlackBox
         - StaticCodeAnalysis
         - SoftwareCompositionAnalysis
+        - SecretDetection
       type: string
     ScanObject:
       required:
@@ -12233,6 +12223,8 @@ components:
         searchForConfigurationFlawsEnabled:
           type: boolean
         searchWithScaEnabled:
+          type: boolean
+        secretDetectionEnabled:
           type: boolean
       additionalProperties: false
   parameters:

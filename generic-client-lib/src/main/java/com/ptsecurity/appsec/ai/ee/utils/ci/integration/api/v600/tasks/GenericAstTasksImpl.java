@@ -10,7 +10,10 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.server.v600.api.model.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.ApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.*;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ApiExceptionConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.EnumsConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.IssuesConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ScanErrorsConverter;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.BranchTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
@@ -29,12 +32,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.scan.progress.Stage.*;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ApiErrorCode.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ApiErrorCode.SCAN_ALREADY_SCHEDULED;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.IssuesConverter.convert;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 
 @Slf4j
 public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstTasks, BranchTask {
+    private final ScanResultIdHelper scanResultIdHelper = new ScanResultIdHelper(
+            client.getScanQueueApi(),
+            client.getBranchesApi(),
+            client.getProjectsApi());
+
     public GenericAstTasksImpl(@NonNull final AbstractApiClient client) {
         super(client);
     }
@@ -91,105 +99,26 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         createQueueItem.setBranchId(branchId);
 
         UUID queueItemId = getQueueItemId(createQueueItem);
-        return getScanResultId(queueItemId, branchId);
+        return scanResultIdHelper.getScanResultId(queueItemId, branchId);
     }
 
     private UUID getQueueItemId(CreateQueueItem createQueueItem) {
         UUID queueItemId;
         try {
             queueItemId = call(
-                    () -> client.getScanQueueApi().scanQueueCreateScanQueueItem(createQueueItem),
+                    () -> client.getScanQueueApi().createItem(createQueueItem),
                     "Create queue item failed");
         } catch (GenericException e) {
             Optional<ApiExceptionConverter> maybeError = ApiExceptionConverter.tryParse(e.getDetails());
 
             if (maybeError.isPresent() && maybeError.get().getErrorCode() == SCAN_ALREADY_SCHEDULED) {
-                List<QueueItem> queueItems = call(
-                        () -> client.getScanQueueApi().scanQueueGetAllScanQueueItems(),
-                        "Failed to get queue items");
-
-                return queueItems.stream()
-                        .filter(qi -> qi.getScanObject().getBranchId().equals(createQueueItem.getBranchId()))
-                        .findFirst()
-                        .map(QueueItem::getId)
-                        .orElseThrow(() -> GenericException.raise(
-                                "Queue item not found", new IllegalArgumentException()));
+                return scanResultIdHelper.getExistsQueueItemId(createQueueItem.getBranchId());
             }
 
             throw e;
         }
 
         return queueItemId;
-    }
-
-    private UUID getScanResultId(UUID queueItemId, UUID branchId) {
-        int maxAttempts = 20;
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            if (attempt > 1) {
-                sleep();
-            }
-            try {
-                return callGetScanResultId(queueItemId);
-            } catch (GenericException e) {
-                Optional<ApiExceptionConverter> maybeError = ApiExceptionConverter.tryParse(e.getDetails());
-                if (!maybeError.isPresent()) {
-                    throw e;
-                }
-                ApiErrorCode errorCode = maybeError.get().getErrorCode();
-
-                if (errorCode == QUEUE_ITEM_ALREADY_ASSIGNED_TO_AGENT) {
-                    try {
-                        return findScanResultIdFromAgents(branchId);
-                    } catch (NullPointerException npe) {
-                        if (attempt == maxAttempts) {
-                            throw GenericException.raise("Failed to get scan result id from agents after " + maxAttempts + " attempts", npe);
-                        }
-                    }
-                    continue;
-                }
-
-                if (errorCode == EMPTY_SCAN_RESULT) {
-                    if (attempt == maxAttempts) {
-                        throw GenericException.raise("Empty scan result after " + maxAttempts + " attempts", e);
-                    }
-                    continue;
-                }
-
-                throw e;
-            }
-        }
-        throw new RuntimeException("Unexpected end of loop");
-    }
-
-    private UUID callGetScanResultId(UUID queueItemId) {
-        return call(
-                () -> client.getScanQueueApi().scanQueueGetScanQueueItem(queueItemId),
-                "Failed to get queue item"
-        ).getScanResultId();
-    }
-
-    private UUID findScanResultIdFromAgents(UUID branchId) {
-        List<AgentWithScan> agents = call(
-                () -> client.getAgentsApi().agentsGetAgentsWithScanInfo(),
-                "Failed to get agents list with scan info"
-        );
-
-        return agents.stream()
-                .filter(a -> a.getScan().getObject().getBranchId().equals(branchId))
-                .findFirst()
-                .map(AgentWithScan::getAgent)
-                .map(Agent::getScanResultId)
-                .orElseThrow(() -> GenericException.raise(
-                        "Scan result id not found", new IllegalArgumentException("Branch id:" + branchId)));
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interrupted while waiting to retry", ie);
-        }
     }
 
     @Override
@@ -401,7 +330,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     public void stop(@NonNull UUID scanResultId) throws GenericException {
         log.debug("Calling scan stop for scan result ID {}", scanResultId);
         List<QueueItem> queueItems = call(
-                () -> client.getScanQueueApi().scanQueueGetAllScanQueueItems(),
+                () -> client.getScanQueueApi().getAllItems(),
                 "Failed to get queue items");
 
         List<UUID> queueItemsToDelete = queueItems.stream()
@@ -416,8 +345,13 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                 .findFirst()
                 .orElse(null);
 
-        call(() -> client.getScanQueueApi().scanQueueDeleteScanQueueItem(queueItemId, deleteQueueItems),
-                "PT AI project scan stop failed");
+        try {
+            call(() -> client.getScanQueueApi().deleteItem(queueItemId),
+                    "PT AI delete scan from queue failed");
+        } catch (Exception e) {
+            call(() -> client.getScanQueueApi().stopScan(queueItemId),
+                    "PT AI project scan stop failed");
+        }
     }
 
     @NonNull

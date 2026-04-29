@@ -41,12 +41,11 @@ public interface ProjectTasks {
      *
      * @param jsonSettings
      * @param jsonPolicy
-     * @param projectPriority
      * @param uploader
      * @return
      * @throws GenericException
      */
-    JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, final String projectPriority, @NonNull final Consumer<UUID> uploader) throws GenericException;
+    JsonParseBrief setupFromJson(@NonNull final String jsonSettings, final String jsonPolicy, @NonNull final Consumer<UUID> uploader) throws GenericException;
 
     void deleteProject(@NonNull final UUID id) throws GenericException;
 

@@ -85,6 +85,7 @@ public class IssuesConverter {
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.SOLIDITY, ScanResult.ScanSettings.Language.SOLIDITY);
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
         LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.SCALA, ScanResult.ScanSettings.Language.SCALA);
+        LANGUAGE_MAP.put(LegacyProgrammingLanguageGroup.ONEC, ScanResult.ScanSettings.Language.ONE_C);
 
         LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.JAVA, ScanResult.ScanSettings.Language.JAVA);
         LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.PHP, ScanResult.ScanSettings.Language.PHP);
@@ -100,6 +101,7 @@ public class IssuesConverter {
         LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.SOLIDITY, ScanResult.ScanSettings.Language.SOLIDITY);
         LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.OBJECTIVEC, ScanResult.ScanSettings.Language.OBJECTIVEC);
         LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.SCALA, ScanResult.ScanSettings.Language.SCALA);
+        LANGUAGE_LICENSE_MAP.put(ProgrammingLanguageGroup.ONEC, ScanResult.ScanSettings.Language.ONE_C);
 
         STATE_MAP.put(Stage.ABORTED, ScanResult.State.ABORTED);
         STATE_MAP.put(Stage.FAILED, ScanResult.State.FAILED);

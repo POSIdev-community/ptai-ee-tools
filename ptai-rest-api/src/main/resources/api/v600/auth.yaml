@@ -543,6 +543,7 @@ components:
         - PROXY_HOST_CONNECTION_FORBIDDEN
         - PROXY_HOST_CONNECTION_INVALID
         - SMTP_HOST_CONNECTION_FORBIDDEN
+        - INVALID_LANGUAGE_FOR_SECRET_DETECTION
       type: string
     AuthResultModel:
       type: object

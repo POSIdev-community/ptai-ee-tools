@@ -81,15 +81,16 @@ public class AiProjConverter {
         REVERSE_LANGUAGE_GROUP_MAP.put(Language.RUBY, LegacyProgrammingLanguageGroup.RUBY);
         REVERSE_LANGUAGE_GROUP_MAP.put(Language.SOLIDITY, LegacyProgrammingLanguageGroup.SOLIDITY);
         REVERSE_LANGUAGE_GROUP_MAP.put(Language.SCALA, LegacyProgrammingLanguageGroup.SCALA);
+        REVERSE_LANGUAGE_GROUP_MAP.put(Language.ONE_C, LegacyProgrammingLanguageGroup.ONEC);
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.NONE, DotNetProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.SOLUTION, DotNetProjectType.SOLUTION);
-        DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.WEBSITE, DotNetProjectType.WEBSITE);
 
         JAVA_VERSION_MAP.put(v1_8, JavaVersions._8);
         JAVA_VERSION_MAP.put(v1_11, JavaVersions._11);
         JAVA_VERSION_MAP.put(v1_17, JavaVersions._17);
         JAVA_VERSION_MAP.put(v1_21, JavaVersions._21);
+        JAVA_VERSION_MAP.put(v1_25, JavaVersions._25);
     }
 
     protected static WhiteBoxSettingsModel apply(@NonNull final UnifiedAiProjScanSettings settings, WhiteBoxSettingsModel model) {
@@ -153,7 +154,7 @@ public class AiProjConverter {
             throw new IllegalArgumentException(message);
         }
 
-        result.setPriority(Priority.MEDIUM);
+        result.setPriority(defaultSettings.getPriority());
 
         PreferredAgentsSettings preferredAgentsSettings = new PreferredAgentsSettings();
         preferredAgentsSettings.setPreferredAgentsOnly(false);

@@ -5,6 +5,7 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.server.integration.rest.Environment;
 import com.ptsecurity.appsec.ai.ee.server.v600.api.model.*;
 import com.ptsecurity.appsec.ai.ee.server.v600.helpers.ApiHelper;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.tasks.ScanResultIdHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ public class ScanTest extends AbstractTest {
     protected static void scan() {
         log.trace("Scan test project");
         ApiHelper.setJwt(CI);
+        ScanResultIdHelper scanResultIdHelper = new ScanResultIdHelper(QUEUE, BRANCHES, PROJECTS);
 
         UUID branchId = assertDoesNotThrow(() -> PROJECTS.apiProjectsProjectIdBranchesGet(PROJECT_ID)
                 .stream()
@@ -62,8 +64,8 @@ public class ScanTest extends AbstractTest {
         createQueueItem.setScope(Scope.FULL);
         createQueueItem.setBranchId(branchId);
 
-        UUID queueItemId = assertDoesNotThrow(() -> QUEUE.scanQueueCreateScanQueueItem(createQueueItem));
-        SCAN_RESULT_ID = assertDoesNotThrow(() -> QUEUE.scanQueueGetScanQueueItem(queueItemId).getId());
+        UUID queueItemId = assertDoesNotThrow(() -> QUEUE.createItem(createQueueItem));
+        SCAN_RESULT_ID = assertDoesNotThrow(() -> scanResultIdHelper.getScanResultId(queueItemId, branchId));
         do {
             Thread.sleep(5000);
             ScanResultModel scanResult = checkApiCall(() -> PROJECTS.apiProjectsProjectIdScanResultsScanResultIdGet(PROJECT_ID, SCAN_RESULT_ID));

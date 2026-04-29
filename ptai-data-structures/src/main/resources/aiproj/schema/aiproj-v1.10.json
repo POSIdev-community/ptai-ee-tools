@@ -354,7 +354,7 @@
         "ProjectType": {
           "title": "Type of application",
           "type": "string",
-          "enum": ["None", "Solution", "WebSite"]
+          "enum": ["None", "Solution"]
         },
         "SolutionFile": {
           "title": "Solution file",
@@ -431,7 +431,7 @@
         "Version": {
           "title": "JDK version",
           "type": "string",
-          "enum": ["8", "11", "17", "21"]
+          "enum": ["8", "11", "17", "21", "25"]
         },
         "UsePublicAnalysisMethod": {
           "title": "Use public analysis method",

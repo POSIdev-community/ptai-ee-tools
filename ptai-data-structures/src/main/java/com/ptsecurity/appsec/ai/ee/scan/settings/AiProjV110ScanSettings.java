@@ -19,7 +19,7 @@ import java.util.*;
 
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__7.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__2.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule___.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
@@ -66,12 +66,12 @@ public class AiProjV110ScanSettings extends UnifiedAiProjScanSettings {
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.NONE.value(), DotNetSettings.ProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.SOLUTION.value(), DotNetSettings.ProjectType.SOLUTION);
-        DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.WEB_SITE.value(), DotNetSettings.ProjectType.WEBSITE);
 
         JAVA_VERSION_MAP.put(_8.value(), v1_8);
         JAVA_VERSION_MAP.put(_11.value(), v1_11);
         JAVA_VERSION_MAP.put(_17.value(), v1_17);
         JAVA_VERSION_MAP.put(_21.value(), v1_21);
+        JAVA_VERSION_MAP.put(_25.value(), v1_25);
 
         BLACKBOX_PROXY_TYPE_MAP.put(ProxyType.HTTP.value(), BlackBoxSettings.ProxySettings.Type.HTTP);
         BLACKBOX_PROXY_TYPE_MAP.put(ProxyType.SOCKS_4.value(), BlackBoxSettings.ProxySettings.Type.SOCKS4);
@@ -271,6 +271,7 @@ public class AiProjV110ScanSettings extends UnifiedAiProjScanSettings {
                 .usePublicAnalysisMethod(B("JavaScriptSettings.UsePublicAnalysisMethod"))
                 .downloadDependencies(B("JavaScriptSettings.DownloadDependencies"))
                 .customParameters(S("JavaScriptSettings.CustomParameters"))
+                .dependenciesPath(S("JavaScriptSettings.DependenciesPath"))
                 .useJsaAnalysis(B("JavaScriptSettings.UseJsaAnalysis"))
                 .useTaintAnalysis(B("JavaScriptSettings.UseTaintAnalysis"))
                 .build();

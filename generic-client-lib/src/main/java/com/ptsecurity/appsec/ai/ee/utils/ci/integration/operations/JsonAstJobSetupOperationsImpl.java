@@ -41,7 +41,7 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
         ProjectTasks.JsonParseBrief brief = projectTasks.setupFromJson(
                 jsonSettings,
                 jsonPolicy,
-                null, projectId -> uploadSources(projectId, finalBranchName)
+                projectId -> uploadSources(projectId, finalBranchName)
         );
 
         owner.setProjectName(brief.getProjectName());

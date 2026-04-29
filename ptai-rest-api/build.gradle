@@ -45,6 +45,7 @@ dependencies {
     // logging, zipped data processing, JSON parse etc.
     testImplementation(testFixtures(project(":pt-misc-tools")))
     testImplementation(testFixtures(project(":ptai-data-structures")))
+    testImplementation project(':generic-client-lib')
 
     testFixturesImplementation(testFixtures(project(":pt-misc-tools")))
     testFixturesImplementation(testFixtures(project(":ptai-data-structures")))

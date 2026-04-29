@@ -456,7 +456,7 @@ public abstract class UnifiedAiProjScanSettings {
         protected Boolean unpackUserPackages = false;
         protected String userPackagePrefixes;
         public enum JavaVersion {
-            v1_8, v1_11, v1_17, v1_21
+            v1_8, v1_11, v1_17, v1_21, v1_25
         }
         protected UnifiedAiProjScanSettings.JavaSettings.JavaVersion javaVersion;
         protected Boolean usePublicAnalysisMethod;
@@ -474,6 +474,7 @@ public abstract class UnifiedAiProjScanSettings {
         protected Boolean usePublicAnalysisMethod;
         protected Boolean downloadDependencies;
         protected String customParameters;
+        protected String dependenciesPath;
         protected Boolean useTaintAnalysis;
         protected Boolean useJsaAnalysis;
     }
