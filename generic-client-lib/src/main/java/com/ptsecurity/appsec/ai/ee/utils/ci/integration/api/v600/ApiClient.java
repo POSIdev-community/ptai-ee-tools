@@ -269,7 +269,7 @@ public class ApiClient extends AbstractApiClient {
                 if (null != console)
                     console.info("Scan started. Project id: %s, scan result id: %s", data.getProjectId(), data.getScanResultId());
                 if (null != eventConsumer) eventConsumer.process(data);
-                List<Agent> scanAgents = call(agentsApi::agentsGetAllAgents, "Get scan agents list failed", true);
+                List<Agent> scanAgents = call(agentsApi::getAll, "Get scan agents list failed", true);
                 if (null != scanAgents) {
                     String agentName = scanAgents.stream()
                             .filter(a -> scanBrief.getId().equals(a.getScanResultId()))
