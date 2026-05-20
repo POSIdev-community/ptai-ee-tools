@@ -85,7 +85,6 @@ public class AiProjConverter {
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.NONE, DotNetProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.SOLUTION, DotNetProjectType.SOLUTION);
-        DOTNET_PROJECT_TYPE_MAP.put(DotNetSettings.ProjectType.WEBSITE, DotNetProjectType.WEBSITE);
 
         JAVA_VERSION_MAP.put(v1_8, JavaVersions._8);
         JAVA_VERSION_MAP.put(v1_11, JavaVersions._11);

@@ -8760,7 +8760,6 @@ components:
       enum:
         - None
         - Solution
-        - WebSite
       type: string
     DotNetSettingsModel:
       type: object
