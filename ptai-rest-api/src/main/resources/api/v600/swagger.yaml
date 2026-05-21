@@ -353,6 +353,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: initiatorId
+          in: query
+          description: "User id (for internal service-to-service calls where the original user token may have\nexpired)"
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: OK
@@ -7844,6 +7850,7 @@ components:
         - INVALID_PRIORITY_TYPE
         - MISSING_PREFERRED_AGENTS
         - SCAN_RESULT_SCAN_TYPE_TRANSITION_IS_NOT_ALLOWED
+        - SCAN_RESULT_IS_NOT_INCREMENTAL
         - ISSUE_TRACKER_CONNECTION_NOT_FOUND
         - ISSUE_TRACKER_CONNECTION_FORBIDDEN
         - ISSUE_TRACKER_CONNECTION_SETTINGS_NOT_SET
@@ -7950,7 +7957,8 @@ components:
         - PROXY_HOST_CONNECTION_FORBIDDEN
         - PROXY_HOST_CONNECTION_INVALID
         - SMTP_HOST_CONNECTION_FORBIDDEN
-        - INVALID_LANGUAGE_FOR_SECRET_DETECTION
+        - INVALID_MODULES_FOR_SECRET_DETECTION
+        - INVALID_LANGUAGE_FOR_MALICIOUS_CODE
       type: string
     AuthProviderScheme:
       enum:
@@ -8693,8 +8701,6 @@ components:
           $ref: '#/components/schemas/RubySettingsModel'
         goSettings:
           $ref: '#/components/schemas/GoSettingsModel'
-        pygrepSettings:
-          $ref: '#/components/schemas/PygrepSettingsModel'
         scaSettings:
           $ref: '#/components/schemas/ScaSettingsModel'
         priority:
@@ -8837,6 +8843,32 @@ components:
         - Debug
         - Trace
       type: string
+    ExploitParameterData:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        vulnerable:
+          type: boolean
+        value:
+          type: string
+          nullable: true
+        source:
+          type: string
+          nullable: true
+        Pattern:
+          type: string
+          nullable: true
+        Functions:
+          type: array
+          items:
+            type: string
+          nullable: true
+        Projection:
+          type: string
+          nullable: true
+      additionalProperties: false
     ExtendedCreateProjectModel:
       type: object
       properties:
@@ -8909,8 +8941,6 @@ components:
           $ref: '#/components/schemas/PythonSettingsModel'
         rubySettings:
           $ref: '#/components/schemas/RubySettingsModel'
-        pygrepSettings:
-          $ref: '#/components/schemas/PygrepSettingsModel'
         scaSettings:
           $ref: '#/components/schemas/ScaSettingsModel'
         reportAfterScan:
@@ -9279,7 +9309,8 @@ components:
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/IssueExploitDataType'
+          type: string
+          nullable: true
         text:
           type: string
           nullable: true
@@ -9287,19 +9318,11 @@ components:
           type: string
           nullable: true
         parameters:
-          type: object
-          additionalProperties:
-            type: string
-            nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ExploitParameterData'
           nullable: true
       additionalProperties: false
-    IssueExploitDataType:
-      enum:
-        - None
-        - Http
-        - Script
-        - Interaction
-      type: string
     IssueLevel:
       enum:
         - None
@@ -9401,6 +9424,7 @@ components:
         - Sca
         - FingerprintSca
         - Secret
+        - MaliciousCode
       type: string
     JavaScriptSettingsModel:
       type: object
@@ -9687,6 +9711,34 @@ components:
           type: boolean
           nullable: true
       additionalProperties: false
+    MaliciousCallModel:
+      type: object
+      properties:
+        sourceFile:
+          type: string
+          nullable: true
+        lineNumber:
+          type: integer
+          format: int32
+        lineValue:
+          type: string
+          nullable: true
+        maliciousGroup:
+          type: string
+          nullable: true
+      additionalProperties: false
+    MaliciousCodeModel:
+      type: object
+      properties:
+        fileName:
+          type: string
+          nullable: true
+        maliciousCalls:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaliciousCallModel'
+          nullable: true
+      additionalProperties: false
     MemberModel:
       type: object
       properties:
@@ -9873,7 +9925,6 @@ components:
         - ReadScanQueue
         - ManageScanAgents
         - ReadScanAgents
-        - ReadScanAgentsWithScans
         - ManageCustomRules
         - ReadCustomRules
         - ManageAccessTokens
@@ -10404,8 +10455,6 @@ components:
           $ref: '#/components/schemas/PythonSettingsModel'
         rubySettings:
           $ref: '#/components/schemas/RubySettingsModel'
-        pygrepSettings:
-          $ref: '#/components/schemas/PygrepSettingsModel'
         scaSettings:
           $ref: '#/components/schemas/ScaSettingsModel'
         reportAfterScan:
@@ -10446,8 +10495,6 @@ components:
           $ref: '#/components/schemas/PythonSettingsModel'
         rubySettings:
           $ref: '#/components/schemas/RubySettingsModel'
-        pygrepSettings:
-          $ref: '#/components/schemas/PygrepSettingsModel'
         scaSettings:
           $ref: '#/components/schemas/ScaSettingsModel'
         reportAfterScan:
@@ -10665,16 +10712,6 @@ components:
           type: string
           nullable: true
         summary:
-          type: string
-          nullable: true
-      additionalProperties: false
-    PygrepSettingsModel:
-      type: object
-      properties:
-        rulesDirPath:
-          type: string
-          nullable: true
-        launchParameters:
           type: string
           nullable: true
       additionalProperties: false
@@ -10993,6 +11030,7 @@ components:
         - Pygrep
         - Sca
         - Secret
+        - MaliciousCodeDetection
       type: string
     ScanEnvironmentModel:
       type: object
@@ -11052,6 +11090,7 @@ components:
         - StaticCodeAnalysis
         - SoftwareCompositionAnalysis
         - SecretDetection
+        - MaliciousCodeDetection
       type: string
     ScanObject:
       required:
@@ -11288,8 +11327,6 @@ components:
           $ref: '#/components/schemas/PythonSettingsModel'
         rubySettings:
           $ref: '#/components/schemas/RubySettingsModel'
-        pygrepSettings:
-          $ref: '#/components/schemas/PygrepSettingsModel'
         scaSettings:
           $ref: '#/components/schemas/ScaSettingsModel'
         emailRecipients:
@@ -12034,6 +12071,8 @@ components:
           $ref: '#/components/schemas/VulnerableCodeModel'
         pygrep:
           $ref: '#/components/schemas/PygrepVulnerabilityModel'
+        maliciousCode:
+          $ref: '#/components/schemas/MaliciousCodeModel'
         language:
           $ref: '#/components/schemas/ProgrammingLanguageGroup'
       additionalProperties: false
@@ -12131,11 +12170,9 @@ components:
             $ref: '#/components/schemas/CodeChunkModel'
           nullable: true
         autocheckExploit:
-          type: string
-          nullable: true
+          $ref: '#/components/schemas/IssueExploitDataModel'
         requestExploit:
-          type: string
-          nullable: true
+          $ref: '#/components/schemas/IssueExploitDataModel'
         condition:
           type: string
           nullable: true
@@ -12225,6 +12262,8 @@ components:
         searchWithScaEnabled:
           type: boolean
         secretDetectionEnabled:
+          type: boolean
+        searchForMaliciousCodeEnabled:
           type: boolean
       additionalProperties: false
   parameters:

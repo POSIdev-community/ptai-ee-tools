@@ -308,7 +308,6 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
                 .phpSettings(projectSettingsModel.getPhpSettings())
                 .rubySettings(projectSettingsModel.getRubySettings())
                 .pmTaintSettings(projectSettingsModel.getPmTaintSettings())
-                .pygrepSettings(projectSettingsModel.getPygrepSettings())
                 .pythonSettings(projectSettingsModel.getPythonSettings())
                 .rubySettings(projectSettingsModel.getRubySettings())
                 .scaSettings(projectSettingsModel.getScaSettings())

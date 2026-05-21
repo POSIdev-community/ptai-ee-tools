@@ -549,23 +549,6 @@
         }
       }
     },
-    "PygrepSettings": {
-      "type": ["object", "null"],
-      "title": "Pygrep scan options",
-      "additionalProperties": false,
-      "properties": {
-        "CustomParameters": {
-          "title": "Custom parameters",
-          "description": "Custom Pygrep kernel startup parameters",
-          "type": ["null", "string"]
-        },
-        "RulesDirPath": {
-          "title": "Custom rules",
-          "description": "Path to the custom rules directory",
-          "type": ["null", "string"]
-        }
-      }
-    },
     "PythonSettings": {
       "type": ["object", "null"],
       "title": "Python scan options",
@@ -739,7 +722,9 @@
           "BlackBox",
           "PatternMatching",
           "StaticCodeAnalysis",
-          "SoftwareCompositionAnalysis"
+          "SoftwareCompositionAnalysis",
+          "SecretDetection",
+          "MaliciousCodeDetection"
         ]
       }
     },

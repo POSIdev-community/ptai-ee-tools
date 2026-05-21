@@ -378,6 +378,8 @@ public abstract class UnifiedAiProjScanSettings {
         PATTERNMATCHING("PatternMatching"),
         STATICCODEANALYSIS("StaticCodeAnalysis"),
         SOFTWARECOMPOSITIONANALYSIS("SoftwareCompositionAnalysis"),
+        SECRETDETECTION("SecretDetection"),
+        MALICIOUSCODEDETECTION("MaliciousCodeDetection"),
         @Deprecated
         DATAFLOWANALYSIS("DataFlowAnalysis"),
         @Deprecated
