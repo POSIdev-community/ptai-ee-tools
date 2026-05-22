@@ -134,7 +134,8 @@ public class ReportsConverter {
                 ProgrammingLanguageGroup.SQL,
                 ProgrammingLanguageGroup.RUBY,
                 ProgrammingLanguageGroup.SOLIDITY,
-                ProgrammingLanguageGroup.SCALA);
+                ProgrammingLanguageGroup.SCALA,
+                ProgrammingLanguageGroup.ONEC);
 
         Reports.IssuesFilter.ProgrammingLanguage language = uniqModel.getLanguage();
         if (language != null) {
@@ -154,6 +155,7 @@ public class ReportsConverter {
                 case RUBY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.RUBY));
                 case SOLIDITY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SOLIDITY));
                 case SCALA: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SCALA));
+                case ONEC: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.ONEC));
             }
             log.info("Language setted: {}", apiModel.getLanguages());
             return;
@@ -211,6 +213,9 @@ public class ReportsConverter {
         if (languages.contains(Reports.IssuesFilter.ProgrammingLanguage.SCALA)) {
             mappedLanguages.add(ProgrammingLanguageGroup.SCALA);
         }
+        if (languages.contains(Reports.IssuesFilter.ProgrammingLanguage.ONEC)) {
+            mappedLanguages.add(ProgrammingLanguageGroup.ONEC);
+        }
         apiModel.setLanguages(mappedLanguages);
         log.info("Language setted 2: {}", apiModel.getLanguages());
     }
@@ -227,7 +232,9 @@ public class ReportsConverter {
                         CONFIGURATION,
                         COMPONENTS,
                         PATTERNMATCHING,
-                        SOFTWARECOMPOSITIONANALYSIS
+                        SOFTWARECOMPOSITIONANALYSIS,
+                        SECRETDETECTION,
+                        MALICIOUSCODEDETECTION
                 ));
             }
             if (scanModule.equals(Reports.IssuesFilter.SourceType.STATIC)) {
@@ -236,7 +243,9 @@ public class ReportsConverter {
                         CONFIGURATION,
                         COMPONENTS,
                         PATTERNMATCHING,
-                        SOFTWARECOMPOSITIONANALYSIS
+                        SOFTWARECOMPOSITIONANALYSIS,
+                        SECRETDETECTION,
+                        MALICIOUSCODEDETECTION
                 ));
             }
             if (scanModule.equals(Reports.IssuesFilter.SourceType.BLACKBOX)) {
@@ -258,7 +267,9 @@ public class ReportsConverter {
                     CONFIGURATION,
                     COMPONENTS,
                     PATTERNMATCHING,
-                    SOFTWARECOMPOSITIONANALYSIS
+                    SOFTWARECOMPOSITIONANALYSIS,
+                    SECRETDETECTION,
+                    MALICIOUSCODEDETECTION
             ));
         }
         if (sourceTypes.contains(Reports.IssuesFilter.SourceType.STATIC)) {
@@ -267,7 +278,9 @@ public class ReportsConverter {
                     CONFIGURATION,
                     COMPONENTS,
                     PATTERNMATCHING,
-                    SOFTWARECOMPOSITIONANALYSIS
+                    SOFTWARECOMPOSITIONANALYSIS,
+                    SECRETDETECTION,
+                    MALICIOUSCODEDETECTION
             ));
         }
         if (sourceTypes.contains(Reports.IssuesFilter.SourceType.BLACKBOX)) {
@@ -311,7 +324,9 @@ public class ReportsConverter {
                 PATTERNMATCHING,
                 COMPONENTS,
                 CONFIGURATION,
-                SOFTWARECOMPOSITIONANALYSIS
+                SOFTWARECOMPOSITIONANALYSIS,
+                SECRETDETECTION,
+                MALICIOUSCODEDETECTION
         ));
 
         defaultFilters.setLanguages(new ArrayList<>());

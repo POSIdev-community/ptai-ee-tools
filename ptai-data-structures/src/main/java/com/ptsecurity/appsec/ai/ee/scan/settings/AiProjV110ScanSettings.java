@@ -20,7 +20,7 @@ import java.util.*;
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__2.Version.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule___.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
@@ -63,6 +63,8 @@ public class AiProjV110ScanSettings extends UnifiedAiProjScanSettings {
         SCAN_MODULE_MAP.put(PATTERN_MATCHING.value(), ScanModule.PATTERNMATCHING);
         SCAN_MODULE_MAP.put(STATIC_CODE_ANALYSIS.value(), ScanModule.STATICCODEANALYSIS);
         SCAN_MODULE_MAP.put(SOFTWARE_COMPOSITION_ANALYSIS.value(), ScanModule.SOFTWARECOMPOSITIONANALYSIS);
+        SCAN_MODULE_MAP.put(SECRET_DETECTION.value(), ScanModule.SECRETDETECTION);
+        SCAN_MODULE_MAP.put(MALICIOUS_CODE_DETECTION.value(), ScanModule.MALICIOUSCODEDETECTION);
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.NONE.value(), DotNetSettings.ProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.SOLUTION.value(), DotNetSettings.ProjectType.SOLUTION);

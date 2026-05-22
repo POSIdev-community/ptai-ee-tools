@@ -308,7 +308,6 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
                 .phpSettings(projectSettingsModel.getPhpSettings())
                 .rubySettings(projectSettingsModel.getRubySettings())
                 .pmTaintSettings(projectSettingsModel.getPmTaintSettings())
-                .pygrepSettings(projectSettingsModel.getPygrepSettings())
                 .pythonSettings(projectSettingsModel.getPythonSettings())
                 .rubySettings(projectSettingsModel.getRubySettings())
                 .scaSettings(projectSettingsModel.getScaSettings())
@@ -367,6 +366,9 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
         }
         if (detection.getScala() != null && detection.getScala() > 0) {
             result.add(SCALA);
+        }
+        if (detection.getOneC() != null && detection.getOneC() > 0) {
+            result.add(ONEC);
         }
 
         return result;

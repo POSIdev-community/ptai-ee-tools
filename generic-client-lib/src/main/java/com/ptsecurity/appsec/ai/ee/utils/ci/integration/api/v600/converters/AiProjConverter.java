@@ -103,6 +103,8 @@ public class AiProjConverter {
         model.setSearchForConfigurationFlawsEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.CONFIGURATION));
         model.setSearchForVulnerableComponentsEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.COMPONENTS));
         model.setSearchWithScaEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.SOFTWARECOMPOSITIONANALYSIS));
+        model.setSecretDetectionEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.SECRETDETECTION));
+        model.setSearchForMaliciousCodeEnabled(scanModules.contains(UnifiedAiProjScanSettings.ScanModule.MALICIOUSCODEDETECTION));
 
         return model;
     }
@@ -314,21 +316,6 @@ public class AiProjConverter {
     }
 
     @SneakyThrows
-    public static PygrepSettingsModel apply(
-            @NonNull final UnifiedAiProjScanSettings settings,
-            PygrepSettingsModel model) {
-        if (model == null) {
-            model = new PygrepSettingsModel();
-        }
-        if (null == settings.getPyGrepSettings()) return model;
-        UnifiedAiProjScanSettings.PygrepSettings pyGrepSettings = settings.getPyGrepSettings();
-
-        model.setRulesDirPath(pyGrepSettings.getRulesDirPath());
-        model.setLaunchParameters(pyGrepSettings.getCustomParameters());
-        return model;
-    }
-
-    @SneakyThrows
     public static ScaSettingsModel apply(
             @NonNull final UnifiedAiProjScanSettings settings,
             ScaSettingsModel model) {
@@ -444,7 +431,6 @@ public class AiProjConverter {
         model.setPythonSettings(apply(settings, model.getPythonSettings()));
         model.setRubySettings(apply(settings, model.getRubySettings()));
         model.setPmTaintSettings(apply(settings, model.getPmTaintSettings()));
-        model.setPygrepSettings(apply(settings, model.getPygrepSettings()));
         model.setScaSettings(apply(settings, model.getScaSettings()));
         model.setReportAfterScan(apply(settings, model.getReportAfterScan(), client));
 

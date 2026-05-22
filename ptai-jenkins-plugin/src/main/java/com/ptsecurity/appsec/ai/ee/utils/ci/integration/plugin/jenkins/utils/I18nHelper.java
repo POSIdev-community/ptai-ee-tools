@@ -40,6 +40,8 @@ public class I18nHelper {
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.PYGREP, Resources::i18n_misc_enums_vulnerability_clazz_pygrep);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.SCA, Resources::i18n_misc_enums_vulnerability_clazz_sca);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.FINGERPRINT_SCA, Resources::i18n_misc_enums_vulnerability_clazz_fingerprint);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.SECRET, Resources::i18n_misc_enums_vulnerability_clazz_secret);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.MALICIOUSCODE, Resources::i18n_misc_enums_vulnerability_clazz_maliciouscode);
 
         APPROVAL_STATE_SUPPLIER_MAP.put(BaseIssue.ApprovalState.APPROVAL, Resources::i18n_misc_enums_vulnerability_approval_confirmed);
         APPROVAL_STATE_SUPPLIER_MAP.put(BaseIssue.ApprovalState.AUTO_APPROVAL, Resources::i18n_misc_enums_vulnerability_approval_auto);

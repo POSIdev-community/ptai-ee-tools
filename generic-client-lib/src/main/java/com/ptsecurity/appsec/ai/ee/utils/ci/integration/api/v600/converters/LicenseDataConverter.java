@@ -29,6 +29,7 @@ public class LicenseDataConverter {
         LANGUAGES_MAP.put(ProgrammingLanguageGroup.RUBY, "Ruby");
         LANGUAGES_MAP.put(ProgrammingLanguageGroup.SOLIDITY, "Solidity");
         LANGUAGES_MAP.put(ProgrammingLanguageGroup.SCALA, "Scala");
+        LANGUAGES_MAP.put(ProgrammingLanguageGroup.ONEC, "1C");
     }
 
     @NonNull

@@ -52,6 +52,8 @@ public class IssuesConverter {
         ISSUE_TYPE_MAP.put(IssueType.PYGREP.name(), BaseIssue.Type.PYGREP);
         ISSUE_TYPE_MAP.put(IssueType.SCA.name(), BaseIssue.Type.SCA);
         ISSUE_TYPE_MAP.put(IssueType.FINGERPRINTSCA.name(), BaseIssue.Type.FINGERPRINT_SCA);
+        ISSUE_TYPE_MAP.put(IssueType.SECRET.name(), BaseIssue.Type.SECRET);
+        ISSUE_TYPE_MAP.put(IssueType.MALICIOUSCODE.name(), BaseIssue.Type.MALICIOUSCODE);
 
         ISSUE_LEVEL_MAP.put(IssueLevel.NONE, BaseIssue.Level.NONE);
         ISSUE_LEVEL_MAP.put(IssueLevel.POTENTIAL, BaseIssue.Level.POTENTIAL);
@@ -367,6 +369,8 @@ public class IssuesConverter {
             baseIssue = scaIssue;
         } else if (IssueType.FINGERPRINTSCA == issueType) {
             baseIssue = new FingerprintScaIssue();
+        } else if (IssueType.SECRET == issueType) {
+            baseIssue = new SecretIssue();
         } else {
             log.warn("Issue {} conversion failed", issue);
             return;
