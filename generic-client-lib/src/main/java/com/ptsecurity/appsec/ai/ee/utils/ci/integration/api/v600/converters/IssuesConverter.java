@@ -49,7 +49,6 @@ public class IssuesConverter {
         ISSUE_TYPE_MAP.put(IssueType.CONFIGURATION.name(), BaseIssue.Type.CONFIGURATION);
         ISSUE_TYPE_MAP.put(IssueType.FINGERPRINT.name(), BaseIssue.Type.FINGERPRINT);
         ISSUE_TYPE_MAP.put(IssueType.BLACKBOX.name(), BaseIssue.Type.BLACKBOX);
-        ISSUE_TYPE_MAP.put(IssueType.PYGREP.name(), BaseIssue.Type.PYGREP);
         ISSUE_TYPE_MAP.put(IssueType.SCA.name(), BaseIssue.Type.SCA);
         ISSUE_TYPE_MAP.put(IssueType.FINGERPRINTSCA.name(), BaseIssue.Type.FINGERPRINT_SCA);
         ISSUE_TYPE_MAP.put(IssueType.SECRET.name(), BaseIssue.Type.SECRET);
@@ -360,9 +359,6 @@ public class IssuesConverter {
                             .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
                             .build());
 
-        } else if (IssueType.PYGREP == issueType) {
-            // can't get info from  VulnerabilityModel and idk if it needs
-            baseIssue = new PygrepIssue();
         } else if (IssueType.SCA == issueType) {
             ScaIssue scaIssue = new ScaIssue();
             scaIssue.setFile(issue.getSourceFile());
