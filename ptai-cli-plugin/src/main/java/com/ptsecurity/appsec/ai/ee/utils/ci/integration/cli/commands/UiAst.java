@@ -2,6 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.commands;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.CliUiAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.Plugin;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.ProjectPriority;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
@@ -102,6 +103,12 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
             description = "Execute full AST instead of incremental")
     protected boolean fullScan = false;
 
+    @CommandLine.Option(
+            names = {"--priority"}, order = 22,
+            paramLabel = "<priority>",
+            description = "An agent will first handle the project that has the highest priority. Valid values: ${COMPLETION-CANDIDATES}")
+    protected ProjectPriority priority = ProjectPriority.Medium;
+
     @Override
     public Integer call() {
         CliUiAstJob job = CliUiAstJob.builder()
@@ -114,6 +121,7 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
                 .projectName(project)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
+                .projectPriority(priority.getValue())
                 .async(async)
                 .input(input).output(output)
                 .includes(includes).excludes(excludes)

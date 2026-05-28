@@ -194,4 +194,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
     public UnifiedAiProjScanSettings loadProjectScanSettings(@NonNull UUID projectId, @NonNull UUID scanSettingsId) throws GenericException {
         throw GenericException.raise("No AIPROJ scan settings download support in PT AI 4.1.1", new UnsupportedOperationException());
     }
+
+    @Override
+    public void setProjectPriority(@NonNull UUID projectId, String projectPriority) {}
 }

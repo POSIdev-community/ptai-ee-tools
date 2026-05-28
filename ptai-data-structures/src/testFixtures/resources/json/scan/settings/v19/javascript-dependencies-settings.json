@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.9.json",
+  "Version": "1.9",
+  "ProjectName": "JavaScript App",
+  "ProgrammingLanguages": ["JavaScript"],
+  "ScanModules": [
+    "StaticCodeAnalysis",
+    "Configuration"
+  ],
+  "JavaScriptSettings": {
+    "UsePublicAnalysisMethod": true,
+    "UseTaintAnalysis": true,
+    "UseJsaAnalysis": false,
+    "DownloadDependencies": true,
+    "CustomParameters": "--jsa-timeout 120",
+    "DependenciesPath": "/workspace/node_modules"
+  }
+}

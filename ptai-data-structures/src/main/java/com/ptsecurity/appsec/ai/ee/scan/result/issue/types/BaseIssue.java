@@ -49,6 +49,8 @@ public abstract class BaseIssue {
         TYPES.put(PygrepIssue.class, Type.PYGREP);
         TYPES.put(ScaIssue.class, Type.SCA);
         TYPES.put(FingerprintScaIssue.class, Type.FINGERPRINT_SCA);
+        TYPES.put(SecretIssue.class, Type.SECRET);
+        TYPES.put(MaliciousCodeIssue.class, Type.MALICIOUSCODE);
     }
 
     /**
@@ -70,7 +72,8 @@ public abstract class BaseIssue {
     protected String typeId;
 
     public enum Type {
-        VULNERABILITY, WEAKNESS, FINGERPRINT, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, SCA, FINGERPRINT_SCA, UNKNOWN
+        VULNERABILITY, WEAKNESS, FINGERPRINT, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, SCA, FINGERPRINT_SCA,
+        SECRET, MALICIOUSCODE, UNKNOWN
     }
 
     public static String getIssueTypeKey(@NonNull final BaseIssue issue) {

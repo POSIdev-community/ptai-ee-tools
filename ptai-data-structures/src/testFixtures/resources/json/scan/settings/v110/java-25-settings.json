@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.10.json",
+  "Version": "1.10",
+  "ProjectName": "Java 25 App",
+  "ProgrammingLanguages": ["Java"],
+  "ScanModules": [
+    "StaticCodeAnalysis",
+    "Configuration"
+  ],
+  "JavaSettings": {
+    "Version": "25",
+    "UnpackUserPackages": true,
+    "UserPackagePrefixes": "com.example",
+    "Parameters": "-Xmx1024m",
+    "UsePublicAnalysisMethod": false,
+    "DownloadDependencies": true,
+    "DependenciesPath": "/workspace/.m2"
+  }
+}

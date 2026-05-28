@@ -38,7 +38,7 @@ public class ScanBriefDetailedTest extends BaseTest {
 
     @Test
     @DisplayName("Convert PT AI 4.1.1, 4.2.0, 4.3.0, 4.4.1, 4.5.0, 4.6.0, 4.7.0, 4.7.1, 4.7.2, 4.8.0, 4.8.1, 4.9.0," +
-            "4.9.1, 4.10.0, 4.11.0, 5.0.0, 5.2.0, 5.3.0 scan results")
+            "4.9.1, 4.10.0, 4.11.0, 5.0.0, 5.2.0, 5.3.0, 6.0.0 scan results")
     @SneakyThrows
     public void generateScanResults() {
         try (TempFile temp = TempFile.createFolder()) {
@@ -61,7 +61,8 @@ public class ScanBriefDetailedTest extends BaseTest {
                             version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490 ||
                             version == ScanBrief.ApiVersion.V491 || version == ScanBrief.ApiVersion.V4100 ||
                             version == ScanBrief.ApiVersion.V4110 || version == ScanBrief.ApiVersion.V500 ||
-                            version == ScanBrief.ApiVersion.V520 || version == ScanBrief.ApiVersion.V530) {
+                            version == ScanBrief.ApiVersion.V520 || version == ScanBrief.ApiVersion.V530 ||
+                            version == ScanBrief.ApiVersion.V600) {
                         continue;
                     }
                     if (JAVA_OWASP_BENCHMARK == templateId) {

@@ -30,6 +30,12 @@ public class Labels {
 
     public static final String SCAN_LABEL = "Scan label";
 
+    public static final String PROJECT_PRIORITY = "Project priority";
+    public static final String PROJECT_PRIORITY_LOW = "Low";
+    public static final String PROJECT_PRIORITY_MEDIUM = "Medium";
+    public static final String PROJECT_PRIORITY_HIGH = "High";
+    public static final String PROJECT_PRIORITY_CRITICAL = "Critical";
+
     public static final String AST_SETTINGS = "Scan settings type";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
     public static final String AST_SETTINGS_UI = Resources.i18n_ast_settings_type_ui_label();

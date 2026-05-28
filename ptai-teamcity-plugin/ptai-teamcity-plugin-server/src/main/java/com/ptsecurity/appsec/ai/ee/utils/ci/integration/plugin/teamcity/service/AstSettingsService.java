@@ -175,6 +175,7 @@ public class AstSettingsService {
                 .fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
 
         res.fill(SCAN_LABEL, request);
+        res.fill(PROJECT_PRIORITY, request);
 
         return res;
     }

@@ -75,6 +75,14 @@ public class AstEditRunTypeControllerExtension implements EditRunTypeControllerE
             properties.put(BRANCH_SETTINGS, Defaults.BRANCH_SETTINGS);
         }
 
+        if (!PROJECT_PRIORITY_LOW.equals(properties.get(PROJECT_PRIORITY)) &&
+            !PROJECT_PRIORITY_MEDIUM.equals(properties.get(PROJECT_PRIORITY)) &&
+            !PROJECT_PRIORITY_HIGH.equals(properties.get(PROJECT_PRIORITY)) &&
+            !PROJECT_PRIORITY_CRITICAL.equals(properties.get(PROJECT_PRIORITY))
+        ) {
+            properties.put(PROJECT_PRIORITY, Defaults.PROJECT_PRIORITY);
+        }
+
         if (!AST_SETTINGS_UI.equals(properties.get(AST_SETTINGS)) && !AST_SETTINGS_JSON.equals(properties.get(AST_SETTINGS)))
             properties.put(AST_SETTINGS, Defaults.AST_SETTINGS);
         if (!AST_MODE_ASYNC.equals(properties.get(AST_MODE)) && !AST_MODE_SYNC.equals(properties.get(AST_MODE)))
