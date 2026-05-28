@@ -228,4 +228,8 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
     private String getProjectPriority(Map<String, String> params) {
         return PRIORITY_MAPPING.getOrDefault(params.get(Params.PROJECT_PRIORITY), "Medium");
     }
+
+    private String getProjectPriority(Map<String, String> params) {
+        return PRIORITY_MAPPING.getOrDefault(params.get(Params.PROJECT_PRIORITY), "Medium");
+    }
 }
