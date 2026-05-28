@@ -274,5 +274,8 @@ options:
 + [Feature] Added scan-label (A commit hash can be used as a scan label)
 ### 20260218
 + [Feature] PT AI v.5.4.0 support approved
-### 20260325
+### 20260528
 + [Feature] PT AI v.6.0.0 support approved
++ [Feature] Added support for SecretDetection and MaliciousCodeDetection
++ [Feature] Added support for scanning Java 25 version
++ [Feature] Added support for scanning OneC
