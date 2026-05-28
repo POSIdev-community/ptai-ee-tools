@@ -18,6 +18,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalcon
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.priority.ProjectPrioritySettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
@@ -74,6 +75,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
     private final ScanLabelSettings scanLabelSettings;
 
     @Getter
+    private final ProjectPrioritySettings projectPrioritySettings;
+
+    @Getter
     private final WorkMode workMode;
 
     @Getter
@@ -98,8 +102,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public Plugin(final com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings scanSettings,
                   final ConfigBase config,
-                  BranchSettings branchSettings,
-                  ScanLabelSettings scanLabelSettings,
+                  final BranchSettings branchSettings,
+                  final ScanLabelSettings scanLabelSettings,
+                  final ProjectPrioritySettings projectPrioritySettings,
                   final WorkMode workMode,
                   final String advancedSettings,
                   final boolean verbose,
@@ -109,6 +114,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
         this.config = config;
         this.branchSettings = branchSettings;
         this.scanLabelSettings = scanLabelSettings;
+        this.projectPrioritySettings = projectPrioritySettings;
         this.workMode = workMode;
         this.advancedSettings = advancedSettings;
         this.verbose = verbose;
@@ -248,6 +254,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
+                .projectPriority(projectPrioritySettings.getValue())
                 .settings(selectedScanSettingsUi ? null : jsonSettings)
                 .policy(selectedScanSettingsUi ?  null : jsonPolicy)
                 .console(listener.getLogger())

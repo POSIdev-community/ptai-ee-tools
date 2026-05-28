@@ -27,6 +27,7 @@ public class UiAstJobSetupOperationsImpl extends AbstractSetupOperations impleme
         String branchName = owner.getBranchName();
 
         uploadSources(projectId, branchName);
+        projectTasks.setProjectPriority(projectId, owner.getProjectPriority());
         return projectId;
     }
 }

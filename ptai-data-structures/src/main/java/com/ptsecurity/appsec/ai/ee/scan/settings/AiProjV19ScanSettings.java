@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.networknt.schema.ValidationMessage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
-import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage_____;
+import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage______;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
@@ -19,8 +19,8 @@ import java.util.*;
 
 import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__6.Version.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule__.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__7.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule___.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
@@ -40,21 +40,21 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
     private static final Map<String, DetectionType> BLACKBOX_FORM_AUTH_DETECTION_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
 
     static {
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.GO.value(), ScanBrief.ScanSettings.Language.GO);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_____.SCALA.value(), ScanBrief.ScanSettings.Language.SCALA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.GO.value(), ScanBrief.ScanSettings.Language.GO);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SCALA.value(), ScanBrief.ScanSettings.Language.SCALA);
 
         SCAN_MODULE_MAP.put(CONFIGURATION.value(), ScanModule.CONFIGURATION);
         SCAN_MODULE_MAP.put(COMPONENTS.value(), ScanModule.COMPONENTS);
@@ -125,7 +125,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public Version getVersion() {
-        return Version.V18;
+        return Version.V19;
     }
 
     @Override
@@ -140,7 +140,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull ScanBrief.ScanSettings.Language getProgrammingLanguage() {
-        log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.8");
+        log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.9");
         return this.getProgrammingLanguages().iterator().next();
     }
 
@@ -201,13 +201,13 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public String getCustomParameters() {
-        log.trace("No common CustomParameters flag support for AIPROJ schema v.1.8");
+        log.trace("No common CustomParameters flag support for AIPROJ schema v.1.9");
         return null;
     }
 
     @Override
     public UnifiedAiProjScanSettings setCustomParameters(String parameters) {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.8");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.9");
         return this;
     }
 
@@ -270,6 +270,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
                 .usePublicAnalysisMethod(B("JavaScriptSettings.UsePublicAnalysisMethod"))
                 .downloadDependencies(B("JavaScriptSettings.DownloadDependencies"))
                 .customParameters(S("JavaScriptSettings.CustomParameters"))
+                .dependenciesPath(S("JavaScriptSettings.DependenciesPath"))
                 .useJsaAnalysis(B("JavaScriptSettings.UseJsaAnalysis"))
                 .useTaintAnalysis(B("JavaScriptSettings.UseTaintAnalysis"))
                 .build();
@@ -350,13 +351,13 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUsePublicAnalysisMethod() {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.8");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.9");
         return false;
     }
 
     @Override
     public UnifiedAiProjScanSettings setUsePublicAnalysisMethod(@NonNull Boolean value) {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.8");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.9");
         return this;
     }
 
@@ -367,7 +368,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUseCustomPmRules() {
-        log.trace("No UseCustomPmRules rules support for AIPROJ schema v.1.8");
+        log.trace("No UseCustomPmRules rules support for AIPROJ schema v.1.9");
         return false;
     }
 
@@ -378,7 +379,7 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUseCustomYaraRules() {
-        log.trace("No custom SAST rules support for AIPROJ schema v.1.8");
+        log.trace("No custom SAST rules support for AIPROJ schema v.1.9");
         return false;
     }
 
@@ -389,13 +390,13 @@ public class AiProjV19ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isDownloadDependencies() {
-        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.8");
+        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.9");
         return false;
     }
 
     @Override
     public UnifiedAiProjScanSettings setDownloadDependencies(@NonNull Boolean value) {
-        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.8");
+        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.9");
         return this;
     }
 

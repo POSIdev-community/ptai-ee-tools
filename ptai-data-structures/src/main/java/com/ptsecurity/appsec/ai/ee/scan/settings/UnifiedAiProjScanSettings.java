@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV19.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV110.Version.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -129,6 +129,8 @@ public abstract class UnifiedAiProjScanSettings {
                 settings = (root.path("ScanModules").isMissingNode())
                         ? new AiProjLegacyScanSettings(root)
                         : new AiProjV10ScanSettings(root);
+            else if (_1_10.value().equals(versionNode.textValue()))
+                settings = new AiProjV110ScanSettings(root);
             else if (_1_9.value().equals(versionNode.textValue()))
                 settings = new AiProjV19ScanSettings(root);
             else if (_1_8.value().equals(versionNode.textValue()))
@@ -336,7 +338,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V110 }
     public abstract Version getVersion();
 
     /**
@@ -376,6 +378,8 @@ public abstract class UnifiedAiProjScanSettings {
         PATTERNMATCHING("PatternMatching"),
         STATICCODEANALYSIS("StaticCodeAnalysis"),
         SOFTWARECOMPOSITIONANALYSIS("SoftwareCompositionAnalysis"),
+        SECRETDETECTION("SecretDetection"),
+        MALICIOUSCODEDETECTION("MaliciousCodeDetection"),
         @Deprecated
         DATAFLOWANALYSIS("DataFlowAnalysis"),
         @Deprecated
@@ -454,7 +458,7 @@ public abstract class UnifiedAiProjScanSettings {
         protected Boolean unpackUserPackages = false;
         protected String userPackagePrefixes;
         public enum JavaVersion {
-            v1_8, v1_11, v1_17, v1_21
+            v1_8, v1_11, v1_17, v1_21, v1_25
         }
         protected UnifiedAiProjScanSettings.JavaSettings.JavaVersion javaVersion;
         protected Boolean usePublicAnalysisMethod;
@@ -472,6 +476,7 @@ public abstract class UnifiedAiProjScanSettings {
         protected Boolean usePublicAnalysisMethod;
         protected Boolean downloadDependencies;
         protected String customParameters;
+        protected String dependenciesPath;
         protected Boolean useTaintAnalysis;
         protected Boolean useJsaAnalysis;
     }

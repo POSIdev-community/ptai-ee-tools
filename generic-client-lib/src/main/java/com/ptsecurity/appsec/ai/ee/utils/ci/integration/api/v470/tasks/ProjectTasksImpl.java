@@ -237,4 +237,7 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks {
         }
         return res;
     }
+
+    @Override
+    public void setProjectPriority(@NonNull UUID projectId, String projectPriority) {}
 }
