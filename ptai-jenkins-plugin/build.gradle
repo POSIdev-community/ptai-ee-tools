@@ -31,10 +31,10 @@ jenkinsPlugin {
     gitHubUrl = 'https://github.com/POSIdev-community/ptai-ee-tools.git'
 
     // use the plugin class loader before the core class loader, defaults to false
-    // pluginFirstClassLoader = true
+    pluginFirstClassLoader = true
 
     // optional list of package prefixes that your plugin doesn't want to see from core
-    // maskClasses = 'groovy.grape org.apache.commons.codec'
+    maskClasses = 'org.apache.commons.compress'
 
     // optional version number from which this plugin release is configuration-compatible
     // compatibleSinceVersion = '1.1.0'
