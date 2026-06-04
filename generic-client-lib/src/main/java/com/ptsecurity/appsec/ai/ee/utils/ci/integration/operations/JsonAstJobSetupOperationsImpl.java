@@ -45,6 +45,7 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
         );
 
         owner.setProjectName(brief.getProjectName());
+        projectTasks.setProjectPriority(brief.getProjectId(), owner.getProjectPriority());
 
         // If fullScanMode is false, but incremental scan is disabled, use fullScanMode indeed
         owner.setFullScanMode(owner.isFullScanMode() || !brief.getIncremental());
