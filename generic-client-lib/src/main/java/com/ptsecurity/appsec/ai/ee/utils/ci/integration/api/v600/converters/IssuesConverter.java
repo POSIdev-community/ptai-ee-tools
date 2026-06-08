@@ -366,7 +366,17 @@ public class IssuesConverter {
         } else if (IssueType.FINGERPRINTSCA == issueType) {
             baseIssue = new FingerprintScaIssue();
         } else if (IssueType.SECRET == issueType) {
-            baseIssue = new SecretIssue();
+            SecretIssue secretIssue = new SecretIssue();
+            secretIssue.setVulnerableExpression(BaseSourceIssue.Place.builder()
+                    .file(Objects.requireNonNull(issue.getSourceFile()))
+                    .value(issue.getVulnerableValue())
+                    .beginLine(Objects.requireNonNull(issue.getSourceBeginLine()))
+                    .endLine(Objects.requireNonNull(issue.getSourceEndLine()))
+                    .beginColumn(Objects.requireNonNull(issue.getSourceBeginColumn()))
+                    .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
+                    .build());
+
+            baseIssue = secretIssue;
         } else if (IssueType.MALICIOUSCODE == issueType) {
             MaliciousCodeIssue maliciousCodeIssue = new MaliciousCodeIssue();
             maliciousCodeIssue.setVulnerableExpression(BaseSourceIssue.Place.builder()
