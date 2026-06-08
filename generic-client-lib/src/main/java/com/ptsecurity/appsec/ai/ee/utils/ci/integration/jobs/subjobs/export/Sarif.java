@@ -200,13 +200,7 @@ public class Sarif extends Export {
                 location.withPhysicalLocation(phl(secretIssue.getVulnerableExpression()));
             } else if (BaseIssue.Type.MALICIOUSCODE.equals(issue.getClazz())) {
                 MaliciousCodeIssue maliciousCodeIssue = (MaliciousCodeIssue) issue;
-                location.withPhysicalLocation(
-                        new PhysicalLocation()
-                                .withArtifactLocation(
-                                        new ArtifactLocation()
-                                                .withUri(fixUri(maliciousCodeIssue.getSourceFile()))
-                                                .withUriBaseId("SRCROOT")
-                                ));
+                location.withPhysicalLocation(phl(maliciousCodeIssue.getVulnerableExpression()));
             }
 
             sarifRun.getResults().add(result);
