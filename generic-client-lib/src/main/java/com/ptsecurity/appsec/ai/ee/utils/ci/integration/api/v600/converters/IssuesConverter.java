@@ -6,7 +6,6 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.server.v600.api.model.*;
-import com.ptsecurity.appsec.ai.ee.server.v600.notifications.model.ProgrammingLanguageGroup;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ServerVersionTasks;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
