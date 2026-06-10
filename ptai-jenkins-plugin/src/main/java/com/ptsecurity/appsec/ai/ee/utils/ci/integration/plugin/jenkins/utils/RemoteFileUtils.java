@@ -66,6 +66,10 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
 
     @SuppressWarnings("UnusedReturnValue")
     public static FilePath saveReport(@NonNull final JenkinsAstJob jenkinsAstJob, String artifact, @NonNull final File data) throws GenericException {
+        if (!validateArtifactPath(jenkinsAstJob, artifact)) {
+            return null;
+        }
+
         try (
                 TempFile tempFolder = TempFile.createFolder();
                 TempFile archive = TempFile.createFile(tempFolder.toPath()) ) {
@@ -152,7 +156,25 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
 
     @Override
     public FilePath call() throws GenericException {
-        return new FilePath(executor.execute());
+        File file = executor.execute();
+        return file == null ? null : new FilePath(file);
+    }
+
+    protected static boolean validateArtifactPath(@NonNull final JenkinsAstJob jenkinsAstJob, @NonNull final String artifact) throws GenericException {
+        ArtifactPathValidator validator = new ArtifactPathValidator(jenkinsAstJob, artifact);
+        return null != CallHelper.call(
+                () -> Objects.requireNonNull(jenkinsAstJob.getLauncher().getChannel()).call(new RemoteFileUtils(validator)),
+                "Remote artifact path validation call failed");
+    }
+
+    static Path resolveArtifactPath(@NonNull final String dir, @NonNull final String artifact, @NonNull final AbstractTool logger) {
+        Path outputDir = Paths.get(dir).resolve(AbstractJob.DEFAULT_OUTPUT_FOLDER).toAbsolutePath().normalize();
+        Path destination = outputDir.resolve(artifact).toAbsolutePath().normalize();
+        if (!destination.startsWith(outputDir)) {
+            logger.warning("Invalid file name: '" + artifact + "'. Skipping");
+            return null;
+        }
+        return destination;
     }
 
     protected interface Executor {
@@ -223,6 +245,22 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
         }
     }
 
+    protected static class ArtifactPathValidator extends RemoteAbstractTool implements Executor, Serializable {
+        public ArtifactPathValidator(@NonNull final JenkinsAstJob jenkinsAstJob, @NonNull final String artifact) {
+            super(jenkinsAstJob);
+            this.dir = jenkinsAstJob.getWorkspace().getRemote();
+            this.artifact = artifact;
+        }
+
+        protected final String dir;
+        protected final String artifact;
+
+        public File execute() {
+            Path destination = resolveArtifactPath(dir, artifact, this);
+            return destination == null ? null : destination.toFile();
+        }
+    }
+
     @ToString(callSuper = true)
     protected static class DataUploadTool extends RemoteAbstractTool implements Executor, Serializable {
         public DataUploadTool(@NonNull final JenkinsAstJob jenkinsAstJob, final byte[] data) {
@@ -251,7 +289,10 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
             try {
                 Path destination;
                 if (null != dir && null != artifact) {
-                    destination = Paths.get(dir).resolve(AbstractJob.DEFAULT_OUTPUT_FOLDER).resolve(artifact);
+                    destination = resolveArtifactPath(dir, artifact, this);
+                    if (destination == null) {
+                        return null;
+                    }
                     check(destination);
                 } else
                     destination = TempFile.createFile().toPath();
@@ -321,7 +362,10 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
                     }
                 }, "File parts merge failed");
 
-                Path destination = Paths.get(dir).resolve(AbstractJob.DEFAULT_OUTPUT_FOLDER).resolve(artifact);
+                Path destination = resolveArtifactPath(dir, artifact, this);
+                if (destination == null) {
+                    return null;
+                }
                 log.trace("Destination file path: {}", destination);
                 DataUploadTool.check(destination);
 
