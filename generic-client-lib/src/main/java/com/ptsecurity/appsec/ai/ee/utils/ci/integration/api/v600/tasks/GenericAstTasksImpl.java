@@ -349,7 +349,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
             call(() -> client.getScanQueueApi().deleteItem(queueItemId),
                     "PT AI delete scan from queue failed");
         } catch (Exception e) {
-            call(() -> client.getScanQueueApi().stopScan(queueItemId),
+            call(() -> client.getScanQueueApi().stopScan(scanResultId),
                     "PT AI project scan stop failed");
         }
     }

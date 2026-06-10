@@ -40,6 +40,11 @@ public class ScanResultIdHelper {
                 if (queueItemId == null) {
                     queueItemId = getExistsQueueItemId(branchId);
                 }
+
+                if (queueItemId == null) {
+                    continue;
+                }
+
                 return callGetScanResultId(queueItemId);
             } catch (GenericException e) {
                 Optional<ApiExceptionConverter> maybeError = ApiExceptionConverter.tryParse(e.getDetails());
