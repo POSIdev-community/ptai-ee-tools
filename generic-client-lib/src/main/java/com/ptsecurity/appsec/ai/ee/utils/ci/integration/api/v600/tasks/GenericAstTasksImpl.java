@@ -98,11 +98,12 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         UUID branchId = getBranchIdByName(projectId, branchName);
         createQueueItem.setBranchId(branchId);
 
-        UUID queueItemId = getQueueItemId(createQueueItem);
-        return scanResultIdHelper.getScanResultId(queueItemId, branchId);
+        Set<UUID> existingScanResultIds = scanResultIdHelper.getExistingScanResultIds(branchId).orElse(null);
+        UUID queueItemId = getQueueItemId(projectId, branchName, createQueueItem);
+        return scanResultIdHelper.getScanResultId(queueItemId, branchId, existingScanResultIds);
     }
 
-    private UUID getQueueItemId(CreateQueueItem createQueueItem) {
+    private UUID getQueueItemId(UUID projectId, String branchName, CreateQueueItem createQueueItem) {
         UUID queueItemId;
         try {
             queueItemId = call(
@@ -112,7 +113,13 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
             Optional<ApiExceptionConverter> maybeError = ApiExceptionConverter.tryParse(e.getDetails());
 
             if (maybeError.isPresent() && maybeError.get().getErrorCode() == SCAN_ALREADY_SCHEDULED) {
-                return scanResultIdHelper.getExistsQueueItemId(createQueueItem.getBranchId());
+                String message = String.format(
+                        "Scan for project %s branch %s (%s) is already scheduled or running. " +
+                                "Wait until the current scan finishes before starting another scan for the same project branch",
+                        projectId,
+                        branchName,
+                        createQueueItem.getBranchId());
+                throw GenericException.raise(message, new IllegalStateException("Concurrent scan is not allowed", e));
             }
 
             throw e;

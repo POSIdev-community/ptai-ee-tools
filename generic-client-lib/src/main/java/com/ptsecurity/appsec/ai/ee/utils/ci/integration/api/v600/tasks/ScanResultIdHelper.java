@@ -5,13 +5,13 @@ import com.ptsecurity.appsec.ai.ee.server.v600.api.api.ProjectsApi;
 import com.ptsecurity.appsec.ai.ee.server.v600.api.api.ScanQueueApi;
 import com.ptsecurity.appsec.ai.ee.server.v600.api.model.ActiveScanModel;
 import com.ptsecurity.appsec.ai.ee.server.v600.api.model.QueueItem;
+import com.ptsecurity.appsec.ai.ee.server.v600.api.model.ScanResultModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ApiErrorCode;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ApiExceptionConverter;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.v600.converters.ApiErrorCode.*;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -31,21 +31,29 @@ public class ScanResultIdHelper {
     }
 
     public UUID getScanResultId(UUID queueItemId, UUID branchId) {
+        return getScanResultId(queueItemId, branchId, null);
+    }
+
+    public UUID getScanResultId(UUID queueItemId, UUID branchId, Set<UUID> existingScanResultIds) {
+        if (queueItemId == null) {
+            throw GenericException.raise(
+                    "Failed to start scan: scan queue item id is empty",
+                    new IllegalArgumentException("Queue item id is null"));
+        }
+
         int maxAttempts = 20;
+        Throwable lastError = new IllegalStateException("Scan result id was not found");
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             if (attempt > 1) {
                 sleep();
             }
             try {
-                if (queueItemId == null) {
-                    queueItemId = getExistsQueueItemId(branchId);
-                }
-
-                if (queueItemId == null) {
+                UUID scanResultId = callGetScanResultId(queueItemId);
+                if (scanResultId == null) {
+                    lastError = new IllegalStateException("Queue item " + queueItemId + " has empty scan result id");
                     continue;
                 }
-
-                return callGetScanResultId(queueItemId);
+                return scanResultId;
             } catch (GenericException e) {
                 Optional<ApiExceptionConverter> maybeError = ApiExceptionConverter.tryParse(e.getDetails());
                 if (!maybeError.isPresent()) {
@@ -53,33 +61,28 @@ public class ScanResultIdHelper {
                 }
                 ApiErrorCode errorCode = maybeError.get().getErrorCode();
 
-                if (errorCode == QUEUE_ITEM_ALREADY_ASSIGNED_TO_AGENT) {
+                if (errorCode == QUEUE_ITEM_ALREADY_ASSIGNED_TO_AGENT || errorCode == QUEUE_ITEM_NOT_FOUND) {
+                    lastError = e;
                     try {
-                        return findScanResultIdFromActiveScans(branchId);
-                    } catch (Exception exception) {
-                        if (attempt == maxAttempts) {
-                            throw GenericException.raise(
-                                    "Failed to get scan result id from active scans after " + maxAttempts +" attempts", exception);
+                        Optional<UUID> scanResultId = findStartedScanResultId(branchId, existingScanResultIds);
+                        if (scanResultId.isPresent()) {
+                            return scanResultId.get();
                         }
+                    } catch (GenericException exception) {
+                        lastError = exception;
                     }
                     continue;
                 }
 
                 if (errorCode == EMPTY_SCAN_RESULT) {
-                    if (attempt == maxAttempts) {
-                        throw GenericException.raise("Empty scan result after " + maxAttempts + " attempts", e);
-                    }
+                    lastError = e;
                     continue;
-                }
-
-                if (errorCode == QUEUE_ITEM_NOT_FOUND) {
-                    return callGetLastScanResultsId(branchId);
                 }
 
                 throw e;
             }
         }
-        throw new RuntimeException("Unexpected end of loop");
+        throw GenericException.raise("Failed to get scan result id after " + maxAttempts + " attempts", lastError);
     }
 
     public UUID getExistsQueueItemId(UUID branchId) {
@@ -87,11 +90,37 @@ public class ScanResultIdHelper {
                 scanQueueApi::getAllItems,
                 "Failed to get queue items");
 
+        if (queueItems == null) {
+            return null;
+        }
+
         return queueItems.stream()
-                .filter(qi -> qi.getScanObject().getBranchId().equals(branchId))
+                .filter(Objects::nonNull)
+                .filter(qi -> qi.getScanObject() != null)
+                .filter(qi -> branchId.equals(qi.getScanObject().getBranchId()))
                 .findFirst()
                 .map(QueueItem::getId)
                 .orElse(null);
+    }
+
+    public Optional<Set<UUID>> getExistingScanResultIds(UUID branchId) {
+        try {
+            List<ScanResultModel> scanResults = call(
+                    () -> branchesApi.apiBranchesBranchIdScanResultsGet(branchId),
+                    "Failed to get branch scan results");
+
+            if (scanResults == null) {
+                return Optional.of(Collections.emptySet());
+            }
+
+            return Optional.of(scanResults.stream()
+                    .filter(Objects::nonNull)
+                    .map(ScanResultModel::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet()));
+        } catch (GenericException e) {
+            return Optional.empty();
+        }
     }
 
     private void sleep() {
@@ -104,30 +133,62 @@ public class ScanResultIdHelper {
     }
 
     private UUID callGetScanResultId(UUID queueItemId) {
-        return call(
+        QueueItem queueItem = call(
                 () -> scanQueueApi.getItem(queueItemId),
                 "Failed to get queue item"
-        ).getScanResultId();
+        );
+        return queueItem != null ? queueItem.getScanResultId() : null;
     }
 
-    private UUID callGetLastScanResultsId(UUID branchId) {
-        return call (
-                () -> branchesApi.apiBranchesBranchIdScanResultsLastGet(branchId),
-                "Failed to get last scan result"
-        ).getId();
+    private Optional<UUID> findStartedScanResultId(UUID branchId, Set<UUID> existingScanResultIds) {
+        Optional<UUID> activeScanResultId = findScanResultIdFromActiveScans(branchId);
+        if (activeScanResultId.isPresent()) {
+            return activeScanResultId;
+        }
+
+        return findScanResultIdFromBranchScanResults(branchId, existingScanResultIds);
     }
 
-    private UUID findScanResultIdFromActiveScans(UUID branchId) {
+    private Optional<UUID> findScanResultIdFromBranchScanResults(UUID branchId, Set<UUID> existingScanResultIds) {
+        if (existingScanResultIds == null) {
+            ScanResultModel lastScanResult = call(
+                    () -> branchesApi.apiBranchesBranchIdScanResultsLastGet(branchId),
+                    "Failed to get last scan result");
+            return lastScanResult != null ? Optional.ofNullable(lastScanResult.getId()) : Optional.empty();
+        }
+
+        List<ScanResultModel> scanResults = call(
+                () -> branchesApi.apiBranchesBranchIdScanResultsGet(branchId),
+                "Failed to get branch scan results");
+
+        if (scanResults == null) {
+            return Optional.empty();
+        }
+
+        return scanResults.stream()
+                .filter(Objects::nonNull)
+                .map(ScanResultModel::getId)
+                .filter(Objects::nonNull)
+                .filter(scanResultId -> !existingScanResultIds.contains(scanResultId))
+                .findFirst();
+    }
+
+    private Optional<UUID> findScanResultIdFromActiveScans(UUID branchId) {
         List<ActiveScanModel> activeScans = call(
                 projectsApi::apiProjectsActiveScansGet,
                 "Failed to get active scans"
         );
 
+        if (activeScans == null) {
+            return Optional.empty();
+        }
+
         return activeScans.stream()
-                .filter(activeScanModel -> activeScanModel.getBranch().getId().equals(branchId))
+                .filter(Objects::nonNull)
+                .filter(activeScanModel -> activeScanModel.getBranch() != null)
+                .filter(activeScanModel -> branchId.equals(activeScanModel.getBranch().getId()))
                 .findFirst()
                 .map(ActiveScanModel::getScanResultId)
-                .orElseThrow(() -> GenericException.raise(
-                        "Scan result id not found", new IllegalArgumentException("Branch id:" + branchId)));
+                .filter(Objects::nonNull);
     }
 }
