@@ -367,6 +367,18 @@ public class IssuesConverter {
             baseIssue = new FingerprintScaIssue();
         } else if (IssueType.SECRET == issueType) {
             baseIssue = new SecretIssue();
+        } else if (IssueType.MALICIOUSCODE == issueType) {
+            MaliciousCodeIssue maliciousCodeIssue = new MaliciousCodeIssue();
+            maliciousCodeIssue.setVulnerableExpression(BaseSourceIssue.Place.builder()
+                    .file(Objects.requireNonNull(issue.getSourceFile()))
+                    .value(issue.getVulnerableValue())
+                    .beginLine(Objects.requireNonNull(issue.getSourceBeginLine()))
+                    .endLine(Objects.requireNonNull(issue.getSourceEndLine()))
+                    .beginColumn(Objects.requireNonNull(issue.getSourceBeginColumn()))
+                    .endColumn(Objects.requireNonNull(issue.getSourceEndColumn()))
+                    .build());
+
+            baseIssue = maliciousCodeIssue;
         } else {
             log.warn("Issue {} conversion failed", issue);
             return;

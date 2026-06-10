@@ -245,8 +245,7 @@ public class SonarGiif extends Export {
                 primaryLocation = pl(message, secretIssue.getVulnerableExpression());
             } else if (BaseIssue.Type.MALICIOUSCODE == clazz) {
                 MaliciousCodeIssue maliciousCodeIssue = (MaliciousCodeIssue) issue;
-                primaryLocation = SonarGiifReport.Issue.PrimaryLocation.builder()
-                        .message(message).filePath(fixUri(maliciousCodeIssue.getSourceFile())).build();
+                primaryLocation = pl(message, maliciousCodeIssue.getVulnerableExpression());
             } else continue;
             result.getIssues().add(SonarGiifReport.Issue.builder()
                     .engineId("PTAI")
