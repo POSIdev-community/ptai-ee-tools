@@ -29,26 +29,39 @@ public class LocalFileOperations extends AbstractFileOperations implements FileO
     @SneakyThrows
     protected void saveInMemoryData(@NonNull String name, byte[] data) {
         byte[] safeData = (null == data) ? new byte[0] : data;
-        Path out = resolveAndValidate(saver.getOutput(), name, console);
+        Path out = prepareOutputPath(name);
         if (out == null) {
             return;
         }
 
-        if (out.toFile().exists()) {
-            console.warning("Existing file " + name + " will be overwritten");
-            if (!out.toFile().delete()) {
-                console.severe("Existing file " + name + " delete failed");
-                return;
-            }
-        }
         FileUtils.writeByteArrayToFile(out.toFile(), safeData);
     }
 
     public void saveArtifact(@NonNull String name, @NonNull File file) {
         log.trace("Started: save {} file contents as build artifact {}", file.getAbsolutePath(), name);
-        CallHelper.call(() -> FileUtils.copyFile(file, saver.getOutput().resolve(name).toFile()), "Artifact file copy failed");
+        Path out = prepareOutputPath(name);
+        if (out == null) {
+            return;
+        }
+
+        CallHelper.call(() -> FileUtils.copyFile(file, out.toFile()), "Artifact file copy failed");
         log.trace("Finished: save {} file contents as build artifact {}", file.getAbsolutePath(), name);
     }
 
+    private Path prepareOutputPath(@NonNull String name) {
+        Path out = resolveAndValidate(saver.getOutput(), name, console);
+        if (out == null) {
+            return null;
+        }
 
+        File output = out.toFile();
+        if (output.exists()) {
+            log.trace("Existing file {} will be overwritten", name);
+            if (!output.delete()) {
+                log.trace("Existing file {} delete failed", name);
+                return null;
+            }
+        }
+        return out;
+    }
 }
