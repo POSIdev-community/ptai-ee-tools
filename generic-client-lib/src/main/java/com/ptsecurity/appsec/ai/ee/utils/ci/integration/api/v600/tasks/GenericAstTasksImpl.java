@@ -22,6 +22,7 @@ import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.time.Duration;
@@ -50,13 +51,15 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
     public void upload(@NonNull final UUID projectId, @NonNull final File sources, final String branchName) throws GenericException {
         List<BranchModel> branches = getBranchModelsByProjectId(projectId);
 
+        String effectiveBranchName = StringUtils.isEmpty(branchName) ? null : branchName;
+
         String defaultBranchName = "default";
         UUID branchId = null;
         if (!branches.isEmpty()) {
-            branchId = getTargetBranchId(branches, branchName, defaultBranchName, projectId);
+            branchId = getTargetBranchId(branches, effectiveBranchName, defaultBranchName, projectId);
         }
 
-        String targetBranchName = branchName != null ? branchName : defaultBranchName;
+        String targetBranchName = effectiveBranchName != null ? effectiveBranchName : defaultBranchName;
 
         if (branchId == null) {
             call(() -> client.getStoreApi().apiStoreProjectProjectIdBranchesArchivePost(
@@ -158,6 +161,10 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
             @NonNull final String branchName
     ) {
         List<BranchModel> branches = getBranchModelsByProjectId(projectId);
+        if (StringUtils.isEmpty(branchName)) {
+            String defaultBranchName = "default";
+            return getTargetBranchId(branches, null, defaultBranchName, projectId);
+        }
         return filterBranchModelByName(branches, branchName).getId();
     }
 
