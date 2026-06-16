@@ -22,6 +22,7 @@ import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__7.Version.*;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule___.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
