@@ -317,6 +317,27 @@
         </td>
     </tr>
 
+    <tr id="row_${PROJECT_PRIORITY}">
+        <th>
+            <label for="${PROJECT_PRIORITY}">${LABEL_PROJECT_PRIORITY}</label></th>
+        <td>
+            <props:selectProperty
+                    name="${PROJECT_PRIORITY}" enableFilter="true"
+                    className="longField">
+                <props:option value="${PROJECT_PRIORITY_LOW}"
+                              currValue="${propertiesBean.properties[PROJECT_PRIORITY]}">${LABEL_PROJECT_PRIORITY_LOW}</props:option>
+                <props:option value="${PROJECT_PRIORITY_MEDIUM}"
+                              currValue="${propertiesBean.properties[PROJECT_PRIORITY]}">${LABEL_PROJECT_PRIORITY_MEDIUM}</props:option>
+                <props:option value="${PROJECT_PRIORITY_HIGH}"
+                              currValue="${propertiesBean.properties[PROJECT_PRIORITY]}">${LABEL_PROJECT_PRIORITY_HIGH}</props:option>
+                <props:option value="${PROJECT_PRIORITY_CRITICAL}"
+                              currValue="${propertiesBean.properties[PROJECT_PRIORITY]}">${LABEL_PROJECT_PRIORITY_CRITICAL}</props:option>
+            </props:selectProperty>
+            <span class="smallNote">${HINT_PROJECT_PRIORITY}</span>
+            <span class="error" id="error_${PROJECT_PRIORITY}"></span>
+        </td>
+    </tr>
+
     <tr id="row_${AST_SETTINGS}">
         <th>
             <label for="${AST_SETTINGS}">${LABEL_AST_SETTINGS}</label></th>

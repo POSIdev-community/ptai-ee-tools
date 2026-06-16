@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.commands;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.CliJsonAstJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.ProjectPriority;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
@@ -105,6 +106,12 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
             description = "Execute full AST instead of incremental")
     protected boolean fullScan = false;
 
+    @CommandLine.Option(
+            names = {"--priority"}, order = 22,
+            paramLabel = "<priority>",
+            description = "An agent will first handle the project that has the highest priority. Valid values: ${COMPLETION-CANDIDATES}")
+    protected ProjectPriority priority = ProjectPriority.Medium;
+
     @Override
     public Integer call() {
         CliJsonAstJob job = CliJsonAstJob.builder()
@@ -117,6 +124,7 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
                 .settings(jsonSettings)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
+                .projectPriority(priority.getValue())
                 .policy(jsonPolicy)
                 .async(async)
                 .input(input).output(output)

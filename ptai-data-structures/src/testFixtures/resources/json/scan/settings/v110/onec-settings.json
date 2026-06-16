@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.10.json",
+  "Version": "1.10",
+  "ProjectName": "OneC App",
+  "ProgrammingLanguages": ["OneC"],
+  "ScanModules": [
+    "StaticCodeAnalysis"
+  ]
+}

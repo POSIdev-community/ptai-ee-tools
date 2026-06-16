@@ -246,6 +246,10 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiScanLabel", elem)
             },
 
+            onPtaiProjectPriorityError: function (elem) {
+                this.handle("ptaiProjectPriority", elem)
+            },
+
             onPtaiProjectNameError: function (elem) {
                 this.handle("ptaiProjectName", elem);
             },

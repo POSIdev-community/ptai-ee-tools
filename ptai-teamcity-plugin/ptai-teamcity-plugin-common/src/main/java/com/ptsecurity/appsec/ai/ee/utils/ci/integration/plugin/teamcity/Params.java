@@ -49,6 +49,11 @@ public class Params {
     public static final String SCAN_LABEL = PARAM("ScanLabel");
 
     /**
+     * PT AI project priority
+     */
+    public static final String PROJECT_PRIORITY = PARAM("ProjectPriority");
+
+    /**
      * Defines how code AST settings are defined. If this field equals to
      * {@link Constants#AST_SETTINGS_JSON} then settings are defined via two JSONs, if
      * equals to {@link Constants#AST_SETTINGS_UI} then settings are defined via viewer

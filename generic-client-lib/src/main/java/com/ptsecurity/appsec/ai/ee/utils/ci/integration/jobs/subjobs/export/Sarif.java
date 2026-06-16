@@ -195,6 +195,12 @@ public class Sarif extends Export {
                                                 .withUri(fixUri(scaIssue.getFile()))
                                                 .withUriBaseId("SRCROOT")
                                 ));
+            } else if (BaseIssue.Type.SECRET.equals(issue.getClazz())) {
+                SecretIssue secretIssue = (SecretIssue) issue;
+                location.withPhysicalLocation(phl(secretIssue.getVulnerableExpression()));
+            } else if (BaseIssue.Type.MALICIOUSCODE.equals(issue.getClazz())) {
+                MaliciousCodeIssue maliciousCodeIssue = (MaliciousCodeIssue) issue;
+                location.withPhysicalLocation(phl(maliciousCodeIssue.getVulnerableExpression()));
             }
 
             sarifRun.getResults().add(result);

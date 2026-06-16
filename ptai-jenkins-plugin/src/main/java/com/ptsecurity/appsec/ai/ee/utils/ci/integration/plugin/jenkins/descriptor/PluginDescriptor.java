@@ -10,6 +10,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalcon
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.priority.ProjectPrioritySettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
@@ -23,6 +24,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.CopyOnWriteList;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import lombok.Getter;
 import lombok.NonNull;
@@ -226,6 +228,20 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public static WorkMode.WorkModeDescriptor getDefaultWorkModeDescriptor() {
         return Jenkins.get().getDescriptorByType(WorkModeSync.Descriptor.class);
+    }
+
+    @SuppressWarnings("unused")
+    public ListBoxModel doFillProjectPrioritySettingsItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (ProjectPrioritySettings setting : ProjectPrioritySettings.values()) {
+            items.add(setting.getDisplayName(), setting.name());
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public String getDefaultProjectPrioritySettings() {
+        return ProjectPrioritySettings.MEDIUM.name();
     }
 
     protected static Map<String, String> versionInfo = null;

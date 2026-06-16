@@ -299,6 +299,9 @@ public class ProjectTasksImpl extends AbstractTaskImpl implements ProjectTasks, 
         return res;
     }
 
+    @Override
+    public void setProjectPriority(@NonNull UUID projectId, String projectPriority) {}
+
     private List<LegacyProgrammingLanguageGroup> getLanguagesFromDetectionObject(DefaultProjectSettingsModelLangPercentDistribution detection) {
         if (detection == null) {
             return Collections.emptyList();

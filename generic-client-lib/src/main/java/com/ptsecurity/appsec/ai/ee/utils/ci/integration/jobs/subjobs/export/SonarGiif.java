@@ -7,8 +7,8 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTasks;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -240,6 +240,12 @@ public class SonarGiif extends Export {
                         .filePath(fixUri(scaIssue.getFile()))
                         .message(message)
                         .build();
+            } else if (BaseIssue.Type.SECRET == clazz) {
+                SecretIssue secretIssue = (SecretIssue) issue;
+                primaryLocation = pl(message, secretIssue.getVulnerableExpression());
+            } else if (BaseIssue.Type.MALICIOUSCODE == clazz) {
+                MaliciousCodeIssue maliciousCodeIssue = (MaliciousCodeIssue) issue;
+                primaryLocation = pl(message, maliciousCodeIssue.getVulnerableExpression());
             } else continue;
             result.getIssues().add(SonarGiifReport.Issue.builder()
                     .engineId("PTAI")
