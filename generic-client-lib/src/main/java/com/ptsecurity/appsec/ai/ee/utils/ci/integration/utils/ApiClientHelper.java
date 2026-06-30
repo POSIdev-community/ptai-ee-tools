@@ -8,20 +8,13 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 import static com.ptsecurity.misc.tools.helpers.CertificateHelper.createTrustManager;
 import static org.joor.Reflect.on;
@@ -62,10 +55,11 @@ public class ApiClientHelper {
             X509TrustManager trustManager = createTrustManager(connectionSettings.getCaCertsPem(), connectionSettings.isInsecure());
 
             OkHttpClient.Builder builder = helper.getHttpClient().newBuilder()
-                    .hostnameVerifier((hostname, session) -> true)
                     .authenticator(new JwtAuthenticator(client))
                     .addInterceptor(new LoggingInterceptor(client.getAdvancedSettings()))
                     .protocols(Collections.singletonList(Protocol.HTTP_1_1));
+            if (connectionSettings.isInsecure())
+                builder.hostnameVerifier((hostname, session) -> true);
             if (null != trustManager) {
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, new TrustManager[] { trustManager }, new SecureRandom());
