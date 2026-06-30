@@ -140,7 +140,8 @@ public class AiProjV110ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public String getBranchName() {
-        return S("BranchName");
+        String branchName = S("BranchName");
+        return isEmpty(branchName) ? null : branchName;
     }
 
     @Override
