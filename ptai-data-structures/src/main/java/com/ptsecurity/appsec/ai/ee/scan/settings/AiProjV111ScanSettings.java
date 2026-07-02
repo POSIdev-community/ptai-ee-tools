@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
-import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage___;
+import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage_;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
-import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.JavaVersion;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +19,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule____.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__2.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Slf4j
-public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
+public class AiProjV111ScanSettings extends UnifiedAiProjScanSettings {
     private static final Map<String, ScanBrief.ScanSettings.Language> PROGRAMMING_LANGUAGE_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
     private static final Map<String, ScanModule> SCAN_MODULE_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
     private static final Map<String, DotNetSettings.ProjectType> DOTNET_PROJECT_TYPE_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
@@ -38,21 +41,23 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
     private static final Map<String, DetectionType> BLACKBOX_FORM_AUTH_DETECTION_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
 
     static {
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.VB.value(), ScanBrief.ScanSettings.Language.VB);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.GO.value(), ScanBrief.ScanSettings.Language.GO);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.GO.value(), ScanBrief.ScanSettings.Language.GO);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.SCALA.value(), ScanBrief.ScanSettings.Language.SCALA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.ONE_C.value(), ScanBrief.ScanSettings.Language.ONE_C);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_.DART.value(), ScanBrief.ScanSettings.Language.DART);
 
         SCAN_MODULE_MAP.put(CONFIGURATION.value(), ScanModule.CONFIGURATION);
         SCAN_MODULE_MAP.put(COMPONENTS.value(), ScanModule.COMPONENTS);
@@ -60,14 +65,17 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
         SCAN_MODULE_MAP.put(PATTERN_MATCHING.value(), ScanModule.PATTERNMATCHING);
         SCAN_MODULE_MAP.put(STATIC_CODE_ANALYSIS.value(), ScanModule.STATICCODEANALYSIS);
         SCAN_MODULE_MAP.put(SOFTWARE_COMPOSITION_ANALYSIS.value(), ScanModule.SOFTWARECOMPOSITIONANALYSIS);
+        SCAN_MODULE_MAP.put(SECRET_DETECTION.value(), ScanModule.SECRETDETECTION);
+        SCAN_MODULE_MAP.put(MALICIOUS_CODE_DETECTION.value(), ScanModule.MALICIOUSCODEDETECTION);
 
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.NONE.value(), DotNetSettings.ProjectType.NONE);
         DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.SOLUTION.value(), DotNetSettings.ProjectType.SOLUTION);
-        DOTNET_PROJECT_TYPE_MAP.put(DotNetProjectType.WEB_SITE.value(), DotNetSettings.ProjectType.WEBSITE);
 
-        JAVA_VERSION_MAP.put(JavaVersion._8.value(), v1_8);
-        JAVA_VERSION_MAP.put(JavaVersion._11.value(), v1_11);
-        JAVA_VERSION_MAP.put(JavaVersion._17.value(), v1_17);
+        JAVA_VERSION_MAP.put(_8.value(), v1_8);
+        JAVA_VERSION_MAP.put(_11.value(), v1_11);
+        JAVA_VERSION_MAP.put(_17.value(), v1_17);
+        JAVA_VERSION_MAP.put(_21.value(), v1_21);
+        JAVA_VERSION_MAP.put(_25.value(), v1_25);
 
         BLACKBOX_PROXY_TYPE_MAP.put(ProxyType.HTTP.value(), BlackBoxSettings.ProxySettings.Type.HTTP);
         BLACKBOX_PROXY_TYPE_MAP.put(ProxyType.SOCKS_4.value(), BlackBoxSettings.ProxySettings.Type.SOCKS4);
@@ -95,17 +103,17 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
         BLACKBOX_FORM_AUTH_DETECTION_MAP.put(AuthFormDetectionType.MANUAL.value(), DetectionType.MANUAL);
     }
 
-    public AiProjV15ScanSettings(@NonNull final JsonNode rootNode) {
+    public AiProjV111ScanSettings(@NonNull final JsonNode rootNode) {
         super(rootNode);
     }
 
     @Override
     public @NonNull String getJsonSchema() {
-        return ResourcesHelper.getResourceString("aiproj/schema/aiproj-v1.5.json");
+        return ResourcesHelper.getResourceString("aiproj/schema/aiproj-v1.11.json");
     }
 
     @Override
-    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<com.networknt.schema.Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
         for (Error error : errors) {
             ParseResult.Message.Type type = error.getKeyword().equals("format") &&
@@ -122,7 +130,7 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public Version getVersion() {
-        return Version.V15;
+        return Version.V111;
     }
 
     @Override
@@ -132,18 +140,23 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public String getBranchName() {
-        log.trace("No branch name support for AIPROJ schema v.1.5");
-        return null;
+        String branchName = S("BranchName");
+        return isEmpty(branchName) ? null : branchName;
     }
 
     @Override
     protected void validateBranchName() {
-        getBranchName();
+        String branchName = getBranchName();
+        if (branchName == null) {
+            throw GenericException.raise(
+                    i18n_ast_settings_branch_from_json_message_empty(),
+                    new IllegalArgumentException());
+        }
     }
 
     @Override
     public @NonNull ScanBrief.ScanSettings.Language getProgrammingLanguage() {
-        log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.5");
+        log.trace("No common ProgrammingLanguage support for AIPROJ schema v.1.10");
         return this.getProgrammingLanguages().iterator().next();
     }
 
@@ -176,6 +189,17 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    protected void validateProgrammingLanguages(ParseResult result) {
+        Set<ScanBrief.ScanSettings.Language> languages = getProgrammingLanguages();
+        if (languages.contains(ScanBrief.ScanSettings.Language.CSHARPWINONLY) &&
+                languages.contains(ScanBrief.ScanSettings.Language.CSHARP)) {
+            String errorMessage = i18n_ast_settings_type_manual_json_settings_message_csharp_error();
+            log.error(errorMessage);
+            addErrorMessageToResult(result, errorMessage);
+        }
+    }
+
+    @Override
     public Set<ScanModule> getScanModules() {
         Set<ScanModule> res = new HashSet<>();
         JsonNode scanModules = N("ScanModules");
@@ -193,13 +217,13 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public String getCustomParameters() {
-        log.trace("No common CustomParameters flag support for AIPROJ schema v.1.5");
+        log.trace("No common CustomParameters flag support for AIPROJ schema v.1.10");
         return null;
     }
 
     @Override
     public UnifiedAiProjScanSettings setCustomParameters(String parameters) {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.5");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.10");
         return this;
     }
 
@@ -262,6 +286,7 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
                 .usePublicAnalysisMethod(B("JavaScriptSettings.UsePublicAnalysisMethod"))
                 .downloadDependencies(B("JavaScriptSettings.DownloadDependencies"))
                 .customParameters(S("JavaScriptSettings.CustomParameters"))
+                .dependenciesPath(S("JavaScriptSettings.DependenciesPath"))
                 .useJsaAnalysis(B("JavaScriptSettings.UseJsaAnalysis"))
                 .useTaintAnalysis(B("JavaScriptSettings.UseTaintAnalysis"))
                 .build();
@@ -279,10 +304,21 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public PmTaintSettings getPmTaintSettings() {
-        if (N("PmTaintSettings").isMissingNode()) return null;
+        JsonNode pmTaintSettings = N("PmTaintSettings");
+        if (pmTaintSettings.isMissingNode()) return null;
+
+        List<String> pmGroups = new ArrayList<>();
+        JsonNode pmGroupsNode = N(pmTaintSettings, "PMGroups");
+        if (pmGroupsNode.isArray()) {
+            for (JsonNode pmGroupNameNode : pmGroupsNode) {
+                pmGroups.add(pmGroupNameNode.asText());
+            }
+        }
+
         return PmTaintSettings.builder()
                 .usePublicAnalysisMethod(B("PmTaintSettings.UsePublicAnalysisMethod"))
                 .customParameters(S("PmTaintSettings.CustomParameters"))
+                .pmGroups(pmGroups)
                 .build();
     }
 
@@ -331,13 +367,13 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUsePublicAnalysisMethod() {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.5");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.10");
         return false;
     }
 
     @Override
     public UnifiedAiProjScanSettings setUsePublicAnalysisMethod(@NonNull Boolean value) {
-        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.5");
+        log.trace("No common PublicAnalysisMethod flag support for AIPROJ schema v.1.10");
         return this;
     }
 
@@ -348,18 +384,18 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isUseCustomPmRules() {
-        return B("UseCustomPmRules");
-    }
-
-    @Override
-    public @NonNull Boolean isApplyAllPMRules() {
-        log.trace("No ApplyAllPMRules rules support for AIPROJ schema v.1.5");
+        log.trace("No UseCustomPmRules rules support for AIPROJ schema v.1.10");
         return false;
     }
 
     @Override
+    public @NonNull Boolean isApplyAllPMRules() {
+        return B("ApplyAllPMRules");
+    }
+
+    @Override
     public @NonNull Boolean isUseCustomYaraRules() {
-        log.trace("No custom SAST rules support for AIPROJ schema v.1.5");
+        log.trace("No custom SAST rules support for AIPROJ schema v.1.10");
         return false;
     }
 
@@ -370,13 +406,13 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public @NonNull Boolean isDownloadDependencies() {
-        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.5");
+        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.10");
         return false;
     }
 
     @Override
     public UnifiedAiProjScanSettings setDownloadDependencies(@NonNull Boolean value) {
-        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.5");
+        log.trace("No common DownloadDependencies flag support for AIPROJ schema v.1.10");
         return this;
     }
 
@@ -394,37 +430,6 @@ public class AiProjV15ScanSettings extends UnifiedAiProjScanSettings {
                 .enabled(B(mailingProjectSettings, "Enabled"))
                 .mailProfileName(S(mailingProjectSettings, "MailProfileName"))
                 .emailRecipients(emailRecipients)
-                .build();
-    }
-
-    @Override
-    public Tags getTags() {
-        if (N("Tags").isMissingNode()) return null;
-        List<TagEntity> tagEntities = new ArrayList<>();
-        JsonNode tagsNode = N("Tags");
-        if (tagsNode.isArray()) {
-            for (JsonNode tagNode : tagsNode) {
-                String tagTypeString = S(tagNode, "Type");
-                String tagValue = S(tagNode, "Value");
-
-                TagEntity.TagType tagType = null;
-                try {
-                    tagType = TagEntity.TagType.valueOf(tagTypeString.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    log.warn("Unknown tag type: {}", tagTypeString);
-                }
-
-                if (tagType != null) {
-                    tagEntities.add(TagEntity.builder()
-                            .type(tagType)
-                            .value(tagValue)
-                            .build());
-                }
-            }
-        }
-
-        return Tags.builder()
-                .tags(tagEntities)
                 .build();
     }
 

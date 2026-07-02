@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV110.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV111.Version.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -202,6 +202,8 @@ public abstract class UnifiedAiProjScanSettings {
             settings = (root.path("ScanModules").isMissingNode())
                     ? new AiProjLegacyScanSettings(root)
                     : new AiProjV10ScanSettings(root);
+        else if (_1_11.value().equals(versionNode.textValue()))
+            settings = new AiProjV111ScanSettings(root);
         else if (_1_10.value().equals(versionNode.textValue()))
             settings = new AiProjV110ScanSettings(root);
         else if (_1_9.value().equals(versionNode.textValue()))
@@ -371,7 +373,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V110 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V110, V111 }
     public abstract Version getVersion();
 
     /**

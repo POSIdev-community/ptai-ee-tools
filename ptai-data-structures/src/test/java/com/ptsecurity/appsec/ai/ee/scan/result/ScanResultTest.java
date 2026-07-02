@@ -41,7 +41,7 @@ public class ScanResultTest extends BaseTest {
                     version == ApiVersion.V491 || version == ApiVersion.V4100 ||
                     version == ApiVersion.V4110 || version == ApiVersion.V500 ||
                     version == ApiVersion.V520 || version == ApiVersion.V530 ||
-                    version == ApiVersion.V600) {
+                    version == ApiVersion.V600 || version == ApiVersion.V610) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_OWASP_BRICKS);
@@ -75,7 +75,7 @@ public class ScanResultTest extends BaseTest {
                     version == ScanBrief.ApiVersion.V491 || version == ApiVersion.V4100 ||
                     version == ApiVersion.V4110 || version == ApiVersion.V500 ||
                     version == ApiVersion.V520 || version == ApiVersion.V530 ||
-                    version == ApiVersion.V600) {
+                    version == ApiVersion.V600 || version == ApiVersion.V610) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_SMOKE);

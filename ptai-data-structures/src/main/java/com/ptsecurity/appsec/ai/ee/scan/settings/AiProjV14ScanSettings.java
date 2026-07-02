@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
-import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage__;
+import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage___;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.JavaVersion;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
@@ -38,21 +38,21 @@ public class AiProjV14ScanSettings extends UnifiedAiProjScanSettings {
     private static final Map<String, DetectionType> BLACKBOX_FORM_AUTH_DETECTION_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
 
     static {
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.VB.value(), ScanBrief.ScanSettings.Language.VB);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.GO.value(), ScanBrief.ScanSettings.Language.GO);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage__.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.VB.value(), ScanBrief.ScanSettings.Language.VB);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.GO.value(), ScanBrief.ScanSettings.Language.GO);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage___.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
 
         SCAN_MODULE_MAP.put(CONFIGURATION.value(), ScanModule.CONFIGURATION);
         SCAN_MODULE_MAP.put(COMPONENTS.value(), ScanModule.COMPONENTS);
