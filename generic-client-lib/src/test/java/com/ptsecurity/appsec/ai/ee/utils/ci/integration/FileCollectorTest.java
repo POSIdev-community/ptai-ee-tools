@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.jupiter.api.condition.OS.LINUX;
+import static org.junit.jupiter.api.condition.OS.MAC;
 
 public class FileCollectorTest extends BaseTest {
     private static final Map<Locale, String> NATIONAL_FILE_NAMES = new HashMap<>();
@@ -63,6 +64,48 @@ public class FileCollectorTest extends BaseTest {
 
         File zip = FileCollector.collect(null, sources.toFile(), new Tool());
         Assertions.assertTrue(zip.exists());
+    }
+
+    @SneakyThrows
+    @Test
+    @EnabledOnOs({LINUX, MAC})
+    public void symlinkContainment(@TempDir final Path root) {
+        if (!SystemUtils.IS_OS_LINUX && !SystemUtils.IS_OS_MAC) return;
+
+        Path outside = Files.createDirectory(root.resolve("outside"));
+        final String secret = UUID.randomUUID().toString();
+        Path secretFile = Files.write(outside.resolve("secret.txt"), secret.getBytes(StandardCharsets.UTF_8));
+
+        Path project = Files.createDirectory(root.resolve("project"));
+        Files.write(project.resolve("app.txt"), "code".getBytes(StandardCharsets.UTF_8));
+        final String localContent = UUID.randomUUID().toString();
+        Files.write(project.resolve("local.txt"), localContent.getBytes(StandardCharsets.UTF_8));
+        Files.createSymbolicLink(project.resolve("local.link"), project.resolve("local.txt"));
+        Files.createSymbolicLink(project.resolve("loot.link"), secretFile);
+
+        File zip = FileCollector.collect(null, project.toFile(), new Tool());
+        Assertions.assertTrue(zip.exists());
+
+        Map<String, String> entries = new HashMap<>();
+        try (java.util.zip.ZipFile zf = new java.util.zip.ZipFile(zip)) {
+            Enumeration<? extends java.util.zip.ZipEntry> en = zf.entries();
+            while (en.hasMoreElements()) {
+                java.util.zip.ZipEntry e = en.nextElement();
+                if (e.isDirectory()) continue;
+                try (InputStream is = zf.getInputStream(e)) {
+                    entries.put(e.getName(), new String(org.apache.commons.io.IOUtils.toByteArray(is), StandardCharsets.UTF_8));
+                }
+            }
+        }
+
+        Assertions.assertFalse(entries.containsKey("loot.link"), "out-of-tree symlink must not be in the archive");
+        Assertions.assertTrue(entries.values().stream().noneMatch(v -> v.contains(secret)),
+                "content of a file outside the project tree must not be packed");
+
+        Assertions.assertTrue(entries.containsKey("app.txt"));
+        Assertions.assertTrue(entries.containsKey("local.link"), "in-tree symlink must be kept");
+        Assertions.assertNotEquals(localContent, entries.get("local.link"),
+                "in-tree symlink must be stored unresolved, not as its target's content");
     }
 
     @SneakyThrows

@@ -11,20 +11,25 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.zip.UnixStat;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -55,6 +60,8 @@ public class FileCollector {
         private final Path path;
         @NonNull
         private final String entryName;
+
+        private final boolean symbolicLink;
     }
 
     private final Transfers transfers;
@@ -170,44 +177,119 @@ public class FileCollector {
                     verbose("Exclude pattern = %s", pattern);
                 }
             fileSet.setDefaultexcludes(transfer.isUseDefaultExcludes());
-            String[] dirs = fileSet.getDirectoryScanner().getIncludedDirectories();
-            String[] files = fileSet.getDirectoryScanner().getIncludedFiles();
+
+            fileSet.setFollowSymlinks(false);
+            DirectoryScanner scanner = fileSet.getDirectoryScanner();
+            String[] dirs = scanner.getIncludedDirectories();
+            String[] files = scanner.getIncludedFiles();
+
             verboseCollectionDetails(files, "Included files");
-            verboseCollectionDetails(getScannedDirs(fileSet.getDirectoryScanner()), "Scanned dirs");
-            verboseCollectionDetails(fileSet.getDirectoryScanner().getNotIncludedFiles(), "Not included files");
-            verboseCollectionDetails(fileSet.getDirectoryScanner().getDeselectedFiles(), "Deselected files");
-            verboseCollectionDetails(fileSet.getDirectoryScanner().getExcludedFiles(), "Excluded files");
-            // files is an array of this.srcDir - relative paths to files
+            verboseCollectionDetails(getScannedDirs(scanner), "Scanned dirs");
+            verboseCollectionDetails(scanner.getNotIncludedFiles(), "Not included files");
+            verboseCollectionDetails(scanner.getDeselectedFiles(), "Deselected files");
+            verboseCollectionDetails(scanner.getExcludedFiles(), "Excluded files");
+
             Path parentFolder = dir.isDirectory() ? dir.toPath() : dir.getParentFile().toPath();
             for (int i = 0 ; i < 2 ; i++) {
-                // Add all the folders then files
                 String[] items = 0 == i ? dirs : files;
+                boolean isDirectory = 0 == i;
                 for (String item : items) {
-                    // Normalize relative path
                     Path itemPath = parentFolder.resolve(item);
-                    String relativePath = itemPath.toUri().normalize().getPath();
-                    relativePath = StringUtils.removeStart(relativePath, parentFolder.toUri().normalize().getPath());
-                    String entryName;
-                    if (transfer.isFlatten()) {
-                        if (0 == i) continue;
-                        entryName = itemPath.getFileName().toString();
-                    } else if (relativePath.equals(removePrefix)) {
+                    String entryName = buildEntryName(transfer, parentFolder, removePrefix, itemPath, isDirectory);
+                    if (entryName == null) {
                         continue;
-                    } else {
-                        if (!relativePath.startsWith(removePrefix))
-                            throw GenericException.raise("File collect failed", new IllegalArgumentException(String.format("File's %s does not starts with prefix %s", item, removePrefix)));
-                        entryName = StringUtils.removeStart(relativePath, removePrefix);
-                    }
-                    if (entryName.startsWith("/")) {
-                        entryName = entryName.substring(1);
                     }
 
-                    verbose("File %s will be added as %s", itemPath.toString(), entryName);
-                    res.add(new Entry(itemPath, entryName));
+                    verbose("File %s will be added as %s", itemPath, entryName);
+                    res.add(new Entry(itemPath, entryName, false));
                 }
             }
+
+            collectSymbolicLinks(transfer, scanner, parentFolder, removePrefix, res);
         }
         return res;
+    }
+
+    private void collectSymbolicLinks(@NonNull final Transfer transfer, @NonNull final DirectoryScanner scanner,
+                                      @NonNull final Path parentFolder, @NonNull final String removePrefix,
+                                      @NonNull final List<Entry> res) throws GenericException {
+        Path rootReal = resolveProjectRoot(parentFolder);
+        String[] symlinks = scanner.getNotFollowedSymlinks();
+        verboseCollectionDetails(symlinks, "Not followed symbolic links");
+        if (null == symlinks) {
+            return;
+        }
+
+        for (String symlink : symlinks) {
+            Path linkPath = Paths.get(symlink);
+            if (!shouldKeepSymbolicLink(linkPath, rootReal)) {
+                continue;
+            }
+
+            String entryName = buildEntryName(transfer, parentFolder, removePrefix, linkPath, false);
+            if (null == entryName) {
+                continue;
+            }
+
+            verbose("Symbolic link %s will be kept (unresolved) as %s", linkPath, entryName);
+            res.add(new Entry(linkPath, entryName, true));
+        }
+    }
+
+    private Path resolveProjectRoot(@NonNull final Path parentFolder) throws GenericException {
+        try {
+            return parentFolder.toRealPath();
+        } catch (IOException e) {
+            throw GenericException.raise("File collect failed", e);
+        }
+    }
+
+    private boolean shouldKeepSymbolicLink(@NonNull final Path linkPath, @NonNull final Path rootReal) {
+        if (!Files.isSymbolicLink(linkPath)) {
+            verbose("Skip %s as it is not a real symbolic link", linkPath);
+            return false;
+        }
+
+        Path target;
+        try {
+            target = linkPath.toRealPath();
+        } catch (IOException e) {
+            verbose("Skip symbolic link %s as its target cannot be resolved (%s)", linkPath, e.getMessage());
+            return false;
+        }
+        if (!target.startsWith(rootReal)) {
+            verbose("Skip symbolic link %s as its target %s is outside the project root %s",
+                    linkPath, target, rootReal);
+            return false;
+        }
+        return true;
+    }
+
+    private String buildEntryName(@NonNull Transfer transfer, @NonNull Path parentFolder, @NonNull String removePrefix, @NonNull Path itemPath, boolean isDirectory) throws GenericException {
+        String relativePath = itemPath.toUri().normalize().getPath();
+        relativePath = Strings.CS.removeStart(relativePath, parentFolder.toUri().normalize().getPath());
+
+        String entryName;
+        if (transfer.isFlatten()) {
+            if (isDirectory) {
+                return null;
+            }
+
+            entryName = itemPath.getFileName().toString();
+        } else if (relativePath.equals(removePrefix)) {
+            return null;
+        } else {
+            if (!relativePath.startsWith(removePrefix)) {
+                throw GenericException.raise("File collect failed", new IllegalArgumentException(
+                        String.format("File's %s does not starts with prefix %s", relativePath, removePrefix)));
+            }
+            entryName = Strings.CS.removeStart(relativePath, removePrefix);
+        }
+
+        if (entryName.startsWith("/")) {
+            entryName = entryName.substring(1);
+        }
+        return entryName;
     }
 
     /*
@@ -229,24 +311,20 @@ public class FileCollector {
             verbose("Destination folder %s doesn't exist, creating", destDir.getAbsolutePath());
             destDir.mkdirs();
         }
-        OutputStream zfs = new FileOutputStream(zip);
-        ArchiveOutputStream as = new ArchiveStreamFactory().createArchiveOutputStream(ZIP, zfs);
+        OutputStream zfs = Files.newOutputStream(zip.toPath());
+        ZipArchiveOutputStream as = new ArchiveStreamFactory().createArchiveOutputStream(ZIP, zfs);
         verbose("Zip stream created");
 
         for (Entry entry : files) {
             verbose("Add %s file as %s to zip stream", entry.path, entry.entryName);
-            // Check if this is symlink with missing destination
-            if (Files.isSymbolicLink(entry.path)) {
-                verbose("%s is a symbolic link, let's check if its destination exist", entry.path);
-                if (!Files.readSymbolicLink(entry.path).toFile().exists()) {
-                    verbose("Skip %s as there's no target file exist", entry.path);
-                    continue;
-                }
+            if (entry.symbolicLink) {
+                packSymbolicLink(as, entry);
+                continue;
             }
 
             as.putArchiveEntry(new ZipArchiveEntry(entry.entryName));
             if (!Files.isDirectory(entry.path)) {
-                BufferedInputStream is = new BufferedInputStream(new FileInputStream(entry.path.toFile()));
+                BufferedInputStream is = new BufferedInputStream(Files.newInputStream(entry.path.toFile().toPath()));
                 int size = IOUtils.copy(is, as);
                 verbose("%s zipped", bytesToString(size));
                 is.close();
@@ -257,6 +335,18 @@ public class FileCollector {
         verbose("Closing zip stream");
         as.finish();
         zfs.close();
+    }
+
+    private void packSymbolicLink(
+            @NonNull final ZipArchiveOutputStream as,
+            @NonNull final Entry entry) throws IOException {
+        String target = Files.readSymbolicLink(entry.path).toString();
+        ZipArchiveEntry zipEntry = new ZipArchiveEntry(entry.entryName);
+        zipEntry.setUnixMode(UnixStat.LINK_FLAG | UnixStat.DEFAULT_LINK_PERM);
+        as.putArchiveEntry(zipEntry);
+        as.write(target.getBytes(StandardCharsets.UTF_8));
+        as.closeArchiveEntry();
+        verbose("Symbolic link %s stored as %s -> %s (unresolved)", entry.path, entry.entryName, target);
     }
 
     private static final double LOG1024 = Math.log10(1024);
