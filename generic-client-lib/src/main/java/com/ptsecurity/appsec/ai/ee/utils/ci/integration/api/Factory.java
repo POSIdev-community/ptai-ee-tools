@@ -4,10 +4,10 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.SSLCertificateTrustException;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.VersionUnsupportedException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.*;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CertificateHelper;
 import com.ptsecurity.misc.tools.helpers.VersionHelper;
 import lombok.NonNull;
@@ -17,13 +17,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.reflections.Reflections;
 
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import java.lang.reflect.Modifier;
-import java.net.*;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -178,13 +185,13 @@ public class Factory {
                     log.trace("No need to continue iterate through API client versions as connection to {} host timeout", connectionSettings.getUrl());
                     throw GenericException.raise(
                             Resources.i18n_ast_settings_server_check_message_connectiontimeout(), e2);
-                } else if (e2 instanceof SSLHandshakeException) {
-                    log.trace("No need to continue iterate through API client versions as there's SSL handshake problem");
+                } else if (e2 instanceof SSLException) {
+                    log.trace("No need to continue iterate through API client versions as there's SSL handshake / hostname verification problem");
                     throw GenericException.raise(
                             Resources.i18n_ast_settings_server_check_message_sslhandshakefailed(), e2);
-                } else if (HttpStatus.SC_NOT_FOUND == e.getCode()) {
+                } else if (null != e.getCode() && HttpStatus.SC_NOT_FOUND == e.getCode()) {
                     log.trace("Continue iterate through API client versions as 404 response");
-                } else if (HttpStatus.SC_UNAUTHORIZED == e.getCode()) {
+                } else if (null != e.getCode() && HttpStatus.SC_UNAUTHORIZED == e.getCode()) {
                     log.trace("No need to continue iterate through API client versions as authentication failed");
                     throw GenericException.raise(
                             Resources.i18n_ast_settings_server_check_message_unauthorized(), e.getCause());
