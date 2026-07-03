@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations;
 
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -8,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Slf4j
 @SuperBuilder
@@ -34,4 +35,14 @@ public abstract class AbstractFileOperations implements FileOperations {
     }
 
     protected abstract void saveInMemoryData(@NonNull String name, byte[] data);
+
+    protected Path resolveAndValidate(Path outputDir, String name, TextOutput logger) {
+        Path out = outputDir.resolve(name).toAbsolutePath().normalize();
+        Path safeDir = outputDir.toAbsolutePath().normalize();
+        if (!out.startsWith(safeDir)) {
+            logger.warning("Invalid file name: '" + name + "'. Skipping");
+            return null;
+        }
+        return out;
+    }
 }

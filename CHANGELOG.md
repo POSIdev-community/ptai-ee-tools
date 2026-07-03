@@ -279,3 +279,7 @@ options:
 + [Feature] Added support for SecretDetection and MaliciousCodeDetection
 + [Feature] Added support for scanning Java 25 version
 + [Feature] Added support for scanning OneC
+### 20260702
++ [Feature] PT AI v.6.1.0 support approved
++ [Feature] Added support for scanning Dart
++ [Fix] Fixed several vulnerabilities

@@ -2,10 +2,10 @@ package com.ptsecurity.appsec.ai.ee.scan.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
-import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage______;
+import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage_______;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
@@ -18,10 +18,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
-import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__7.Version.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule___.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__8.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule____.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
@@ -42,21 +41,21 @@ public class AiProjV18ScanSettings extends UnifiedAiProjScanSettings {
     private static final Map<String, DetectionType> BLACKBOX_FORM_AUTH_DETECTION_MAP = new TreeMap<>(Comparator.nullsFirst(CASE_INSENSITIVE_ORDER));
 
     static {
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.GO.value(), ScanBrief.ScanSettings.Language.GO);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
-        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage______.SCALA.value(), ScanBrief.ScanSettings.Language.SCALA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.JAVA.value(), ScanBrief.ScanSettings.Language.JAVA);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.C_SHARP_WINDOWS_LINUX.value(), ScanBrief.ScanSettings.Language.CSHARP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.C_SHARP_WINDOWS.value(), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.PHP.value(), ScanBrief.ScanSettings.Language.PHP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.JAVA_SCRIPT.value(), ScanBrief.ScanSettings.Language.JAVASCRIPT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.PYTHON.value(), ScanBrief.ScanSettings.Language.PYTHON);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.OBJECTIVE_C.value(), ScanBrief.ScanSettings.Language.OBJECTIVEC);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.SWIFT.value(), ScanBrief.ScanSettings.Language.SWIFT);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.C_AND_C_PLUS_PLUS.value(), ScanBrief.ScanSettings.Language.CPP);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.GO.value(), ScanBrief.ScanSettings.Language.GO);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.KOTLIN.value(), ScanBrief.ScanSettings.Language.KOTLIN);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.SQL.value(), ScanBrief.ScanSettings.Language.SQL);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.RUBY.value(), ScanBrief.ScanSettings.Language.RUBY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.SOLIDITY.value(), ScanBrief.ScanSettings.Language.SOLIDITY);
+        PROGRAMMING_LANGUAGE_MAP.put(ProgrammingLanguage_______.SCALA.value(), ScanBrief.ScanSettings.Language.SCALA);
 
         SCAN_MODULE_MAP.put(CONFIGURATION.value(), ScanModule.CONFIGURATION);
         SCAN_MODULE_MAP.put(COMPONENTS.value(), ScanModule.COMPONENTS);
@@ -110,11 +109,11 @@ public class AiProjV18ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
-    public Set<ParseResult.Message> processErrorMessages(Set<ValidationMessage> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
-        for (ValidationMessage error : errors) {
-            ParseResult.Message.Type type = error.getCode().equals(FORMAT.getErrorCode()) &&
-                    error.getSchemaPath().equals("#/properties/MailingProjectSettings/properties/EmailRecipients/items")
+        for (Error error : errors) {
+            ParseResult.Message.Type type = error.getKeyword().equals("format") &&
+                    error.getSchemaLocation().toString().equals("#/properties/MailingProjectSettings/properties/EmailRecipients/items")
                     ? ParseResult.Message.Type.WARNING
                     : ParseResult.Message.Type.ERROR;
             result.add(ParseResult.Message.builder()

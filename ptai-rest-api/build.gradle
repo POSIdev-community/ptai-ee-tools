@@ -25,14 +25,14 @@ dependencies {
 
     // Used inside generated code
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/logging-interceptor
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.2.1'
 
     // Used inside generated code
     // https://mvnrepository.com/artifact/io.swagger/swagger-annotations
     implementation 'io.swagger:swagger-annotations:1.6.2'
     // Used inside generated code
     // https://mvnrepository.com/artifact/io.gsonfire/gson-fire
-    implementation 'io.gsonfire:gson-fire:1.8.5'
+    implementation 'io.gsonfire:gson-fire:1.9.0'
     // Need this as generated code uses annotations like @Nullable etc.
     // https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
@@ -917,6 +917,48 @@ swaggerSources {
             ]
         }
     }
+
+    auth610 {
+        inputFile = file('src/main/resources/api/v610/auth.yaml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v610.auth.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v610.auth.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    api610 {
+        inputFile = file('src/main/resources/api/v610/swagger.yaml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v610.api.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v610.api.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
+
+    notifications610 {
+        inputFile = file('src/main/resources/api/v610/notifications.yml')
+        code {
+            language = 'java'
+            library = 'okhttp-gson'
+            additionalProperties = [
+                    'modelPackage': 'com.ptsecurity.appsec.ai.ee.server.v610.notifications.model',
+                    'apiPackage': 'com.ptsecurity.appsec.ai.ee.server.v610.notifications.api',
+                    'dateLibrary': 'java8',
+                    'hideGenerationTimestamp': 'true'
+            ]
+        }
+    }
 }
 
 compileJava.dependsOn \
@@ -980,7 +1022,10 @@ compileJava.dependsOn \
  swaggerSources.notifications530.code, \
  swaggerSources.auth600.code, \
  swaggerSources.api600.code, \
- swaggerSources.notifications600.code
+ swaggerSources.notifications600.code, \
+ swaggerSources.auth610.code, \
+ swaggerSources.api610.code, \
+ swaggerSources.notifications610.code
 
 sourceSets.main.java.srcDirs \
  "${swaggerSources.auth411.code.outputDir}/src/main/java", \
@@ -1043,4 +1088,7 @@ sourceSets.main.java.srcDirs \
  "${swaggerSources.notifications530.code.outputDir}/src/main/java", \
  "${swaggerSources.auth600.code.outputDir}/src/main/java", \
  "${swaggerSources.api600.code.outputDir}/src/main/java", \
- "${swaggerSources.notifications600.code.outputDir}/src/main/java"
+ "${swaggerSources.notifications600.code.outputDir}/src/main/java", \
+ "${swaggerSources.auth610.code.outputDir}/src/main/java", \
+ "${swaggerSources.api610.code.outputDir}/src/main/java", \
+ "${swaggerSources.notifications610.code.outputDir}/src/main/java"

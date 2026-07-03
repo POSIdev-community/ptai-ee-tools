@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.*;
+import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.TempFile;
@@ -20,10 +21,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV110.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.AiprojV111.Version.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
@@ -32,7 +36,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Slf4j
 @Accessors
 public abstract class UnifiedAiProjScanSettings {
-    private static final List<NonValidationKeyword> NON_VALIDATION_KEYS = Collections.singletonList(new NonValidationKeyword("javaType"));
     protected final ObjectNode rootNode;
 
     public UnifiedAiProjScanSettings(@NonNull final JsonNode jsonNode) {
@@ -130,14 +133,17 @@ public abstract class UnifiedAiProjScanSettings {
             }
 
             log.trace("Check AIPROJ for schema compliance");
-            JsonSchemaFactory factory = JsonSchemaFactory
-                    .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                    .addMetaSchema(JsonMetaSchema
-                            .builder(JsonMetaSchema.getV4().getUri(), JsonMetaSchema.getV4())
-                            .addKeywords(NON_VALIDATION_KEYS).build()).build();
+            SchemaRegistryConfig schemaRegistryConfig = SchemaRegistryConfig.builder()
+                    .formatAssertionsEnabled(false)
+                    .build();
+
+            SchemaRegistry schemaRegistry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_4,
+                    builder -> builder.schemaRegistryConfig(schemaRegistryConfig));
+
             log.trace("Validate JSON for AIPROJ schema compliance");
-            JsonSchema jsonSchema = factory.getSchema(settings.getJsonSchema());
-            Set<ValidationMessage> errors = jsonSchema.validate(root);
+            Schema schema = schemaRegistry.getSchema(settings.getJsonSchema());
+            String inputJson = root.toString();
+            List<Error> errors = schema.validate(inputJson, InputFormat.JSON);
 
             log.trace("Validate Programming Languages");
             settings.validateProgrammingLanguages(result);
@@ -196,6 +202,8 @@ public abstract class UnifiedAiProjScanSettings {
             settings = (root.path("ScanModules").isMissingNode())
                     ? new AiProjLegacyScanSettings(root)
                     : new AiProjV10ScanSettings(root);
+        else if (_1_11.value().equals(versionNode.textValue()))
+            settings = new AiProjV111ScanSettings(root);
         else if (_1_10.value().equals(versionNode.textValue()))
             settings = new AiProjV110ScanSettings(root);
         else if (_1_9.value().equals(versionNode.textValue()))
@@ -277,13 +285,14 @@ public abstract class UnifiedAiProjScanSettings {
      * domain names etc.). This method removes low-severity errors from validation results
      * @param errors List of errors to be processed
      */
-    public Set<ParseResult.Message> processErrorMessages(Set<ValidationMessage> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
-        for (ValidationMessage error : errors)
+        for (Error error : errors) {
             result.add(ParseResult.Message.builder()
                     .type(ParseResult.Message.Type.ERROR)
                     .text(error.getMessage())
                     .build());
+        }
         return result;
     }
 
@@ -364,7 +373,7 @@ public abstract class UnifiedAiProjScanSettings {
         return res;
     }
 
-    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V110 }
+    public enum Version { LEGACY, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V110, V111 }
     public abstract Version getVersion();
 
     /**
