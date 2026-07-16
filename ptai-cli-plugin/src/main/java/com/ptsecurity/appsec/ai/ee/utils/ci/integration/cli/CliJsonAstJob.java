@@ -1,7 +1,8 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli;
 
-import com.ptsecurity.misc.tools.exceptions.GenericException;
+import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.JsonAstJobSetupOperationsImpl;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -30,6 +31,10 @@ public class CliJsonAstJob extends GenericCliAstJob {
                     return new String(Files.readAllBytes(settings), UTF_8);
         }, "JSON settings file read failed");
 
+        if (branchName == null) {
+            branchName = getBranchName(jsonSettings);
+        }
+
         String jsonPolicy = (null == policy)
                 ? null
                 : call(() -> {
@@ -43,5 +48,10 @@ public class CliJsonAstJob extends GenericCliAstJob {
                 .jsonPolicy(jsonPolicy)
                 .owner(this)
                 .build();
+    }
+
+    private String getBranchName(String jsonSettings) {
+        UnifiedAiProjScanSettings scanSettings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
+        return scanSettings.getBranchName();
     }
 }
