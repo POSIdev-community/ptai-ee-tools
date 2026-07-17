@@ -4,6 +4,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.As
 import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.serverSide.BuildStartContext;
 import jetbrains.buildServer.serverSide.BuildStartContextProcessor;
+import jetbrains.buildServer.serverSide.SRunnerContext;
 import lombok.NonNull;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.*;
@@ -27,16 +28,28 @@ public class AstBuildStartContextProcessor implements BuildStartContextProcessor
     }
 
     /**
-     * Adds globally defined parameter values to agent job as these parameters aren't
-     * part of build step configuration
+     * Adds globally defined parameter values to those PT AI AST steps that are set up to use global
+     * connection settings. Values are added as a step-scoped runner parameters and not as a build-wide
+     * shared ones, so builds without AST step get no PT AI credentials at all and steps that share
+     * a build with an AST one can't read the PT AI token
      * @param context Agent job context
      */
     @Override
     public void updateParameters(@NonNull BuildStartContext context) {
-        context.addSharedParameter(URL, settings.getValue(URL));
-        context.addSharedParameter(TOKEN, settings.getValue(TOKEN));
-        context.addSharedParameter(CERTIFICATES, settings.getValue(CERTIFICATES));
-        context.addSharedParameter(INSECURE, settings.getValue(INSECURE));
+        for (SRunnerContext runner : context.getRunnerContexts()) {
+            if (!runner.isEnabled()) {
+                continue;
+            }
+
+            if (!AstRunnerSettings.usesGlobalConnectionSettings(runner)) {
+                continue;
+            }
+
+            runner.addRunnerParameter(URL, settings.getValue(URL));
+            runner.addRunnerParameter(TOKEN, settings.getValue(TOKEN));
+            runner.addRunnerParameter(CERTIFICATES, settings.getValue(CERTIFICATES));
+            runner.addRunnerParameter(INSECURE, settings.getValue(INSECURE));
+        }
     }
 
     public void register() {
