@@ -15,6 +15,12 @@
 <c:set var="SERVER_SETTINGS_GLOBAL_INSECURE" value="<%=Params.INSECURE%>"/>
 <c:set var="LABEL_SERVER_SETTINGS_GLOBAL_INSECURE" value="<%=Labels.INSECURE%>"/>
 <c:set var="HINT_SERVER_SETTINGS_GLOBAL_INSECURE" value="<%=Hints.INSECURE%>"/>
+<c:set var="HINT_SERVER_SETTINGS_GLOBAL_INSECURE_SCOPE" value="<%=Hints.INSECURE_SCOPE%>"/>
+
+<c:set var="ALLOWED_URLS" value="<%=Constants.ALLOWED_URLS%>"/>
+<c:set var="LABEL_ALLOWED_URLS" value="<%=Labels.ALLOWED_URLS%>"/>
+<c:set var="LABEL_ALLOWED_URLS_SELECT" value="<%=Labels.ALLOWED_URLS_SELECT%>"/>
+<c:set var="HINT_ALLOWED_URLS" value="<%=Hints.ALLOWED_URLS%>"/>
 
 <c:set var="SERVER_SETTINGS" value="<%=Params.SERVER_SETTINGS%>"/>
 <c:set var="LABEL_SERVER_SETTINGS" value="<%=Labels.SERVER_SETTINGS%>"/>
@@ -29,7 +35,6 @@
 
 <c:set var="SERVER_SETTINGS_LOCAL_URL" value="<%=Params.URL%>"/>
 <c:set var="LABEL_SERVER_SETTINGS_LOCAL_URL" value="<%=Labels.URL%>"/>
-<c:set var="HINT_SERVER_SETTINGS_LOCAL_URL" value="<%=Hints.URL%>"/>
 
 <c:set var="SERVER_SETTINGS_LOCAL_TOKEN" value="<%=Params.TOKEN%>"/>
 <c:set var="LABEL_SERVER_SETTINGS_LOCAL_TOKEN" value="<%=Labels.TOKEN%>"/>

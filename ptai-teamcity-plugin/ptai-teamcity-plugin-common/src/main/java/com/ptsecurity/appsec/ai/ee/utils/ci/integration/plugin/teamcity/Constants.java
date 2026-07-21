@@ -49,6 +49,8 @@ public class Constants {
     public static final String SERVER_SETTINGS_GLOBAL = "SettingsGlobal";
     public static final String SERVER_SETTINGS_LOCAL = "SettingsTask";
 
+    public static final String ALLOWED_URLS = PREFIX + "AllowedUrls";
+
     /**
      * AST job is to be executed in synchronous mode i.e. CI system will wait
      * for job to finish, then look at the AST policy assessment results, generate reports etc.

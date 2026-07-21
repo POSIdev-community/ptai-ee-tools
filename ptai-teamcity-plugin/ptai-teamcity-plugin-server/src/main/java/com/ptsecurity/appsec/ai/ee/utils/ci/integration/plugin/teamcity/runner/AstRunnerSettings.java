@@ -8,8 +8,12 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.C
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.SERVER_SETTINGS;
 
 public class AstRunnerSettings {
+    public static boolean isAstRunner(@NonNull final ParametersDescriptor runner) {
+        return RUNNER_TYPE.equals(runner.getType());
+    }
+
     public static boolean usesGlobalConnectionSettings(@NonNull final ParametersDescriptor runner) {
-        return RUNNER_TYPE.equals(runner.getType())
+        return isAstRunner(runner)
                 && !SERVER_SETTINGS_LOCAL.equals(runner.getParameters().get(SERVER_SETTINGS));
     }
 }

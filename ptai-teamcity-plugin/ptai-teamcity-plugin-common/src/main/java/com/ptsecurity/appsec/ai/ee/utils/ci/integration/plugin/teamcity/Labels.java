@@ -17,6 +17,9 @@ public class Labels {
     public static final String CERTIFICATES = Resources.i18n_ast_settings_server_ca_pem_label();
     public static final String INSECURE = Resources.i18n_ast_settings_server_insecure_label();
 
+    public static final String ALLOWED_URLS = "Allowed PT AI server addresses";
+    public static final String ALLOWED_URLS_SELECT = "-- Select an allowed PT AI server address --";
+
     // Task settings labels
     public static final String SERVER_SETTINGS = "PT AI server connection";
     public static final String SERVER_SETTINGS_GLOBAL = "Globally defined";

@@ -65,11 +65,15 @@ public class AstSettingsPageController extends BaseAstController {
 
         if (MODE_MODIFY.equals(mode)) {
             // Perform as-you-type field validation
-            AstSettingsService.VerificationResults results = AstSettingsService.checkConnectionSettings(bean, true);
+            AstSettingsService.VerificationResults results = AstSettingsService
+                    .checkConnectionSettings(bean, settings, true);
+
             results = AstSettingsService.checkAstSettings(bean, results, true);
             saveVerificationResults(xml, results);
         } else if (MODE_TEST.equals(mode)) {
-            AstSettingsService.VerificationResults results = AstSettingsService.checkConnectionSettings(bean, false);
+            AstSettingsService.VerificationResults results = AstSettingsService
+                    .checkConnectionSettings(bean, settings, false);
+
             boolean connectionSettingsErrors = results.isFailure();
             // If connection failed then perform only parameters syntax validation and skip AST check
             results = AstSettingsService.checkAstSettings(bean, results, connectionSettingsErrors);

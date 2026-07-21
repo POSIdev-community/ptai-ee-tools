@@ -107,6 +107,8 @@ public class AstEditRunTypeControllerExtension implements EditRunTypeControllerE
                 });
         // We don't need publicKey property in the model as TeamCity did that for us
 
+        model.put("ptaiAllowedUrlList", AstSettingsService.parseAllowedUrls(settings));
+
         // Need to explicily call rememberState with newly added attributes
         // as editRunParams.jsp calls BS.EditBuildRunnerForm.setModified(${buildForm.buildRunnerBean.stateModified})
         // BuildRunnerBean's isStateModified calls getPropertiesBean().isStateModified() and as
@@ -139,7 +141,9 @@ public class AstEditRunTypeControllerExtension implements EditRunTypeControllerE
         // we need to inject those settings into bean prior to verification
         bean.injectGlobalSettings(settings);
 
-        AstSettingsService.VerificationResults results = AstSettingsService.checkConnectionSettings(bean, true);
+        AstSettingsService.VerificationResults results = AstSettingsService
+                .checkConnectionSettings(bean, settings, true);
+
         AstSettingsService.checkAstSettings(bean, results, true);
         ActionErrors errors = new ActionErrors();
         results.stream().filter(r -> null != r.getLeft()).forEach(e -> errors.addError(e.getLeft(), e.getRight()));

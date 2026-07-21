@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.ADMIN_CONTROLLER_PATH;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.ALLOWED_URLS;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.*;
 
 @Slf4j
@@ -53,7 +54,12 @@ public class AstAdminPageController extends BaseAstController {
             return;
         }
 
-        PropertiesBean bean = new PropertiesBean().fill(URL, request).fill(CERTIFICATES, request).fill(INSECURE, request).fillSecret(TOKEN, request);
+        PropertiesBean bean = new PropertiesBean()
+                .fill(URL, request)
+                .fill(CERTIFICATES, request)
+                .fill(INSECURE, request)
+                .fill(ALLOWED_URLS, request)
+                .fillSecret(TOKEN, request);
 
         String mode = request.getParameter("mode");
         if ("modify".equalsIgnoreCase(mode))
@@ -61,7 +67,9 @@ public class AstAdminPageController extends BaseAstController {
         else {
             // Check if settings passed as a subject to save or to test connection are correct
             if ("test".equalsIgnoreCase(mode)) {
-                AstSettingsService.VerificationResults results = AstSettingsService.checkConnectionSettings(bean, false);
+                AstSettingsService.VerificationResults results = AstSettingsService
+                        .checkConnectionSettings(bean, null, false);
+
                 saveVerificationResults(xml, results);
             } else if (mode.equals("save")) {
                 bean.getProperties().forEach(settings::setValue);

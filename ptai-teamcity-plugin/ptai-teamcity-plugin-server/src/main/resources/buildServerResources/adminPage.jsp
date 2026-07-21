@@ -44,7 +44,7 @@
 
         <table class="runnerFormTable">
             <tr class="groupingTitle">
-                <td colspan="2">PT AI server</td>
+                <td colspan="2">PT AI server connection (verified by "<%=Labels.TEST%>")</td>
             </tr>
 
             <tbody class="ptai-group">
@@ -92,10 +92,31 @@
                     <td>
                         <props:checkboxProperty name="${SERVER_SETTINGS_GLOBAL_INSECURE}"/>
 						<span class="smallNote">${HINT_SERVER_SETTINGS_GLOBAL_INSECURE}</span>
+                        <span class="smallNote"><strong>${HINT_SERVER_SETTINGS_GLOBAL_INSECURE_SCOPE}</strong></span>
                         <span class="error" id="error_${SERVER_SETTINGS_GLOBAL_INSECURE}"></span>
                     </td>
                 </tr>
-			
+            </tbody>
+
+            <tr class="groupingTitle">
+                <td colspan="2">Allowed addresses for task-scope build steps</td>
+            </tr>
+
+            <tbody class="ptai-group">
+                <tr>
+                    <th>
+                        <label for="${ALLOWED_URLS}">${LABEL_ALLOWED_URLS}</label>
+                    </th>
+                    <td>
+                        <props:multilineProperty
+                                name="${ALLOWED_URLS}"
+                                className="longField"
+                                linkTitle="Edit allowed PT AI server addresses"
+                                rows="3" cols="49" expanded="${true}"
+                                note="${HINT_ALLOWED_URLS}"/>
+                        <span class="error" id="error_${ALLOWED_URLS}"></span>
+                    </td>
+                </tr>
             </tbody>
         </table>
 
