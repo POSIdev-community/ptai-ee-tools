@@ -80,7 +80,6 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
 
     private AbstractJob.JobExecutionResult ast() {
         Map<String, String> params = buildRunnerContext.getRunnerParameters();
-        Map<String, String> globals = agentRunningBuild.getSharedConfigParameters();
 
         boolean selectedScanSettingsUi = AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
         String projectName = null;
@@ -118,10 +117,6 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         transfer.setUseDefaultExcludes(TRUE.equalsIgnoreCase(params.get(Params.USE_DEFAULT_EXCLUDES)));
         Transfers transfers = new Transfers().addTransfer(transfer);
 
-        Map<String, String> activeConnectionParams = SERVER_SETTINGS_LOCAL.equals(params.get(Params.SERVER_SETTINGS))
-                ? params
-                : globals;
-
         String branchName = getBranchName(params);
         String scanLabel =  params.get(Params.SCAN_LABEL);
         String projectPriority = getProjectPriority(params);
@@ -136,10 +131,10 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 .settings(selectedScanSettingsUi ? null : settings)
                 .policy(selectedScanSettingsUi ?  null : policy)
                 .connectionSettings(ConnectionSettings.builder()
-                        .url(activeConnectionParams.get(Params.URL))
-                        .insecure(TRUE.equals(activeConnectionParams.get(Params.INSECURE)))
-                        .credentials(TokenCredentials.builder().token(activeConnectionParams.get(Params.TOKEN)).build())
-                        .caCertsPem(activeConnectionParams.get(Params.CERTIFICATES))
+                        .url(params.get(Params.URL))
+                        .insecure(TRUE.equals(params.get(Params.INSECURE)))
+                        .credentials(TokenCredentials.builder().token(params.get(Params.TOKEN)).build())
+                        .caCertsPem(params.get(Params.CERTIFICATES))
                         .build())
                 .fullScanMode(TRUE.equals(params.get(Params.FULL_SCAN_MODE)))
                 .verbose(TRUE.equals(params.get(Params.VERBOSE)))
