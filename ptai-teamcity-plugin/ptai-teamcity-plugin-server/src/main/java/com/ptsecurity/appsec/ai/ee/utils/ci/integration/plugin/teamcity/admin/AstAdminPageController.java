@@ -3,9 +3,12 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.BaseAstController;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service.AstSettingsService;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service.PropertiesBean;
+import jetbrains.buildServer.controllers.AuthorizationInterceptor;
 import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.controllers.PublicKeyUtil;
 import jetbrains.buildServer.controllers.XmlResponseUtil;
+import jetbrains.buildServer.serverSide.auth.AccessDeniedException;
+import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import lombok.NonNull;
@@ -26,10 +29,16 @@ public class AstAdminPageController extends BaseAstController {
 
     public AstAdminPageController(
             @NonNull WebControllerManager manager,
+            @NonNull AuthorizationInterceptor authInterceptor,
             AstAdminSettings settings,
             PluginDescriptor descriptor) {
         this.settings = settings;
         manager.registerController(ADMIN_CONTROLLER_PATH, this);
+
+        authInterceptor.addPathBasedPermissionsChecker(ADMIN_CONTROLLER_PATH, (authorityHolder, httpRequest) -> {
+            if (!authorityHolder.isPermissionGrantedGlobally(Permission.CHANGE_SERVER_SETTINGS))
+                throw new AccessDeniedException(authorityHolder, "You do not have permission to change PT AI global settings");
+        });
     }
 
     @Override
