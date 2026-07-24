@@ -14,10 +14,25 @@ pipeline {
         checkout scm
       }
     }
+    stage('Validate parameters') {
+      steps {
+        script {
+          def versionPattern = /^[0-9][0-9A-Za-z._-]*$/
+          if (!(params.JENKINS_VERSION ==~ versionPattern)) {
+            error("Invalid JENKINS_VERSION: '${params.JENKINS_VERSION}'. Expected a version like 2.387.3.")
+          }
+          if (!(params.TEAMCITY_VERSION ==~ versionPattern)) {
+            error("Invalid TEAMCITY_VERSION: '${params.TEAMCITY_VERSION}'. Expected a version like 2022.10.")
+          }
+        }
+      }
+    }
     stage('Build image') {
       steps {
         container('gradle') {
-          sh "gradle build -P jenkinsVersion=${params.JENKINS_VERSION} -P teamcityVersion=${params.TEAMCITY_VERSION}"
+          withEnv(["JENKINS_VERSION=${params.JENKINS_VERSION}", "TEAMCITY_VERSION=${params.TEAMCITY_VERSION}"]) {
+            sh 'gradle build -P jenkinsVersion="$JENKINS_VERSION" -P teamcityVersion="$TEAMCITY_VERSION"'
+          }
         }
       }
     }
