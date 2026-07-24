@@ -3,6 +3,9 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity;
 public class Messages {
     public static final String MESSAGE_GLOBAL_SETTINGS_INVALID = "Global connection settings are invalid";
 
+    public static final String MESSAGE_URL_NOT_ALLOWED = "PT AI server URL is not in the list of addresses allowed by the administrator";
+    public static final String MESSAGE_CONNECTION_CHECK_FAILED = "PT AI server connection check failed. Please contact your administrator or check the TeamCity server logs for details";
+
     public static final String MESSAGE_CUSTOM_BRANCH_NAME_EMPTY = "Custom branch name must not be empty";
     public static final String MESSAGE_JSON_SETTINGS_EMPTY = "JSON-defined scan settings must not be empty";
     public static final String MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG = "Custom branch name exceeds the length of 512 characters";

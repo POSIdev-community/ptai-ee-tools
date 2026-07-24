@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.ALLOWED_URLS;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params.*;
 
 public class AstAdminSettings {
@@ -63,6 +64,7 @@ public class AstAdminSettings {
         this.properties.put(TOKEN, scramble(Defaults.TOKEN));
         this.properties.put(CERTIFICATES, Defaults.CERTIFICATES);
         this.properties.put(INSECURE, Defaults.INSECURE);
+        this.properties.put(ALLOWED_URLS, "");
         getConfigFile().toFile().getParentFile().mkdirs();
         PropertiesUtil.storeProperties(properties, path.toFile(), "PT AI EE");
     }

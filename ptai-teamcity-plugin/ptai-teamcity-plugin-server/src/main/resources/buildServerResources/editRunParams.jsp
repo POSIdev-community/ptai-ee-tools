@@ -41,7 +41,7 @@
             'row_${SERVER_SETTINGS_LOCAL_URL}',
             'row_${SERVER_SETTINGS_LOCAL_TOKEN}',
             'row_${SERVER_SETTINGS_LOCAL_CERTIFICATES}',
-            'row_${SERVER_SETTINGS_LOCAL_INSECURE}' ];
+            'row_ptaiLocalInsecureNote' ];
 
         // ... converts array to varargs
         ptaiServerSettingsChange = function () {
@@ -228,8 +228,14 @@
             <label for="${SERVER_SETTINGS_LOCAL_URL}">${LABEL_SERVER_SETTINGS_LOCAL_URL}<l:star/></label>
         </th>
         <td>
-            <props:textProperty name="${SERVER_SETTINGS_LOCAL_URL}" className="longField"/>
-            <span class="smallNote">${HINT_SERVER_SETTINGS_LOCAL_URL}</span>
+            <props:selectProperty name="${SERVER_SETTINGS_LOCAL_URL}" enableFilter="true" className="longField">
+                <props:option value=""
+                              currValue="${propertiesBean.properties[SERVER_SETTINGS_LOCAL_URL]}">${LABEL_ALLOWED_URLS_SELECT}</props:option>
+                <c:forEach var="ptaiAllowedUrl" items="${ptaiAllowedUrlList}">
+                    <props:option value="${ptaiAllowedUrl}"
+                                  currValue="${propertiesBean.properties[SERVER_SETTINGS_LOCAL_URL]}">${ptaiAllowedUrl}</props:option>
+                </c:forEach>
+            </props:selectProperty>
             <span class="error" id="error_${SERVER_SETTINGS_LOCAL_URL}"></span>
         </td>
     </tr>
@@ -258,17 +264,6 @@
                     rows="3" cols="49" expanded="${true}"
                     note="${HINT_SERVER_SETTINGS_LOCAL_CERTIFICATES}"/>
             <span class="error" id="error_${SERVER_SETTINGS_LOCAL_CERTIFICATES}"></span>
-        </td>
-    </tr>
-
-    <tr id="row_${SERVER_SETTINGS_LOCAL_INSECURE}">
-        <th>
-            <label for="${SERVER_SETTINGS_LOCAL_INSECURE}">${LABEL_SERVER_SETTINGS_LOCAL_INSECURE}</label>
-        </th>
-        <td>
-            <props:checkboxProperty name="${SERVER_SETTINGS_LOCAL_INSECURE}"/>
-            <span class="smallNote">${HINT_SERVER_SETTINGS_LOCAL_INSECURE}</span>
-            <span class="error" id="error_${SERVER_SETTINGS_LOCAL_INSECURE}"></span>
         </td>
     </tr>
     </tbody>

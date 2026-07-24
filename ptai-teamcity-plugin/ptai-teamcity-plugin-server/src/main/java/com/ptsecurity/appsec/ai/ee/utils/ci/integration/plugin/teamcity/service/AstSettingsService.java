@@ -24,15 +24,21 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.net.ssl.SSLException;
 import javax.servlet.http.HttpServletRequest;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 import static com.ptsecurity.appsec.ai.ee.ServerCheckResult.State.ERROR;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.*;
@@ -86,14 +92,24 @@ public class AstSettingsService {
         }
     }
 
-    public static VerificationResults checkConnectionSettings(@NonNull final PropertiesBean bean, boolean parametersOnly) {
+    public static VerificationResults checkConnectionSettings(
+            @NonNull final PropertiesBean bean,
+            final AstAdminSettings settings,
+            boolean parametersOnly) {
         VerificationResults results = new VerificationResults();
-        return checkConnectionSettings(bean, results, parametersOnly);
+        return checkConnectionSettings(bean, settings, results, parametersOnly);
     }
 
-    public static VerificationResults checkConnectionSettings(@NonNull final PropertiesBean bean, @NonNull VerificationResults results, boolean parametersOnly) {
-        validateConnectionSettings(bean, results);
-        if (!parametersOnly && results.isSuccess()) checkConnectionSettings(bean, results);
+    public static VerificationResults checkConnectionSettings(
+            @NonNull final PropertiesBean bean,
+            final AstAdminSettings settings,
+            @NonNull VerificationResults results,
+            boolean parametersOnly) {
+        validateConnectionSettings(bean, settings, results);
+        if (!parametersOnly && results.isSuccess()) {
+            checkConnectionSettings(bean, results);
+        }
+
         return results;
     }
 
@@ -126,8 +142,7 @@ public class AstSettingsService {
             // If global settings mode is selected - init bean with global field values
             res.fill(URL, settings).fill(TOKEN, settings).fill(CERTIFICATES, settings).fill(INSECURE, settings);
         else if (SERVER_SETTINGS_LOCAL.equals(res.get(SERVER_SETTINGS))) {
-            // If task-scope settings mode is selected - init bean from request
-            res.fill(URL, request).fill(CERTIFICATES, request).fill(INSECURE, request);
+            res.fill(URL, request).fill(CERTIFICATES, request).fill(INSECURE, settings);
             String token = RSACipher.decryptWebRequestData(PropertiesBean.getEncryptedProperty(request, TOKEN));
             res.setProperty(TOKEN, token);
         }
@@ -188,6 +203,7 @@ public class AstSettingsService {
      */
     public static void validateConnectionSettings(
             @NonNull final PropertiesBean bean,
+            final AstAdminSettings settings,
             @NonNull final VerificationResults results) {
         // JavaScript handlers are named as on[Error ID]Error like "onEmptyUrlError"
 
@@ -200,6 +216,8 @@ public class AstSettingsService {
             temp.addError(URL, Resources.i18n_ast_settings_server_url_message_empty());
         else if (Validator.validateUrl(bean.get(URL)).fail())
             temp.addError(URL, Resources.i18n_ast_settings_server_url_message_invalid());
+        else if (null != settings && bean.eq(SERVER_SETTINGS, SERVER_SETTINGS_LOCAL) && !isUrlAllowed(bean.get(URL), settings))
+            temp.addError(URL, MESSAGE_URL_NOT_ALLOWED);
         if (bean.empty(TOKEN))
             temp.addError(TOKEN, Resources.i18n_ast_settings_server_token_message_empty());
         if (!bean.empty(CERTIFICATES)) {
@@ -221,6 +239,40 @@ public class AstSettingsService {
             else
                 results.add(SERVER_SETTINGS, MESSAGE_GLOBAL_SETTINGS_INVALID);
         }
+    }
+
+    @NonNull
+    public static List<String> parseAllowedUrls(final AstAdminSettings settings) {
+        if (null == settings) {
+            return Collections.emptyList();
+        }
+
+        return splitAllowedUrls(settings.getValue(ALLOWED_URLS));
+    }
+
+    @NonNull
+    static List<String> splitAllowedUrls(final String raw) {
+        if (StringUtils.isEmpty(raw)) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(raw.split("\\R"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    static boolean isUrlAllowed(final String url, final List<String> allowedUrls) {
+        if (null == url) {
+            return false;
+        }
+
+        String candidate = url.trim();
+        return allowedUrls.stream().anyMatch(candidate::equals);
+    }
+
+    private static boolean isUrlAllowed(final String url, final AstAdminSettings settings) {
+        return isUrlAllowed(url, parseAllowedUrls(settings));
     }
 
     /**
@@ -396,7 +448,7 @@ public class AstSettingsService {
             results.setResult(res.getState().equals(ERROR) ? FAILURE : SUCCESS);
         } catch (GenericException e) {
             log.warn(e.getDetailedMessage(), e);
-            results.add(e);
+            addConnectionCheckError(results, e);
         }
     }
 
@@ -444,7 +496,39 @@ public class AstSettingsService {
             new Factory().reportsTasks(client).check(reports);
         } catch (GenericException e) {
             log.warn(e.getDetailedMessage(), e);
-            results.add(e);
+            addConnectionCheckError(results, e);
         }
+    }
+
+    static void addConnectionCheckError(@NonNull final VerificationResults results, @NonNull final GenericException e) {
+        if (null != e.getCode()) {
+            results.add(e);
+            return;
+        }
+
+        Throwable root = rootCause(e);
+        if (isSimpleConnectivityError(root)) {
+            String reason = StringUtils.isNotEmpty(root.getMessage()) ? root.getMessage() : root.getClass().getSimpleName();
+            results.add(e.getMessage() + ": " + reason);
+            results.failure();
+            return;
+        }
+
+        results.add(MESSAGE_CONNECTION_CHECK_FAILED);
+        results.failure();
+    }
+
+    private static Throwable rootCause(@NonNull final Throwable e) {
+        Throwable cause = e;
+        while (null != cause.getCause() && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+
+        return cause;
+    }
+
+    private static boolean isSimpleConnectivityError(@NonNull final Throwable t) {
+        return t instanceof UnknownHostException
+                || t instanceof SSLException;
     }
 }

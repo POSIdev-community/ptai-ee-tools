@@ -17,6 +17,15 @@ public class Hints {
     public static final String CERTIFICATES = Resources.i18n_ast_settings_server_ca_pem_hint();
     public static final String INSECURE = Resources.i18n_ast_settings_server_insecure_hint();
 
+    public static final String INSECURE_SCOPE =
+            "This option applies to both global and task-scope (project) connection settings.";
+
+    public static final String ALLOWED_URLS =
+            "PT AI server addresses (one per line) that task-scope build steps may connect to. " +
+                    "Build steps using task-scope connection settings can only pick an address from this list. " +
+                    "This list is independent of the PT AI server URL above: that URL is not added here " +
+                    "automatically, so leave this empty to forbid task-scope addresses entirely.";
+
     public static final String SERVER_SETTINGS = "Choose how PT AI server connection settings are defined";
     public static final String SERVER_SETTINGS_GLOBAL = "Global scope defined PT AI server config";
     public static final String SERVER_SETTINIGS_LOCAL = "Task scope defined PT AI server config";

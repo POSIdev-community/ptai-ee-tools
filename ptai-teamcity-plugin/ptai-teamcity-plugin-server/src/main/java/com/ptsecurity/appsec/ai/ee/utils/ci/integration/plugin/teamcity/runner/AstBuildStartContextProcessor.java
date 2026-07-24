@@ -41,6 +41,11 @@ public class AstBuildStartContextProcessor implements BuildStartContextProcessor
                 continue;
             }
 
+            if (!AstRunnerSettings.isAstRunner(runner)) {
+                continue;
+            }
+
+            runner.addRunnerParameter(INSECURE, settings.getValue(INSECURE));
             if (!AstRunnerSettings.usesGlobalConnectionSettings(runner)) {
                 continue;
             }
@@ -48,7 +53,6 @@ public class AstBuildStartContextProcessor implements BuildStartContextProcessor
             runner.addRunnerParameter(URL, settings.getValue(URL));
             runner.addRunnerParameter(TOKEN, settings.getValue(TOKEN));
             runner.addRunnerParameter(CERTIFICATES, settings.getValue(CERTIFICATES));
-            runner.addRunnerParameter(INSECURE, settings.getValue(INSECURE));
         }
     }
 
