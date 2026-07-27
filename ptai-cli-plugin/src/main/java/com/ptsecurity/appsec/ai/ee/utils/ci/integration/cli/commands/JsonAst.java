@@ -4,6 +4,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.CliJsonAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.ProjectPriority;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
 import lombok.extern.slf4j.Slf4j;
@@ -112,8 +113,23 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
             description = "An agent will first handle the project that has the highest priority. Valid values: ${COMPLETION-CANDIDATES}")
     protected ProjectPriority priority = ProjectPriority.Medium;
 
+    @CommandLine.Option(
+            names = {"--retry"}, order = 23,
+            description = "Retry scan attempt if a scan for the same project branch is already scheduled or running")
+    protected boolean retry = false;
+
+    @CommandLine.Option(
+            names = {"--retry-time"}, order = 24,
+            paramLabel = "<seconds>",
+            description = "The time (seconds) during which attempts to enqueue a scan will be retried if the branch " +
+                    "is already being scanned. Requires --retry. Retries run every " + GenericAstJob.RETRY_INTERVAL_SECONDS +
+                    " seconds. Default: ${DEFAULT-VALUE}")
+    protected int retryTime = 3600;
+
     @Override
     public Integer call() {
+        validateRetryOptions(retry, retryTime);
+
         CliJsonAstJob job = CliJsonAstJob.builder()
                 .console(System.out).prefix("").verbose(verbose)
                 .connectionSettings(ConnectionSettings.builder()
@@ -132,6 +148,8 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
                 .useDefaultExcludes(useDefaultExcludes)
                 .truststore(truststore)
                 .fullScanMode(fullScan)
+                .retry(retry)
+                .retryTime(retryTime)
                 .build();
         if (null != reports) reports.addSubJobs(job);
         if (failIfFailed) new FailIfAstFailed().attach(job);

@@ -18,6 +18,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.BranchTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ServerVersionTasks;
+import com.ptsecurity.misc.tools.exceptions.ConcurrentScanException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.ToString;
@@ -122,7 +123,7 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
                         projectId,
                         branchName,
                         createQueueItem.getBranchId());
-                throw GenericException.raise(message, new IllegalStateException("Concurrent scan is not allowed", e));
+                throw new ConcurrentScanException(message, e);
             }
 
             throw e;

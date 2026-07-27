@@ -25,6 +25,22 @@ import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 
 @Slf4j
 public abstract class BaseCommand {
+    @CommandLine.Spec
+    protected CommandLine.Model.CommandSpec spec;
+
+    protected void validateRetryOptions(final boolean retry, final int retryTime) {
+        if (!retry && spec.commandLine().getParseResult().hasMatchedOption("--retry-time")) {
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                    "Option --retry-time can be used only together with --retry");
+        }
+
+        if (retry && retryTime < GenericAstJob.RETRY_INTERVAL_SECONDS) {
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                    String.format("Invalid --retry-time value %d: minimal allowed value is %d seconds",
+                            retryTime, GenericAstJob.RETRY_INTERVAL_SECONDS));
+        }
+    }
+
     @AllArgsConstructor(access = AccessLevel.PACKAGE)
     public enum ExitCode {
         SUCCESS(Plugin.SUCCESS),
