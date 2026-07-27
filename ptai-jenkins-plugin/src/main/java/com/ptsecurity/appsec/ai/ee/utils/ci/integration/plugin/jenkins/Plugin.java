@@ -208,7 +208,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
         Credentials credentials;
         String credentialsId;
         String serverUrl;
-        boolean serverInsecure;
+
+        boolean serverInsecure = descriptor.isServerInsecure();
 
         if (config instanceof ConfigGlobal) {
             // Settings are defined globally, job just refers them using configName
@@ -218,13 +219,15 @@ public class Plugin extends Builder implements SimpleBuildStep {
             credentialsId = serverSettings.getServerCredentialsId();
             credentials = CredentialsImpl.getCredentialsById(item, credentialsId);
             serverUrl = serverSettings.getServerUrl();
-            serverInsecure = serverSettings.isServerInsecure();
         } else {
             ConfigCustom configCustom = (ConfigCustom) config;
             credentialsId = configCustom.getServerSettings().getServerCredentialsId();
             credentials = CredentialsImpl.getCredentialsById(item, credentialsId);
             serverUrl = configCustom.getServerSettings().getServerUrl();
-            serverInsecure = configCustom.getServerSettings().isServerInsecure();
+        }
+
+        if (!descriptor.isServerUrlAllowed(serverUrl)) {
+            throw new AbortException(Resources.i18n_ast_settings_server_url_message_not_allowed());
         }
 
         AdvancedSettings advancedSettings = new AdvancedSettings();

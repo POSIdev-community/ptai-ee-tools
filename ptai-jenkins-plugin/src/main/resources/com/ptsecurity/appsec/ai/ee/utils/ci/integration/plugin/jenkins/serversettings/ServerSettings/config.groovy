@@ -10,7 +10,7 @@ def c = namespace(CredentialsTagLib)
 f.entry(
         title: Resources.i18n_ast_settings_server_url_label(),
         field: 'serverUrl') {
-    f.textbox()
+    f.select()
 }
 
 f.entry(
@@ -19,18 +19,11 @@ f.entry(
     c.select()
 }
 
-f.entry(
-        title: _('serverInsecure'),
-        field: 'serverInsecure',
-        default: 'false') {
-    f.checkbox()
-}
-
 f.block() {
     f.validateButton(
             title: _('testServer'),
             progress: _('testServerProgress'),
             method: 'testServer',
-            with: 'serverUrl,serverCredentialsId,serverInsecure'
+            with: 'serverUrl,serverCredentialsId'
     )
 }
