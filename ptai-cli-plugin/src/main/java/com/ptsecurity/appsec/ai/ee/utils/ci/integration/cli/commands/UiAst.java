@@ -5,7 +5,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.cli.ProjectPriority;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,8 @@ import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob.JobExecutionResult.SUCCESS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.RETRY_INTERVAL_SECONDS;
 
 @Slf4j
 @CommandLine.Command(
@@ -119,9 +120,9 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
             names = {"--retry-time"}, order = 24,
             paramLabel = "<seconds>",
             description = "The time (seconds) during which attempts to enqueue a scan will be retried if the branch " +
-                    "is already being scanned. Requires --retry. Retries run every " + GenericAstJob.RETRY_INTERVAL_SECONDS +
+                    "is already being scanned. Requires --retry. Retries run every " + RETRY_INTERVAL_SECONDS +
                     " seconds. Default: ${DEFAULT-VALUE}")
-    protected int retryTime = 3600;
+    protected int retryTime = DEFAULT_RETRY_TIME_SECONDS;
 
     @Override
     public Integer call() {

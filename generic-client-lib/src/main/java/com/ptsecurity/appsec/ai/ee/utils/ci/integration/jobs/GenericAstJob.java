@@ -71,6 +71,8 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
     public static final int RETRY_INTERVAL_SECONDS = 5;
 
+    public static final int DEFAULT_RETRY_TIME_SECONDS = 3600;
+
     @Getter
     @Setter
     @Builder.Default
@@ -79,7 +81,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Getter
     @Setter
     @Builder.Default
-    protected int retryTime = 3600;
+    protected int retryTime = DEFAULT_RETRY_TIME_SECONDS;
 
     @Builder.Default
     protected UUID branchId = null;

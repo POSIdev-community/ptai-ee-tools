@@ -63,6 +63,8 @@ public class Labels {
     public static final String FAIL_IF_UNSTABLE = "Fail step if SAST unstable";
 
     public static final String FULL_SCAN_MODE = Resources.i18n_ast_settings_fullScanMode_label();
+    public static final String RETRY = Resources.i18n_ast_settings_retry_label();
+    public static final String RETRY_TIME = Resources.i18n_ast_settings_retryTime_label();
     public static final String VERBOSE = Resources.i18n_ast_settings_verbose_label();
     public static final String INCLUDES = "Files to analyse";
     public static final String REMOVE_PREFIX = "Remove prefix";

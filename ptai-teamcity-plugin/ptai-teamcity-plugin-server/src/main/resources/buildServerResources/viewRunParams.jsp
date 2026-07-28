@@ -32,6 +32,18 @@
     <props:displayValue name="${FAIL_IF_UNSTABLE}" emptyValue="false"/>
 </div>
 
+<div class="nestedParameter">
+    ${LABEL_RETRY}:
+    <props:displayValue name="${RETRY}" emptyValue="false"/>
+</div>
+
+<c:if test="${propertiesBean.properties[RETRY] == TRUE}">
+    <div class="nestedParameter">
+        ${LABEL_RETRY_TIME}:
+        <props:displayValue name="${RETRY_TIME}" emptyValue=""/>
+    </div>
+</c:if>
+
 <div class="parameter">Scan scope:</div>
 
 <div class="nestedParameter">

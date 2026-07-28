@@ -102,6 +102,19 @@ public class Params {
      * Allows execute AST in full (i.e. non-incremental) mode if equals to {@link Constants#TRUE}
      */
     public static final String FULL_SCAN_MODE = PARAM("FullScanMode");
+
+    /**
+     * If equals to {@link Constants#TRUE} then plugin will wait in the queue and retry
+     * scan start if a scan for the same project branch is already scheduled or running
+     */
+    public static final String RETRY = PARAM("Retry");
+
+    /**
+     * Time window (seconds) during which scan start is retried if {@link Params#RETRY}
+     * equals to {@link Constants#TRUE}
+     */
+    public static final String RETRY_TIME = PARAM("RetryTime");
+
     /**
      * Allows verbose logging if equals to {@link Constants#TRUE}
      */

@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSetting
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.FromJsonBranchSettings;
@@ -48,6 +49,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -90,6 +92,22 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
     @Getter
     private final boolean fullScanMode;
+
+    @Getter
+    private boolean retry;
+
+    @Getter
+    private int retryTime = GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+
+    @DataBoundSetter
+    public void setRetry(final boolean retry) {
+        this.retry = retry;
+    }
+
+    @DataBoundSetter
+    public void setRetryTime(final int retryTime) {
+        this.retryTime = retryTime;
+    }
 
     @Getter
     private ArrayList<Transfer> transfers;
@@ -278,6 +296,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .buildInfo(buildInfo)
                 .transfers(transfers)
                 .fullScanMode(fullScanMode)
+                .retry(retry)
+                .retryTime(retryTime)
                 .advancedSettings(advancedSettings)
                 .build();
         if (workMode instanceof WorkModeSync) {

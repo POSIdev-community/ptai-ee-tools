@@ -103,6 +103,17 @@ public class Defaults {
     public static final String FULL_SCAN_MODE = FALSE;
 
     /**
+     * See {@link Params#RETRY}
+     */
+    public static final String RETRY = FALSE;
+
+    /**
+     * See {@link Params#RETRY_TIME} and {@link com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob#DEFAULT_RETRY_TIME_SECONDS}
+     */
+    public static final String RETRY_TIME = String.valueOf(
+            com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.DEFAULT_RETRY_TIME_SECONDS);
+
+    /**
      * See {@link Params#VERBOSE}
      */
     public static final String VERBOSE = FALSE;

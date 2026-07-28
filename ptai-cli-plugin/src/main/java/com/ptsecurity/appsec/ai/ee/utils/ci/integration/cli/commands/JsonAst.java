@@ -124,7 +124,7 @@ public class JsonAst extends BaseCommand implements Callable<Integer> {
             description = "The time (seconds) during which attempts to enqueue a scan will be retried if the branch " +
                     "is already being scanned. Requires --retry. Retries run every " + GenericAstJob.RETRY_INTERVAL_SECONDS +
                     " seconds. Default: ${DEFAULT-VALUE}")
-    protected int retryTime = 3600;
+    protected int retryTime = GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
 
     @Override
     public Integer call() {
