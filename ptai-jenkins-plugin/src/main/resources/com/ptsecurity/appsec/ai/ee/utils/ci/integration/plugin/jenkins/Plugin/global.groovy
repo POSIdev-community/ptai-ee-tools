@@ -23,6 +23,22 @@ f.section(
         }
     }
 
+    f.entry(
+            title: Resources.i18n_ast_settings_server_allowed_urls_label(),
+            field: 'allowedServerUrls',
+            help: descriptor.getHelpFile('allowedServerUrls')) {
+        f.textarea(
+                style: 'height:80px',
+                checkMethod: 'post')
+    }
+
+    f.entry(
+            title: Resources.i18n_ast_settings_server_insecure_label(),
+            field: 'serverInsecure',
+            help: descriptor.getHelpFile('serverInsecure')) {
+        f.checkbox()
+    }
+
     f.advanced() {
         f.entry(
                 title: Resources.i18n_ast_settings_advanced_label(),

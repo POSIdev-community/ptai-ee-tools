@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
@@ -15,6 +16,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentia
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.serversettings.ServerSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.Validator;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.model.queue.Tasks;
@@ -28,8 +30,12 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
+import javax.net.ssl.SSLException;
+import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,36 +59,50 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
         return String.valueOf(text.charAt(0)).toLowerCase() + text.substring(1);
     }
 
+    @RequirePOST
     public FormValidation doTestServer(
             @AncestorInPath Item item,
             @QueryParameter("serverUrl") final String serverUrl,
-            @QueryParameter("serverCredentialsId") final String serverCredentialsId,
-            @QueryParameter("serverInsecure") final boolean serverInsecure) {
+            @QueryParameter("serverCredentialsId") final String serverCredentialsId) {
+        checkTestServerPermission(item);
+        log.trace("Test PT AI server {} connection", serverUrl);
+
+        if (!Validator.doCheckFieldNotEmpty(serverUrl)) {
+            return FormValidation.error(Resources.i18n_ast_settings_server_url_message_empty());
+        }
+
+        if (!Validator.doCheckFieldNotEmpty(serverCredentialsId)) {
+            return FormValidation.error(Resources.i18n_ast_settings_server_credentials_message_empty());
+        }
+
+        PluginDescriptor pluginDescriptor = Jenkins.get().getDescriptorByType(PluginDescriptor.class);
+        if (!pluginDescriptor.isServerUrlAllowed(serverUrl)) {
+            return FormValidation.error(Resources.i18n_ast_settings_server_url_message_not_allowed());
+        }
+
+        ConnectionSettings connectionSettings;
+        AdvancedSettings advancedSettings;
         try {
-            log.trace("Test PT AI server {} connection", serverUrl);
-            if (!Validator.doCheckFieldNotEmpty(serverUrl))
-                throw new RuntimeException(Resources.i18n_ast_settings_server_url_message_empty());
-            boolean urlInvalid = !Validator.doCheckFieldUrl(serverUrl);
-            if (!Validator.doCheckFieldNotEmpty(serverCredentialsId))
-                throw new RuntimeException(Resources.i18n_ast_settings_server_credentials_message_empty());
-
             Credentials credentials = CredentialsImpl.getCredentialsById(item, serverCredentialsId);
-
             String ptAiToken = Optional.ofNullable(credentials.getToken())
                     .orElseThrow(() -> new PTAIClientTokenIsEmptyException(
                             Resources.i18n_ast_settings_server_token_message_empty()))
                     .getPlainText();
 
-            PluginDescriptor pluginDescriptor = Jenkins.get().getDescriptorByType(PluginDescriptor.class);
-            AdvancedSettings advancedSettings = new AdvancedSettings();
+            advancedSettings = new AdvancedSettings();
             advancedSettings.apply(pluginDescriptor.getAdvancedSettings());
-
-            AbstractApiClient client = Factory.client(ConnectionSettings.builder()
+            connectionSettings = ConnectionSettings.builder()
                     .url(serverUrl)
                     .credentials(TokenCredentials.builder().token(ptAiToken).build())
-                    .insecure(serverInsecure)
+                    .insecure(pluginDescriptor.isServerInsecure())
                     .caCertsPem(credentials.getServerCaCertificates())
-                    .build(), advancedSettings);
+                    .build();
+        } catch (Exception e) {
+            return Validator.error(e);
+        }
+
+        try {
+            AbstractApiClient client = Factory.client(connectionSettings, advancedSettings);
             ServerCheckResult res = new Factory().checkServerTasks(client).check();
             return ServerCheckResult.State.ERROR.equals(res.getState())
                     ? FormValidation.error(res.text())
@@ -90,27 +110,82 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
                     ? FormValidation.warning(res.text())
                     : FormValidation.ok(res.text());
         } catch (Exception e) {
-            return Validator.error(e);
+            return connectionCheckError(e);
+        }
+    }
+
+    private static FormValidation connectionCheckError(final Exception e) {
+        log.debug("PT AI server connection check failed", e);
+        String caption = e.getMessage();
+
+        if (e instanceof GenericException && null != ((GenericException) e).getCode()) {
+            return FormValidation.error(StringUtils.isNotEmpty(caption)
+                    ? caption
+                    : Resources.i18n_ast_settings_server_check_message_connectioncheckfailed());
+        }
+
+        if (isTlsTrustError(e) && !Jenkins.get().getDescriptorByType(PluginDescriptor.class).isServerInsecure()) {
+            return FormValidation.error(Resources.i18n_ast_settings_server_check_message_insecure_disabled());
+        }
+
+        Throwable root = rootCause(e);
+        if (root instanceof UnknownHostException || root instanceof SSLException) {
+            String reason = StringUtils.isNotEmpty(root.getMessage()) ? root.getMessage() : root.getClass().getSimpleName();
+            return FormValidation.error((StringUtils.isNotEmpty(caption) ? caption + ": " : "") + reason);
+        }
+
+        return FormValidation.error(Resources.i18n_ast_settings_server_check_message_connectioncheckfailed());
+    }
+
+    private static boolean isTlsTrustError(final Throwable e) {
+        for (Throwable t = e; null != t && t != t.getCause(); t = t.getCause()) {
+            if (t instanceof javax.net.ssl.SSLHandshakeException
+                    || t instanceof java.security.cert.CertificateException
+                    || t instanceof java.security.cert.CertPathValidatorException
+                    || t instanceof java.security.cert.CertPathBuilderException) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static Throwable rootCause(@NonNull final Throwable e) {
+        Throwable cause = e;
+        while (null != cause.getCause() && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
+
+    private static void checkTestServerPermission(final Item item) {
+        if (item == null) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        } else {
+            item.checkPermission(Item.READ);
         }
     }
 
     private static final Class<Credentials> BASE_CREDENTIAL_TYPE = Credentials.class;
 
-    // Include any additional contextual parameters that you need in order to refine the
-    // credentials list. For example, if the credentials will be used to connect to a remote server,
-    // you might include the server URL form element as a @QueryParameter so that the domain
-    // requirements can be built from that URL
     public ListBoxModel doFillServerCredentialsIdItems(
             @AncestorInPath Item item,
             @QueryParameter String serverCredentialsId) {
-        if (item == null && !Jenkins.get().hasPermission(Jenkins.ADMINISTER) ||
-                item != null && !item.hasPermission(Item.EXTENDED_READ))
-            return new StandardListBoxModel().includeCurrentValue(serverCredentialsId);
+        StandardListBoxModel result = new StandardListBoxModel();
+        if (item == null) {
+            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                return result.includeCurrentValue(serverCredentialsId);
+            }
+        } else {
+            if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                return result.includeCurrentValue(serverCredentialsId);
+            }
+        }
 
-        if (item == null)
-            // Construct a fake project
-            item = new FreeStyleProject((ItemGroup)Jenkins.get(), "fake-" + UUID.randomUUID().toString());
-        return new StandardListBoxModel()
+        if (item == null){
+            item = new FreeStyleProject((ItemGroup) Jenkins.get(), "fake-" + UUID.randomUUID());
+        }
+
+        return result
                 .includeEmptyValue()
                 .includeMatchingAs(
                         item instanceof Queue.Task
@@ -118,7 +193,33 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
                                 : ACL.SYSTEM,
                         item,
                         BASE_CREDENTIAL_TYPE,
-                        Collections.<DomainRequirement>emptyList(),
-                        CredentialsMatchers.always());
+                        Collections.emptyList(),
+                        CredentialsMatchers.always())
+                .includeCurrentValue(serverCredentialsId);
+    }
+
+    public ListBoxModel doFillServerUrlItems(
+            @AncestorInPath Item item,
+            @QueryParameter String serverUrl) {
+        ListBoxModel items = new ListBoxModel();
+        items.add(Resources.i18n_ast_settings_server_url_select(), "");
+
+        boolean allowed = (item == null)
+                ? Jenkins.get().hasPermission(Jenkins.ADMINISTER)
+                : (item.hasPermission(Item.EXTENDED_READ) || item.hasPermission(Item.CONFIGURE));
+
+        if (allowed) {
+            PluginDescriptor pluginDescriptor = Jenkins.get().getDescriptorByType(PluginDescriptor.class);
+            for (String url : pluginDescriptor.getAllowedServerUrlsList()) {
+                items.add(url, url);
+            }
+        }
+
+        String current = StringUtils.trimToEmpty(serverUrl);
+        if (!current.isEmpty() && items.stream().noneMatch(option -> option.value.equals(current))) {
+            items.add(current, current);
+        }
+
+        return items;
     }
 }

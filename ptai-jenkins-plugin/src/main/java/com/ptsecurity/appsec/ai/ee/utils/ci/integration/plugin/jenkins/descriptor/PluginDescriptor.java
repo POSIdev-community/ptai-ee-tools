@@ -39,12 +39,15 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Extension
@@ -55,6 +58,12 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
 
     @Getter
     private String advancedSettings = null;
+
+    @Getter
+    private String allowedServerUrls = null;
+
+    @Getter
+    private boolean serverInsecure = false;
 
     public List<Config> getGlobalConfigs() {
         return globalConfigs.getView();
@@ -82,6 +91,9 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
 
     @Override
     public boolean configure(StaplerRequest request, JSONObject formData) {
+        allowedServerUrls = StringUtils.trimToNull(formData.optString("allowedServerUrls"));
+        serverInsecure = formData.optBoolean("serverInsecure");
+        advancedSettings = StringUtils.trimToNull(formData.optString("advancedSettings"));
         // noinspection ConstantConditions
         do {
             globalConfigs.clear();
@@ -95,8 +107,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             if ((jsonConfigs instanceof JSONObject) && ((JSONObject) jsonConfigs).isEmpty()) break;
 
             globalConfigs.replaceBy(request.bindJSONToList(Config.class, jsonConfigs));
-
-            advancedSettings = formData.getString("advancedSettings");
         } while (false);
 
         save();
@@ -285,6 +295,59 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public FormValidation doCheckAdvancedSettings(@QueryParameter String value) {
         return Validator.doCheckFieldAdvancedSettings(value, Resources.i18n_ast_settings_advanced_message_invalid());
+    }
+
+    @NonNull
+    public List<String> getAllowedServerUrlsList() {
+        return splitAllowedUrls(allowedServerUrls);
+    }
+
+    public boolean isServerUrlAllowed(final String serverUrl) {
+        return isUrlAllowed(serverUrl, getAllowedServerUrlsList());
+    }
+
+    @NonNull
+    static List<String> splitAllowedUrls(final String raw) {
+        if (StringUtils.isEmpty(raw)) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(raw.split("\\R"))
+                .map(String::trim)
+                .filter(url -> !url.isEmpty())
+                .map(PluginDescriptor::normalizeUrl)
+                .collect(Collectors.toList());
+    }
+
+    static boolean isUrlAllowed(final String serverUrl, final List<String> allowedUrls) {
+        if (StringUtils.isEmpty(serverUrl)) {
+            return false;
+        }
+
+        return allowedUrls.contains(normalizeUrl(serverUrl));
+    }
+
+    private static String normalizeUrl(final String url) {
+        return StringUtils.removeEnd(url.trim(), "/");
+    }
+
+    @SuppressWarnings("unused")
+    public FormValidation doCheckAllowedServerUrls(@QueryParameter String value) {
+        if (StringUtils.isEmpty(value)) {
+            return FormValidation.ok();
+        }
+
+        for (String url : value.split("\\R")) {
+            String candidate = url.trim();
+            if (candidate.isEmpty()){
+                continue;
+            }
+
+            if (!Validator.doCheckFieldUrl(candidate)) {
+                return FormValidation.warning(Resources.i18n_ast_settings_server_allowed_urls_message_invalid());
+            }
+        }
+        return FormValidation.ok();
     }
 
     private static boolean isApplicableManifest(Manifest manifest) {

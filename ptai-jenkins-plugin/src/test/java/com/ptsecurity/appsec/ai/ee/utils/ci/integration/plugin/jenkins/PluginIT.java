@@ -74,6 +74,20 @@ public class PluginIT extends BaseAstIT {
     }
 
     @SneakyThrows
+    protected void setupGlobalSettings(JenkinsRule jenkinsRule) {
+        com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor.PluginDescriptor descriptor =
+                jenkinsRule.jenkins.getDescriptorByType(
+                        com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor.PluginDescriptor.class);
+
+        java.lang.reflect.Field allowedUrls = descriptor.getClass().getDeclaredField("allowedServerUrls");
+        allowedUrls.setAccessible(true);
+        allowedUrls.set(descriptor, CONNECTION().getUrl());
+        java.lang.reflect.Field insecure = descriptor.getClass().getDeclaredField("serverInsecure");
+        insecure.setAccessible(true);
+        insecure.setBoolean(descriptor, true);
+    }
+
+    @SneakyThrows
     @Test
     @Tag("integration")
     @Tag("jenkins")
@@ -82,6 +96,7 @@ public class PluginIT extends BaseAstIT {
         Project phpSmoke = setupProjectFromTemplate(PHP_SMOKE);
 
         initCredentials(jenkinsRule);
+        setupGlobalSettings(jenkinsRule);
 
         log.trace("Create project and set source code location");
 
@@ -98,7 +113,7 @@ public class PluginIT extends BaseAstIT {
         ScanLabelSettings scanLabelSettings = new ScanLabelSettings(phpSmoke.getName());
         ProjectPrioritySettings projectPrioritySettings = ProjectPrioritySettings.MEDIUM;
 
-        ServerSettings serverSettings = new ServerSettings(CONNECTION().getUrl(), credentials.getId(), true);
+        ServerSettings serverSettings = new ServerSettings(CONNECTION().getUrl(), credentials.getId());
         ConfigCustom configCustom = new ConfigCustom(serverSettings);
 
         ArrayList<Base> subJobs = new ArrayList<>();

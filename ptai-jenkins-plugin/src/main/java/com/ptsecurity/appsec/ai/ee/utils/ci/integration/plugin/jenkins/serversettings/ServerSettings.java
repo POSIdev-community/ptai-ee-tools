@@ -19,17 +19,13 @@ public class ServerSettings implements Describable<ServerSettings>, Serializable
     private final String serverUrl;
     @Getter
     private final String serverCredentialsId;
-    @Getter
-    private final boolean serverInsecure;
 
     @DataBoundConstructor
     public ServerSettings(
             final String serverUrl,
-            final String serverCredentialsId,
-            final boolean serverInsecure) {
+            final String serverCredentialsId) {
         this.serverUrl = fixApiUrl(serverUrl);
         this.serverCredentialsId = serverCredentialsId;
-        this.serverInsecure = serverInsecure;
     }
 
     private static String fixApiUrl(String apiUrl) {
