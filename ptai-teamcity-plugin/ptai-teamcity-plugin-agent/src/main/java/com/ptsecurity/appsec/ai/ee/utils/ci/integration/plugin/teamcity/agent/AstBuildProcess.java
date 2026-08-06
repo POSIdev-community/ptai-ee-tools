@@ -8,6 +8,7 @@ import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Report;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sarif;
@@ -142,6 +143,8 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                         .caCertsPem(activeConnectionParams.get(Params.CERTIFICATES))
                         .build())
                 .fullScanMode(TRUE.equals(params.get(Params.FULL_SCAN_MODE)))
+                .retry(TRUE.equals(params.get(Params.RETRY)))
+                .retryTime(getRetryTime(params))
                 .verbose(TRUE.equals(params.get(Params.VERBOSE)))
                 .transfers(transfers)
                 .async(async)
@@ -227,5 +230,18 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
 
     private String getProjectPriority(Map<String, String> params) {
         return PRIORITY_MAPPING.getOrDefault(params.get(Params.PROJECT_PRIORITY), "Medium");
+    }
+
+    private int getRetryTime(Map<String, String> params) {
+        String value = params.get(Params.RETRY_TIME);
+        if (StringUtils.isBlank(value)) {
+            return GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+        }
+
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+        }
     }
 }

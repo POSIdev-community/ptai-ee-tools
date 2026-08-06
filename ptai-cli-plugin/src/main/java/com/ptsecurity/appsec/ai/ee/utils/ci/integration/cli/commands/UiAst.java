@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob.JobExecutionResult.SUCCESS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.RETRY_INTERVAL_SECONDS;
 
 @Slf4j
 @CommandLine.Command(
@@ -109,8 +111,23 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
             description = "An agent will first handle the project that has the highest priority. Valid values: ${COMPLETION-CANDIDATES}")
     protected ProjectPriority priority = ProjectPriority.Medium;
 
+    @CommandLine.Option(
+            names = {"--retry"}, order = 23,
+            description = "Retry scan attempt if a scan for the same project branch is already scheduled or running")
+    protected boolean retry = false;
+
+    @CommandLine.Option(
+            names = {"--retry-time"}, order = 24,
+            paramLabel = "<seconds>",
+            description = "The time (seconds) during which attempts to enqueue a scan will be retried if the branch " +
+                    "is already being scanned. Requires --retry. Retries run every " + RETRY_INTERVAL_SECONDS +
+                    " seconds. Default: ${DEFAULT-VALUE}")
+    protected int retryTime = DEFAULT_RETRY_TIME_SECONDS;
+
     @Override
     public Integer call() {
+        validateRetryOptions(retry, retryTime);
+
         CliUiAstJob job = CliUiAstJob.builder()
                 .console(System.out).prefix("").verbose(verbose)
                 .connectionSettings(ConnectionSettings.builder()
@@ -128,6 +145,8 @@ public class UiAst extends BaseCommand implements Callable<Integer> {
                 .useDefaultExcludes(useDefaultExcludes)
                 .truststore(truststore)
                 .fullScanMode(fullScan)
+                .retry(retry)
+                .retryTime(retryTime)
                 .build();
         if (null != reports) reports.addSubJobs(job);
         if (failIfFailed) new FailIfAstFailed().attach(job);

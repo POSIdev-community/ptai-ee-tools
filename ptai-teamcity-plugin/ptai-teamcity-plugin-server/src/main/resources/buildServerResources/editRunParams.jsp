@@ -196,10 +196,24 @@
             BS.MultilineProperties.updateVisible();
         };
 
+        ptaiRetryShowHide = function (show) {
+            if (true == show) {
+                BS.Util.show('ptaiRetryTimeBlock');
+            } else {
+                BS.Util.hide('ptaiRetryTimeBlock');
+            }
+            BS.MultilineProperties.updateVisible();
+        };
+
+        ptaiRetryClick = function () {
+            ptaiRetryShowHide($('${RETRY}').checked);
+        };
+
         ptaiServerSettingsChange();
         ptaiAstSettingsChange();
         ptaiAstWorkModeChange();
         ptaiBranchSettingsChange();
+        ptaiRetryClick();
     });
 </script>
 
@@ -672,6 +686,29 @@
                     expanded="${true}"
                     note="${HINT_REPORTING_JSON_SETTINGS}"/>
             <span class="error" id="error_${REPORTING_JSON_SETTINGS}"></span>
+        </td>
+    </tr>
+
+    <tr class="advancedSetting">
+        <th>
+            <label for="${RETRY}">${LABEL_RETRY}</label>
+        </th>
+        <td>
+            <props:checkboxProperty name="${RETRY}" onclick="ptaiRetryClick()"/>
+            <span class="smallNote">${HINT_RETRY}</span>
+            <div id="ptaiRetryTimeBlock" style="${propertiesBean.properties[RETRY] == TRUE ? '' : 'display: none'}">
+                <label for="${RETRY_TIME}">${LABEL_RETRY_TIME}<l:star/></label>
+                <props:textProperty
+                        name="${RETRY_TIME}"
+                        value="${
+                            empty propertiesBean.properties[RETRY_TIME]
+                            ? DEFAULT_RETRY_TIME
+                            : propertiesBean.properties[RETRY_TIME]
+                        }"
+                        className="mediumField"/>
+                <span class="smallNote">${HINT_RETRY_TIME}</span>
+                <span class="error" id="error_${RETRY_TIME}"></span>
+            </div>
         </td>
     </tr>
 

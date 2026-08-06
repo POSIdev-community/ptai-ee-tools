@@ -14,6 +14,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperation
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.SetupOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.BranchTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTasks;
+import com.ptsecurity.misc.tools.exceptions.ConcurrentScanException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.State.*;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings.SettingInfo.AST_DIAGNOSTIC_JSON_FILENAME;
@@ -66,6 +68,20 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Getter
     @Builder.Default
     protected String projectPriority = null;
+
+    public static final int RETRY_INTERVAL_SECONDS = 5;
+
+    public static final int DEFAULT_RETRY_TIME_SECONDS = 3600;
+
+    @Getter
+    @Setter
+    @Builder.Default
+    protected boolean retry = false;
+
+    @Getter
+    @Setter
+    @Builder.Default
+    protected int retryTime = DEFAULT_RETRY_TIME_SECONDS;
 
     @Builder.Default
     protected UUID branchId = null;
@@ -145,7 +161,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             branchId = ((BranchTask) genericAstTasks).getBranchIdByName(projectId, branchName);
         }
 
-        scanResultId = genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
+        scanResultId = startScanWithRetry(genericAstTasks);
 
         boolean isScanLabelEmpty =  scanLabel == null || scanLabel.trim().isEmpty();
         String scanEnqueuedFormat = "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s" +
@@ -272,6 +288,31 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         }
 
         info(Resources.i18n_ast_result_status_success_label());
+    }
+
+    protected UUID startScanWithRetry(@NonNull final GenericAstTasks genericAstTasks) throws GenericException {
+        if (!retry) {
+            return genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
+        }
+
+        int maxRetryAttempts = retryTime / RETRY_INTERVAL_SECONDS;
+        for (int attempt = 1; attempt <= maxRetryAttempts; attempt++) {
+            try {
+                return genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
+            } catch (ConcurrentScanException e) {
+                info("Scan attempt failed: scan for project %s branch %s is already scheduled or running. " +
+                                "Waiting %ds before next attempt (%d/%d)",
+                        projectName, branchName, RETRY_INTERVAL_SECONDS, attempt, maxRetryAttempts);
+                try {
+                    TimeUnit.SECONDS.sleep(RETRY_INTERVAL_SECONDS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+        }
+
+        return genericAstTasks.startScan(projectId, fullScanMode, branchName, scanLabel);
     }
 
     public void stop() throws GenericException {

@@ -46,6 +46,9 @@ import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.RETRY_INTERVAL_SECONDS;
+
 @Slf4j
 @Extension
 @Symbol("ptaiAst")
@@ -285,6 +288,33 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public FormValidation doCheckAdvancedSettings(@QueryParameter String value) {
         return Validator.doCheckFieldAdvancedSettings(value, Resources.i18n_ast_settings_advanced_message_invalid());
+    }
+
+    @SuppressWarnings("unused")
+    public int getDefaultRetryTime() {
+        return DEFAULT_RETRY_TIME_SECONDS;
+    }
+
+    @SuppressWarnings("unused")
+    public int getMinRetryTime() {
+        return RETRY_INTERVAL_SECONDS;
+    }
+
+    @SuppressWarnings("unused")
+    public FormValidation doCheckRetryTime(@QueryParameter String value) {
+        int minRetryTime = getMinRetryTime();
+        int retryTime;
+        try {
+            retryTime = Integer.parseInt(StringUtils.trimToEmpty(value));
+        } catch (NumberFormatException e) {
+            return FormValidation.error(Resources.i18n_ast_settings_retryTime_message_invalid(minRetryTime));
+        }
+
+        if (retryTime < minRetryTime) {
+            return FormValidation.error(Resources.i18n_ast_settings_retryTime_message_invalid(minRetryTime));
+        }
+
+        return FormValidation.ok();
     }
 
     private static boolean isApplicableManifest(Manifest manifest) {

@@ -214,6 +214,15 @@
 <c:set var="LABEL_FULL_SCAN_MODE" value="<%=Labels.FULL_SCAN_MODE%>"/>
 <c:set var="HINT_FULL_SCAN_MODE" value="<%=Hints.FULL_SCAN_MODE%>"/>
 
+<c:set var="RETRY" value="<%=Params.RETRY%>"/>
+<c:set var="LABEL_RETRY" value="<%=Labels.RETRY%>"/>
+<c:set var="HINT_RETRY" value="<%=Hints.RETRY%>"/>
+
+<c:set var="RETRY_TIME" value="<%=Params.RETRY_TIME%>"/>
+<c:set var="LABEL_RETRY_TIME" value="<%=Labels.RETRY_TIME%>"/>
+<c:set var="HINT_RETRY_TIME" value="<%=Hints.RETRY_TIME%>"/>
+<c:set var="DEFAULT_RETRY_TIME" value="<%=Defaults.RETRY_TIME%>"/>
+
 <c:set var="VERBOSE" value="<%=Params.VERBOSE%>"/>
 <c:set var="LABEL_VERBOSE" value="<%=Labels.VERBOSE%>"/>
 <c:set var="HINT_VERBOSE" value="<%=Hints.VERBOSE%>"/>
@@ -246,3 +255,4 @@
 <c:set var="TEST_CONTROLLER_PATH" value="<%=Constants.AST_CONTROLLER_PATH%>"/>
 
 <c:set var="FALSE" value="<%=Constants.FALSE%>"/>
+<c:set var="TRUE" value="<%=Constants.TRUE%>"/>

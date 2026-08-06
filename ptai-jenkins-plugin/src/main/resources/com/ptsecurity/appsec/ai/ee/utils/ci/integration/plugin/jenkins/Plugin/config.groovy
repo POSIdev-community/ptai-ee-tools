@@ -83,6 +83,23 @@ f.advanced() {
         f.checkbox()
     }
 
+    f.optionalBlock(
+            title: _('retry'),
+            field: 'retry',
+            checked: instance != null ? instance.retry : false,
+            inline: true) {
+        f.entry(
+                title: _('retryTime'),
+                field: 'retryTime') {
+            f.textbox(
+                    clazz: 'required positive-number',
+                    value: instance != null && instance.retryTime >= descriptor.minRetryTime
+                            ? instance.retryTime
+                            : descriptor.defaultRetryTime,
+                    checkMethod: 'post')
+        }
+    }
+
     f.entry(
             title: _('verbose'),
             field: 'verbose',
