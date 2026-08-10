@@ -27,6 +27,17 @@ public class LoggingInterceptor implements Interceptor {
                 headerName.equalsIgnoreCase("Authorization");
     }
 
+    protected static boolean isAuthenticationCall() {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : elements) {
+            if (element.getClassName().matches("^com.ptsecurity.appsec.[a-zA-Z0-9.]+.ApiClient$") &&
+                    "authenticate".equals(element.getMethodName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected void traceHeaders(@NonNull final String caption, @NonNull final Headers headers) {
         log.trace(caption);
         boolean secure = !advancedSettings.getBoolean(LOGGING_HTTP_CREDENTIALS);
@@ -43,11 +54,20 @@ public class LoggingInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
+        boolean secure = !advancedSettings.getBoolean(LOGGING_HTTP_CREDENTIALS);
+        boolean authenticationCall = secure && isAuthenticationCall();
+
         long requestTime = System.nanoTime();
         log.trace("Sending {} request to {}", request.method(), request.url());
         traceHeaders("Request headers:", request.headers());
-        if (null != request.body())
-            traceBody(request.headers(), request.body());
+
+        if (request.body() != null) {
+            if (authenticationCall) {
+                log.trace("Request body skipped for authentication call");
+            } else {
+                traceBody(request.headers(), request.body());
+            }
+        }
 
         Response response = chain.proceed(request);
         long responseTime = System.nanoTime();
@@ -55,18 +75,7 @@ public class LoggingInterceptor implements Interceptor {
                 response.code(), response.request().url(), (responseTime - requestTime) / 1e6d));
         traceHeaders("Response headers:", response.headers());
 
-        boolean secure = !advancedSettings.getBoolean(LOGGING_HTTP_CREDENTIALS);
-        boolean logBody = true;
-        if (secure) {
-            // Need to check if we are in authentication call
-            StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-            for (StackTraceElement element : elements) {
-                if (element.getClassName().matches("^com.ptsecurity.appsec.[a-zA-Z0-9.]+.ApiClient$") && "authenticate".equals(element.getMethodName())) {
-                    logBody = false;
-                    break;
-                }
-            }
-        }
+        boolean logBody = !authenticationCall;
 
         ResponseBody body = response.body();
         if (logBody && isReadableResponseBody(response)) {

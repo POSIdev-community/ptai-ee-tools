@@ -9,11 +9,12 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Jwt {
+    protected static final String HIDDEN_TOKEN = "${hidden}";
+
     @JsonProperty("accessToken")
     protected String accessToken;
 
@@ -22,4 +23,15 @@ public class Jwt {
 
     @JsonProperty("expiredAt")
     protected OffsetDateTime expiredAt;
+
+    @Override
+    public String toString() {
+        return "Jwt(accessToken=" + mask(accessToken)
+                + ", refreshToken=" + mask(refreshToken)
+                + ", expiredAt=" + expiredAt + ")";
+    }
+
+    protected static String mask(final String token) {
+        return token == null ? "null" : HIDDEN_TOKEN;
+    }
 }
