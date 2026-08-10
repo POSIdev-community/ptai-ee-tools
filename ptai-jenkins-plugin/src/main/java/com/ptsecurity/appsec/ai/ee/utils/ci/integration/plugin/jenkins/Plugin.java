@@ -139,14 +139,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        Jenkins jenkins = Jenkins.get();
         final BuildEnv currentBuildEnv = new BuildEnv(getEnvironmentVariables(build, listener), workspace, build.getTimestamp());
         final BuildInfo buildInfo = new BuildInfo(currentBuildEnv, null);
         buildInfo.setEffectiveEnvironmentInBuildInfo();
-
-        Item item = jenkins.getItem("/");
-        if (build instanceof AbstractBuild)
-            item = ((AbstractBuild)build).getProject();
 
         PluginDescriptor descriptor = this.getDescriptor();
 
@@ -217,12 +212,12 @@ public class Plugin extends Builder implements SimpleBuildStep {
             Config base = descriptor.getConfig(configName);
             serverSettings = base.getServerSettings();
             credentialsId = serverSettings.getServerCredentialsId();
-            credentials = CredentialsImpl.getCredentialsById(item, credentialsId);
+            credentials = CredentialsImpl.getCredentialsById(build, credentialsId);
             serverUrl = serverSettings.getServerUrl();
         } else {
             ConfigCustom configCustom = (ConfigCustom) config;
             credentialsId = configCustom.getServerSettings().getServerCredentialsId();
-            credentials = CredentialsImpl.getCredentialsById(item, credentialsId);
+            credentials = CredentialsImpl.getCredentialsById(build, credentialsId);
             serverUrl = configCustom.getServerSettings().getServerUrl();
         }
 
