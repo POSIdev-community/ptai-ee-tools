@@ -8,7 +8,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Export;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.SetupOperations;
@@ -230,13 +229,13 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // Scan may be stopped from PT AI UI. In this case no scan results will be
         // available even if scan is aborted at the very latest scan stages and some
         // vulnerabilities are found already
-        boolean resultsAvailable = true;
+        GenericException statisticsError = null;
         try {
             genericAstTasks.appendStatistics(scanBrief);
             log.debug("Scan brief for project / scan ID {} / {} loaded successfully", projectId, scanResultId);
             fine("Resulting statistics is " + scanBrief.getStatistics());
         } catch (GenericException e) {
-            resultsAvailable = false;
+            statisticsError = e;
             log.debug("Scan brief for project / scan ID {} / {} load failed", projectId, scanResultId);
             log.debug("Exception details", e);
         }
@@ -265,11 +264,16 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                     new InterruptedException());
         }
 
-        // Call postprocessing tasks
-        for (Base job : subJobs) {
-            if (job instanceof Export && !resultsAvailable) continue;
-            job.execute(scanBrief);
+        if (statisticsError != null) {
+            info(Resources.i18n_ast_result_status_failed_statistics_label());
+            throw GenericException.raise(
+                    "AST result statistics load failed",
+                    statisticsError);
         }
+
+        // Call postprocessing tasks
+        for (Base job : subJobs)
+            job.execute(scanBrief);
 
         info(Resources.i18n_ast_result_status_success_label());
     }
