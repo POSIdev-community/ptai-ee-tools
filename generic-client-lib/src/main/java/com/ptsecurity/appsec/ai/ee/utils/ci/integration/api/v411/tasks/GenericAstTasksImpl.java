@@ -229,14 +229,17 @@ public class GenericAstTasksImpl extends AbstractTaskImpl implements GenericAstT
         ScanStatisticModel statistic = call(
                 () -> Objects.requireNonNull(scanResult.getStatistic(), "Scan result statistics is null"),
                 "Get scan result statistics failed");
+
+        log.trace("Setting scan brief policy assessment state");
+        call(
+                () -> scanBrief.setPolicyState(IssuesConverter.convert(
+                                Objects.requireNonNull(statistic.getPolicyState(), "Scan result policy state is null"))),
+                "Scan result policy state stage conversion failed");
+
         log.trace("Converting v.4.1.1 scan result statistics to version-independent data");
         call(
                 () -> scanBrief.setStatistics(convert(statistic, scanResult)),
                 "Scan result statistics conversion failed");
-        log.trace("Setting scan brief policy assessment state");
-        call(
-                () -> scanBrief.setPolicyState(IssuesConverter.convert(Objects.requireNonNull(statistic.getPolicyState(), "Scan result policy state is null"))),
-                "Scan result policy state stage conversion failed");
     }
 
     @Override
