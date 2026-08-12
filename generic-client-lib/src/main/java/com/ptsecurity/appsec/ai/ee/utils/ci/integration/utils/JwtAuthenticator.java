@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Authenticator;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
@@ -42,6 +43,14 @@ public class JwtAuthenticator extends AbstractTool implements Authenticator {
      */
     @Override
     public Request authenticate(Route route, @NonNull Response response) throws IOException {
+        final HttpUrl trusted = TrustedHost.trusted(client.getConnectionSettings());
+        final HttpUrl target = response.request().url();
+        if (!TrustedHost.sameOrigin(trusted, target)) {
+            log.error("Refused to authenticate request to {} as PT AI server is {}",
+                    TrustedHost.origin(target), TrustedHost.origin(trusted));
+            return null;
+        }
+
         final String staleToken = extractBearerToken(response.request());
 
         Request newRequest = retryWithNewerToken(staleToken, response.request());

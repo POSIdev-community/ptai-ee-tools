@@ -56,6 +56,7 @@ public class ApiClientHelper {
 
             OkHttpClient.Builder builder = helper.getHttpClient().newBuilder()
                     .authenticator(new JwtAuthenticator(client))
+                    .addNetworkInterceptor(new CrossHostRedirectInterceptor(connectionSettings))
                     .addInterceptor(new LoggingInterceptor(client.getAdvancedSettings()))
                     .protocols(Collections.singletonList(Protocol.HTTP_1_1));
             if (connectionSettings.isInsecure())
