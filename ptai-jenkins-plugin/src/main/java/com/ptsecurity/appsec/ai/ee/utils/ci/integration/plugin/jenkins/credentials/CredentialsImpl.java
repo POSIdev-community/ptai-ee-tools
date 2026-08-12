@@ -14,6 +14,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Queue;
+import hudson.model.Run;
 import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
@@ -53,6 +54,24 @@ public class CredentialsImpl extends BaseStandardCredentials implements Credenti
         } catch (CloneNotSupportedException e) {
             return null;
         }
+    }
+
+    public static CredentialsImpl getCredentialsById(@NonNull Run<?, ?> run, String id) throws GenericException {
+        if (StringUtils.isEmpty(id)) {
+            throw GenericException.raise(
+                    "Credentials retrieval failed", new IllegalArgumentException("No credentials ID defined"));
+        }
+
+        CredentialsImpl credentials = CredentialsProvider.findCredentialById(
+                id, CredentialsImpl.class, run, Collections.<DomainRequirement>emptyList());
+
+        if (null == credentials) {
+            throw GenericException.raise(
+                    "Credentials retrieval failed", new IllegalArgumentException("No credentials found with ID " + id));
+        }
+
+        CredentialsProvider.track(run, credentials);
+        return credentials;
     }
 
     public static CredentialsImpl getCredentialsById(Item item, String id) throws GenericException {

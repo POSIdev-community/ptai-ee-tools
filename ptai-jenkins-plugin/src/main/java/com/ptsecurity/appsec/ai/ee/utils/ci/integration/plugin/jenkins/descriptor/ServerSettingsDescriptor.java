@@ -160,8 +160,8 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
     private static void checkTestServerPermission(final Item item) {
         if (item == null) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-        } else {
-            item.checkPermission(Item.READ);
+        } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+            item.checkPermission(Item.EXTENDED_READ);
         }
     }
 
