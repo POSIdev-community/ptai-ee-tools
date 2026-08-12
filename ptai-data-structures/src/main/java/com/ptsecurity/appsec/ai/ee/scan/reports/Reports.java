@@ -140,6 +140,19 @@ public class Reports {
         @JsonProperty("languages")
         private List<ProgrammingLanguage> languages;
 
+        public List<ProgrammingLanguage> effectiveLanguages() {
+            if (languages != null && !languages.isEmpty()) {
+                return languages;
+            }
+
+            if (language == null) {
+                return Collections.emptyList();
+            }
+
+            log.warn("Deprecated single-value language report filter is used, use languages instead");
+            return Collections.singletonList(language);
+        }
+
         public enum Condition {
             NONE, NOCONDITION, UNDERCONDITION, ALL
         }

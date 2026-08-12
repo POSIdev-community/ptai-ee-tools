@@ -122,30 +122,8 @@ public class ReportsConverter {
     private static void applyLanguageFilters(UserReportFiltersModel apiModel, Reports.IssuesFilter uniqModel) {
         List<ProgrammingLanguageLicence> allLanguages = Arrays.asList(ProgrammingLanguageLicence.JAVA, ProgrammingLanguageLicence.CSHARP, ProgrammingLanguageLicence.VB, ProgrammingLanguageLicence.PHP, ProgrammingLanguageLicence.JAVASCRIPT, ProgrammingLanguageLicence.PYTHON, ProgrammingLanguageLicence.OBJECTIVEC, ProgrammingLanguageLicence.SWIFT, ProgrammingLanguageLicence.CANDCPLUSPLUS, ProgrammingLanguageLicence.GO, ProgrammingLanguageLicence.KOTLIN, ProgrammingLanguageLicence.SQL, ProgrammingLanguageLicence.RUBY);
 
-        Reports.IssuesFilter.ProgrammingLanguage language = uniqModel.getLanguage();
-        if (language != null) {
-            switch (language) {
-                case ALL: apiModel.setLanguages(allLanguages);
-                case JAVA: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.JAVA));
-                case CSHARP: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.CSHARP));
-                case VB: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.VB));
-                case PHP: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.PHP));
-                case JAVASCRIPT: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.JAVASCRIPT));
-                case PYTHON: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.PYTHON));
-                case OBJECTIVEC: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.OBJECTIVEC));
-                case SWIFT: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.SWIFT));
-                case CANDCPLUSPLUS: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.CANDCPLUSPLUS));
-                case GO: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.GO));
-                case KOTLIN: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.KOTLIN));
-                case SQL: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.SQL));
-                case RUBY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageLicence.RUBY));
-            }
-            log.info("Language setted: {}", apiModel.getLanguages());
-            return;
-        }
-
-        List<Reports.IssuesFilter.ProgrammingLanguage> languages = uniqModel.getLanguages();
-        if (languages == null) {
+        List<Reports.IssuesFilter.ProgrammingLanguage> languages = uniqModel.effectiveLanguages();
+        if (languages.isEmpty()) {
             return;
         }
         List<ProgrammingLanguageLicence> mappedLanguages = new ArrayList<>();
@@ -195,7 +173,7 @@ public class ReportsConverter {
         }
 
         apiModel.setLanguages(mappedLanguages);
-        log.info("Language setted 2: {}", apiModel.getLanguages());
+        log.debug("Report language filter is set to {}", apiModel.getLanguages());
     }
 
     private static void applyScanModules(UserReportFiltersModel apiModel, Reports.IssuesFilter uniqModel) {

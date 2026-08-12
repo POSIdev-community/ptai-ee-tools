@@ -136,31 +136,8 @@ public class ReportsConverter {
                 ProgrammingLanguageGroup.RUBY,
                 ProgrammingLanguageGroup.SOLIDITY);
 
-        Reports.IssuesFilter.ProgrammingLanguage language = uniqModel.getLanguage();
-        if (language != null) {
-            switch (language) {
-                case ALL: apiModel.setLanguages(allLanguages);
-                case JAVA: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.JAVA));
-                case CSHARP: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.CSHARP));
-                case VB: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.VB));
-                case PHP: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.PHP));
-                case JAVASCRIPT: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.JAVASCRIPT));
-                case PYTHON: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.PYTHON));
-                case OBJECTIVEC: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.OBJECTIVEC));
-                case SWIFT: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SWIFT));
-                case CANDCPLUSPLUS: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.CANDCPLUSPLUS));
-                case GO: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.GO));
-                case KOTLIN: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.KOTLIN));
-                case SQL: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SQL));
-                case RUBY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.RUBY));
-                case SOLIDITY: apiModel.setLanguages(Collections.singletonList(ProgrammingLanguageGroup.SOLIDITY));
-            }
-            log.info("Language setted: {}", apiModel.getLanguages());
-            return;
-        }
-
-        List<Reports.IssuesFilter.ProgrammingLanguage> languages = uniqModel.getLanguages();
-        if (languages == null) {
+        List<Reports.IssuesFilter.ProgrammingLanguage> languages = uniqModel.effectiveLanguages();
+        if (languages.isEmpty()) {
             return;
         }
         List<ProgrammingLanguageGroup> mappedLanguages = new ArrayList<>();
@@ -213,7 +190,7 @@ public class ReportsConverter {
         }
 
         apiModel.setLanguages(mappedLanguages);
-        log.info("Language setted 2: {}", apiModel.getLanguages());
+        log.debug("Report language filter is set to {}", apiModel.getLanguages());
     }
 
     private static void applyScanModules(UserReportFiltersModel apiModel, Reports.IssuesFilter uniqModel) {
