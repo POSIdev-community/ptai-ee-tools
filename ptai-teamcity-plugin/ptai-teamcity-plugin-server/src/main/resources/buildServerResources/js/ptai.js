@@ -23,7 +23,10 @@ PtaiAbstractSettingsForm = OO.extend(BS.AbstractPasswordForm, {
         let that = this;
         return OO.extend(BS.ErrorsAwareListener, {
             handle: function(field, elem) {
-                $("error_" + field).innerHTML = elem.firstChild.nodeValue;
+                let errorElement = $("error_" + field);
+                if (errorElement) {
+                    errorElement.textContent = (elem && elem.textContent) ? elem.textContent : "";
+                }
                 that.highlightErrorField($(field));
             },
 
