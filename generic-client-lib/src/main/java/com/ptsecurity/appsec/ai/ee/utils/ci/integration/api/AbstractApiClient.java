@@ -52,9 +52,8 @@ public abstract class AbstractApiClient {
     protected Jwt apiJwt = null;
 
     protected void setApiJwt(@NonNull final Jwt apiJwt) {
-        boolean insecure = advancedSettings.getBoolean(AdvancedSettings.SettingInfo.LOGGING_HTTP_CREDENTIALS);
         for (Object api : apis) {
-            log.trace("Set JWT {} for {} API", insecure ? apiJwt.getAccessToken() : "${JWT}", api.getClass().toString());
+            log.trace("Set JWT ${JWT} for {} API", api.getClass().toString());
             new ApiClientHelper(api)
                     .setApiKeyPrefix("Bearer")
                     .setApiKey(apiJwt.getAccessToken());

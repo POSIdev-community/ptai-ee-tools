@@ -160,12 +160,12 @@ public class ApiClient extends AbstractApiClient {
                             return authApi.getApiClient().execute(call, stringType);
                         },
                         "Refresh JWT call failed");
-                log.trace("JWT token refreshed: {}", jwtResponse);
+                log.trace("JWT token refreshed");
             } catch (GenericException e) {
                 // Exception thrown while trying to refresh JWT. Let's re-authenticate using API token
                 log.trace("JWT refresh failed, let's authenticate using initial credentials");
                 jwtResponse = initialAuthentication();
-                log.trace("JWT token after re-authentication: {}", jwtResponse);
+                log.trace("JWT token acquired after re-authentication");
             }
         }
 
@@ -176,14 +176,13 @@ public class ApiClient extends AbstractApiClient {
                 jwtData.getAccessToken(),
                 jwtData.getRefreshToken(),
                 Objects.requireNonNull(jwtData.getExpiredAt()));
-        log.trace("JWT parse result: {}", res);
+        log.trace("JWT parsed from authentication response, it expires at {}", res.getExpiredAt());
         // JwtResponse's refreshToken field is null after refresh, let's fill it
         // to avoid multiple parsing calls
         if (StringUtils.isEmpty(res.getRefreshToken()))
             res.setRefreshToken(this.apiJwt.getRefreshToken());
         // Store new JWT and set it as Bearer API key to all APIs
         setApiJwt(res);
-        log.trace("JWT: " + res);
 
         return res;
     }

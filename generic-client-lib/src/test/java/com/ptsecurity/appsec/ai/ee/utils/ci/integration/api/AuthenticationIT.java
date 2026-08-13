@@ -39,7 +39,7 @@ public class AuthenticationIT extends BaseClientIT {
         // client.authenticate();
 
         Jwt initialJwtResponse = client.getApiJwt();
-        log.trace("Initial authentication using API token: JWT is {}", initialJwtResponse);
+        log.trace("Initial authentication using API token: JWT expires at {}", initialJwtResponse.getExpiredAt());
         int signatureIdx = initialJwtResponse.getAccessToken().lastIndexOf('.');
         String withoutSignature = initialJwtResponse.getAccessToken().substring(0, signatureIdx + 1);
         // Allow up to five seconds time difference between PT AI client and server to avoid something like PrematureJwtException
@@ -66,7 +66,7 @@ public class AuthenticationIT extends BaseClientIT {
         Assertions.assertEquals(versionsAfterRefresh.get(ServerVersionTasks.Component.AIE), version);
 
         Jwt freshJwtResponse = client.getApiJwt();
-        log.trace("Subsequent re-authentication using refresh token: JWT is {}", freshJwtResponse);
+        log.trace("Subsequent re-authentication using refresh token: JWT expires at {}", freshJwtResponse.getExpiredAt());
         signatureIdx = freshJwtResponse.getAccessToken().lastIndexOf('.');
         withoutSignature = freshJwtResponse.getAccessToken().substring(0, signatureIdx + 1);
         io.jsonwebtoken.Jwt<Header, Claims> freshJwt = parser.parseClaimsJwt(withoutSignature);
