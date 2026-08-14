@@ -58,7 +58,7 @@ public class AstEditRunTypeControllerExtension implements EditRunTypeControllerE
      * @param model
      */
     @Override
-    public void fillModel(@NonNull HttpServletRequest request, @NonNull BuildTypeForm form, @NonNull Map model) {
+    public void fillModel(@NonNull HttpServletRequest request, @NonNull BuildTypeForm form, @NonNull Map<String, Object> model) {
         BasePropertiesBean bean = form.getBuildRunnerBean().getPropertiesBean();
         final Map<String, String> properties = bean.getProperties();
         // Setup possibly missing fields: Teamcity doesn't save empty or false values to job's
