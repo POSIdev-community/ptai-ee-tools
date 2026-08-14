@@ -83,11 +83,9 @@ public class FileCollector {
     public static File collect(Transfers transfers, @NonNull final File dir, @NonNull final File zip, @NonNull AbstractTool owner) throws GenericException {
         return call(() -> {
             owner.fine("Environment variables:");
-            final Map<String, String> environmentVariables = System.getenv();
-            environmentVariables.keySet().stream().sorted().forEach(key -> owner.fine("%s = %s", key, environmentVariables.get(key)));
+            EnvironmentInfo.environmentVariables().forEach(owner::fine);
             owner.fine("Properties:");
-            Properties properties = System.getProperties();
-            properties.stringPropertyNames().forEach(key -> owner.fine("%s = %s", key, properties.getProperty(key)));
+            EnvironmentInfo.systemProperties().forEach(owner::fine);
 
             owner.fine("Create file collector");
             FileCollector collector = new FileCollector(transfers, owner);
