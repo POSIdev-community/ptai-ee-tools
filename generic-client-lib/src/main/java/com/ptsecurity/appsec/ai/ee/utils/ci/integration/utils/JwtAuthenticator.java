@@ -72,7 +72,7 @@ public class JwtAuthenticator extends AbstractTool implements Authenticator {
             }
             if (auth.matches(UNAUTHORIZED_ERROR) || auth.matches(INVALID_TOKEN_ERROR) || (null == client.getApiJwt())) {
                 log.trace("WWW-Authenticate: {}", auth);
-                log.trace("Current client JWT: {}", client.getApiJwt());
+                log.trace("Client JWT is {}", null == client.getApiJwt() ? "not set" : "rejected by server");
                 // Need to acquire new / refresh existing JWT using client secret
                 try {
                     client.authenticate();
