@@ -7,8 +7,10 @@ import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.VulnerabilityIssue;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isNotEmpty;
@@ -17,6 +19,14 @@ import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isNotEmpty;
  * As {@link ScanResult} is in fact a DTO class, we need to implement its processing separately
  */
 public class ScanResultHelper {
+    private static final Map<VulnerabilityIssue.ScanMode, Reports.IssuesFilter.ScanMode> SCAN_MODE_MAP = new HashMap<>();
+
+    static {
+        SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_ROOT, Reports.IssuesFilter.ScanMode.FROMROOT);
+        SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_OTHER, Reports.IssuesFilter.ScanMode.FROMOTHER);
+        SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_ENTRYPOINT, Reports.IssuesFilter.ScanMode.FROMENTRYPOINT);
+        SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_PUBLICPROTECTED, Reports.IssuesFilter.ScanMode.FROMPUBLICPROTECTED);
+    }
 
     /**
      * Apply {@link com.ptsecurity.appsec.ai.ee.scan.reports.Reports.IssuesFilter} to {@link ScanResult}. Method
@@ -143,22 +153,27 @@ public class ScanResultHelper {
         }
 
         // Filter by scan mode
-        Set<Reports.IssuesFilter.ScanMode> scanModes = new HashSet<>();
-        if (null != filter.getScanMode()) scanModes.add(filter.getScanMode());
-        if (isNotEmpty(filter.getScanModes())) scanModes.addAll(filter.getScanModes());
+        Set<Reports.IssuesFilter.ScanMode> scanModes = new HashSet<>(filter.effectiveScanModes());
         // At this point scan modes contain those that are to be kept in scan result
         if (!scanModes.isEmpty() && !scanModes.contains(Reports.IssuesFilter.ScanMode.ALL)) {
             Iterator<BaseIssue> iterator = scanResult.getIssues().iterator();
             while (iterator.hasNext()) {
                 BaseIssue issue = iterator.next();
-                if (BaseIssue.Type.VULNERABILITY.equals(issue.getClazz())) {
-                    VulnerabilityIssue vulnerabilityIssue = (VulnerabilityIssue) issue;
-                    if (VulnerabilityIssue.ScanMode.FROM_ROOT.equals(vulnerabilityIssue.getScanMode()) && scanModes.contains(Reports.IssuesFilter.ScanMode.FROMROOT)) continue;
-                    if (VulnerabilityIssue.ScanMode.FROM_OTHER.equals(vulnerabilityIssue.getScanMode()) && scanModes.contains(Reports.IssuesFilter.ScanMode.FROMOTHER)) continue;
-                    if (VulnerabilityIssue.ScanMode.FROM_ENTRYPOINT.equals(vulnerabilityIssue.getScanMode()) && scanModes.contains(Reports.IssuesFilter.ScanMode.FROMENTRYPOINT)) continue;
-                    if (VulnerabilityIssue.ScanMode.FROM_PUBLICPROTECTED.equals(vulnerabilityIssue.getScanMode()) && scanModes.contains(Reports.IssuesFilter.ScanMode.FROMPUBLICPROTECTED)) continue;
-                } else
-                if (scanModes.contains(Reports.IssuesFilter.ScanMode.FROMOTHER)) continue;
+                if (!BaseIssue.Type.VULNERABILITY.equals(issue.getClazz())) {
+                    continue;
+                }
+
+                VulnerabilityIssue vulnerabilityIssue = (VulnerabilityIssue) issue;
+                Reports.IssuesFilter.ScanMode issueScanMode = SCAN_MODE_MAP.get(vulnerabilityIssue.getScanMode());
+
+                if (null == issueScanMode) {
+                    continue;
+                }
+
+                if (scanModes.contains(issueScanMode)) {
+                    continue;
+                }
+
                 iterator.remove();
             }
         }
