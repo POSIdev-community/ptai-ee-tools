@@ -19,9 +19,16 @@ import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isNotEmpty;
  * As {@link ScanResult} is in fact a DTO class, we need to implement its processing separately
  */
 public class ScanResultHelper {
+    private static final Map<BaseIssue.ApprovalState, Reports.IssuesFilter.ApprovalState> APPROVAL_STATE_MAP = new HashMap<>();
     private static final Map<VulnerabilityIssue.ScanMode, Reports.IssuesFilter.ScanMode> SCAN_MODE_MAP = new HashMap<>();
 
     static {
+        APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.APPROVAL, Reports.IssuesFilter.ApprovalState.APPROVED);
+        APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.AUTO_APPROVAL, Reports.IssuesFilter.ApprovalState.AUTOAPPROVED);
+        APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.DISCARD, Reports.IssuesFilter.ApprovalState.DISCARDED);
+        APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.NOT_EXIST, Reports.IssuesFilter.ApprovalState.UNDEFINED);
+        APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.NONE, Reports.IssuesFilter.ApprovalState.UNDEFINED);
+
         SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_ROOT, Reports.IssuesFilter.ScanMode.FROMROOT);
         SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_OTHER, Reports.IssuesFilter.ScanMode.FROMOTHER);
         SCAN_MODE_MAP.put(VulnerabilityIssue.ScanMode.FROM_ENTRYPOINT, Reports.IssuesFilter.ScanMode.FROMENTRYPOINT);
@@ -87,19 +94,23 @@ public class ScanResultHelper {
         }
 
         // Filter by confirmation status
-        Set<Reports.IssuesFilter.ApprovalState> approvalStates = new HashSet<>();
-        if (null != filter.getConfirmationStatus()) approvalStates.add(filter.getConfirmationStatus());
-        if (isNotEmpty(filter.getConfirmationStatuses())) approvalStates.addAll(filter.getConfirmationStatuses());
+        Set<Reports.IssuesFilter.ApprovalState> approvalStates = new HashSet<>(filter.effectiveConfirmationStatuses());
+        if (approvalStates.contains(Reports.IssuesFilter.ApprovalState.NONE)) {
+            approvalStates.add(Reports.IssuesFilter.ApprovalState.UNDEFINED);
+        }
         // At this point approvalStates contain confirmatiion sttatuses that are to be kept in scan result
         if (!approvalStates.isEmpty() && !approvalStates.contains(Reports.IssuesFilter.ApprovalState.ALL)) {
             Iterator<BaseIssue> iterator = scanResult.getIssues().iterator();
             while (iterator.hasNext()) {
                 BaseIssue issue = iterator.next();
-                if (BaseIssue.ApprovalState.APPROVAL.equals(issue.getApprovalState()) && approvalStates.contains(Reports.IssuesFilter.ApprovalState.APPROVED)) continue;
-                if (BaseIssue.ApprovalState.AUTO_APPROVAL.equals(issue.getApprovalState()) && approvalStates.contains(Reports.IssuesFilter.ApprovalState.AUTOAPPROVED)) continue;
-                if (BaseIssue.ApprovalState.DISCARD.equals(issue.getApprovalState()) && approvalStates.contains(Reports.IssuesFilter.ApprovalState.DISCARDED)) continue;
-                if (BaseIssue.ApprovalState.NOT_EXIST.equals(issue.getApprovalState()) && approvalStates.contains(Reports.IssuesFilter.ApprovalState.UNDEFINED)) continue;
-                if (BaseIssue.ApprovalState.NONE.equals(issue.getApprovalState()) && approvalStates.contains(Reports.IssuesFilter.ApprovalState.NONE)) continue;
+                Reports.IssuesFilter.ApprovalState issueApprovalState = APPROVAL_STATE_MAP.get(issue.getApprovalState());
+                if (null == issueApprovalState) {
+                    continue;
+                }
+
+                if (approvalStates.contains(issueApprovalState)) {
+                    continue;
+                }
                 iterator.remove();
             }
         }
