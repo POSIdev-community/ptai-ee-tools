@@ -31,19 +31,19 @@ public class ReportsConverter {
     private static void applyOtherFilters(UserReportFiltersModel apiModel, Reports.IssuesFilter uniqModel) {
         Boolean byBestPlace = uniqModel.getByBestPlaceToFix();
         Boolean byFavorite = uniqModel.getByFavorite();
-        Boolean secondLevel = uniqModel.getHideSecondOrder();
-        Boolean suspected = uniqModel.getHideSuspected();
+        Boolean hideSecondOrder = uniqModel.getHideSecondOrder();
+        Boolean hideSuspected = uniqModel.getHideSuspected();
         if (byBestPlace != null) {
             apiModel.setNoPlaceToFix(byBestPlace);
         }
         if (byFavorite != null) {
             apiModel.setOnlyFavorite(byFavorite);
         }
-        if (secondLevel != null) {
-            apiModel.setSecondLevel(secondLevel);
+        if (hideSecondOrder != null) {
+            apiModel.setSecondLevel(!hideSecondOrder);
         }
-        if (suspected != null) {
-            apiModel.setSuspected(suspected);
+        if (hideSuspected != null) {
+            apiModel.setSuspected(!hideSuspected);
         }
     }
 
