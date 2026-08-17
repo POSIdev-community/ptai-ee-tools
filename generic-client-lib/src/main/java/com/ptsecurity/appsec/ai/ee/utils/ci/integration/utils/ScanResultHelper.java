@@ -31,9 +31,7 @@ public class ScanResultHelper {
         // TODO: Get rid of NONE filters
 
         // Filter by language
-        Set<Reports.IssuesFilter.ProgrammingLanguage> programmingLanguages = new HashSet<>();
-        if (null != filter.getLanguages()) programmingLanguages.add(filter.getLanguage());
-        if (isNotEmpty(filter.getLanguages())) programmingLanguages.addAll(filter.getLanguages());
+        Set<Reports.IssuesFilter.ProgrammingLanguage> programmingLanguages = new HashSet<>(filter.effectiveLanguages());
 
         if (!programmingLanguages.isEmpty() && !programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.ALL)) {
             Iterator<BaseIssue> iterator = scanResult.getIssues().iterator();
@@ -42,6 +40,7 @@ public class ScanResultHelper {
                 if (ScanResult.ScanSettings.Language.JAVA.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.JAVA)) continue;
                 if (ScanResult.ScanSettings.Language.PHP.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.PHP)) continue;
                 if (ScanResult.ScanSettings.Language.CSHARP.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.CSHARP)) continue;
+                if (ScanResult.ScanSettings.Language.CSHARPWINONLY.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.CSHARP)) continue;
                 if (ScanResult.ScanSettings.Language.VB.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.VB)) continue;
                 if (ScanResult.ScanSettings.Language.GO.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.GO)) continue;
                 if (ScanResult.ScanSettings.Language.CPP.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.CANDCPLUSPLUS)) continue;
@@ -52,6 +51,9 @@ public class ScanResultHelper {
                 if (ScanResult.ScanSettings.Language.SWIFT.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.SWIFT)) continue;
                 if (ScanResult.ScanSettings.Language.RUBY.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.RUBY)) continue;
                 if (ScanResult.ScanSettings.Language.OBJECTIVEC.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.OBJECTIVEC)) continue;
+                if (ScanResult.ScanSettings.Language.SOLIDITY.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.SOLIDITY)) continue;
+                if (ScanResult.ScanSettings.Language.SCALA.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.SCALA)) continue;
+                if (ScanResult.ScanSettings.Language.ONE_C.equals(issue.getLanguage()) && programmingLanguages.contains(Reports.IssuesFilter.ProgrammingLanguage.ONEC)) continue;
                 iterator.remove();
             }
         }
