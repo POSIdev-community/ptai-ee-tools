@@ -215,9 +215,13 @@ public class ApiClient extends AbstractApiClient {
         OkHttpClient okHttpClient = Reflect.on(httpClient).get("client");
         OkHttpClient.Builder httpBuilder = okHttpClient.newBuilder();
         httpBuilder
-                .hostnameVerifier((hostname, session) -> true)
                 .addInterceptor(new LoggingInterceptor(advancedSettings))
                 .protocols(Collections.singletonList(Protocol.HTTP_1_1));
+
+        if (connectionSettings.isInsecure()) {
+            httpBuilder.hostnameVerifier((hostname, session) -> true);
+        }
+
         if (null != trustManager) {
             SSLContext sslContext = call(() -> SSLContext.getInstance("TLS"), "SSL context creation failed");
             call(() -> sslContext.init(null, new TrustManager[] { trustManager }, new SecureRandom()), "SSL context initialization failed");
