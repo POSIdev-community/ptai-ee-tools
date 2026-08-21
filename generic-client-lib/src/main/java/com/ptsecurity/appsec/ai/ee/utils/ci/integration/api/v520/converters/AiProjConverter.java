@@ -609,10 +609,14 @@ public class AiProjConverter {
             @NonNull final UnifiedAiProjScanSettings settings,
             final Policy[] policy,
             @NonNull final SecurityPoliciesModel model) {
-        model.setCheckSecurityPoliciesAccordance(settings.isUseSecurityPolicies());
-        Boolean checkSecurityPoliciesAccordance = model.getCheckSecurityPoliciesAccordance();
-        boolean requiredSetSecurityPolicies = Boolean.TRUE.equals(checkSecurityPoliciesAccordance) && policy != null;
-        model.setSecurityPolicies(requiredSetSecurityPolicies ? JsonPolicyHelper.serialize(policy) : "");
+        if (null == policy) {
+            model.setCheckSecurityPoliciesAccordance(settings.isUseSecurityPolicies());
+            return model;
+        }
+
+        boolean policyDefined = 0 != policy.length;
+        model.setCheckSecurityPoliciesAccordance(policyDefined);
+        model.setSecurityPolicies(policyDefined ? JsonPolicyHelper.serialize(policy) : "");
         return model;
     }
 }
