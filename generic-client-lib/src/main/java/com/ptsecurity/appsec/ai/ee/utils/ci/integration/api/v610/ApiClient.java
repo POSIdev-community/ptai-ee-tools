@@ -47,7 +47,7 @@ import static com.ptsecurity.appsec.ai.ee.server.v610.notifications.model.Stage.
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 
 @Slf4j
-@VersionRange(min = {6, 1, 0, 0}, max = {6, 1, 99999, 99999})
+@VersionRange(min = {6, 1, 0, 0}, max = {6, 2, 99999, 99999})
 public class ApiClient extends AbstractApiClient {
     @Getter
     protected final String id = UUID.randomUUID().toString();
