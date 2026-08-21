@@ -283,3 +283,5 @@ options:
 + [Feature] PT AI v.6.1.0 support approved
 + [Feature] Added support for scanning Dart
 + [Fix] Fixed several vulnerabilities
+### 20260821
++ [Feature] PT AI v.6.2.0 support approved
