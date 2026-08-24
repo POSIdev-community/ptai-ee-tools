@@ -64,17 +64,8 @@ public class ReportsConverter {
     }
 
     private static void applyScanModeFilters(UserReportFiltersModel apiModel, Reports.IssuesFilter uniqModel) {
-        Reports.IssuesFilter.ScanMode scanMode = uniqModel.getScanMode();
-        if (scanMode != null) {
-            apiModel.setModeEntryPoint(scanMode.equals(Reports.IssuesFilter.ScanMode.FROMENTRYPOINT) || scanMode.equals(Reports.IssuesFilter.ScanMode.ALL));
-            apiModel.setModePublicMethods(scanMode.equals(Reports.IssuesFilter.ScanMode.FROMPUBLICPROTECTED) || scanMode.equals(Reports.IssuesFilter.ScanMode.ALL));
-            apiModel.setModeOthers(scanMode.equals(Reports.IssuesFilter.ScanMode.FROMOTHER) || scanMode.equals(Reports.IssuesFilter.ScanMode.ALL));
-            apiModel.setModeRootFunction(scanMode.equals(Reports.IssuesFilter.ScanMode.FROMROOT) || scanMode.equals(Reports.IssuesFilter.ScanMode.ALL));
-            return;
-        }
-
-        List<Reports.IssuesFilter.ScanMode> scanModes = uniqModel.getScanModes();
-        if (scanModes == null) {
+        List<Reports.IssuesFilter.ScanMode> scanModes = uniqModel.effectiveScanModes();
+        if (scanModes.isEmpty()) {
             return;
         }
         apiModel.setModeEntryPoint(scanModes.contains(Reports.IssuesFilter.ScanMode.FROMENTRYPOINT) || scanModes.contains(Reports.IssuesFilter.ScanMode.ALL));

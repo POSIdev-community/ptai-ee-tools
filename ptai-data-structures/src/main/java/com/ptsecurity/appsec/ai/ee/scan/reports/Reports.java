@@ -190,6 +190,18 @@ public class Reports {
         @JsonProperty("scanModes")
         private List<ScanMode> scanModes;
 
+        public List<ScanMode> effectiveScanModes() {
+            if (scanModes != null && !scanModes.isEmpty()) {
+                return scanModes;
+            }
+
+            if (scanMode == null) {
+                return Collections.emptyList();
+            }
+
+            return Collections.singletonList(scanMode);
+        }
+
         public enum ActualStatus {
             ISNEW, NOTISNEW, ALL
         }
