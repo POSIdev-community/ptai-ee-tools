@@ -250,19 +250,21 @@ public class ReportsConverter {
         if (confirmationStatuses.isEmpty()) {
             return;
         }
+
         boolean all = confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.ALL);
-        apiModel.setStatusConfirmed(all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.APPROVED));
-        apiModel.setStatusConfirmedAuto(all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.AUTOAPPROVED));
-        apiModel.setStatusRejected(all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.DISCARDED));
-
-        apiModel.setStatusUndefined(all
+        boolean confirmed = all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.APPROVED);
+        boolean confirmedAuto = all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.AUTOAPPROVED);
+        boolean rejected = all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.DISCARDED);
+        boolean undefined = all
                 || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.UNDEFINED)
-                || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.NONE));
+                || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.NONE);
 
-        if (!Boolean.TRUE.equals(apiModel.getStatusConfirmed())
-                && !Boolean.TRUE.equals(apiModel.getStatusConfirmedAuto())
-                && !Boolean.TRUE.equals(apiModel.getStatusRejected())
-                && !Boolean.TRUE.equals(apiModel.getStatusUndefined())) {
+        apiModel.setStatusConfirmed(confirmed);
+        apiModel.setStatusConfirmedAuto(confirmedAuto);
+        apiModel.setStatusRejected(rejected);
+        apiModel.setStatusUndefined(undefined);
+
+        if (!confirmed && !confirmedAuto && !rejected && !undefined) {
             throw new IllegalArgumentException("Unsupported confirmation status report filter value: " + confirmationStatuses);
         }
     }
