@@ -36,6 +36,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Slf4j
 @Accessors
 public abstract class UnifiedAiProjScanSettings {
+    public static final String USE_SECURITY_POLICIES_PATH = "UseSecurityPolicies";
+
     protected final ObjectNode rootNode;
 
     public UnifiedAiProjScanSettings(@NonNull final JsonNode jsonNode) {
@@ -627,6 +629,11 @@ public abstract class UnifiedAiProjScanSettings {
 
     @NonNull
     public abstract Boolean isUseSecurityPolicies();
+
+    public boolean isUseSecurityPoliciesDefined() {
+        return Boolean.TRUE.equals(hasPath(USE_SECURITY_POLICIES_PATH));
+    }
+
     @NonNull
     @Deprecated
     public abstract Boolean isDownloadDependencies();

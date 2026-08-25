@@ -620,8 +620,13 @@ public class AiProjConverter {
     public static SecurityPoliciesModel apply(
             final Policy[] policy,
             @NonNull final SecurityPoliciesModel model) {
-        model.setCheckSecurityPoliciesAccordance(null != policy && 0 != policy.length);
-        model.setSecurityPolicies(Boolean.TRUE.equals(model.getCheckSecurityPoliciesAccordance()) ? JsonPolicyHelper.serialize(policy) : "");
+        if (null == policy) {
+            return model;
+        }
+
+        boolean policyDefined = 0 != policy.length;
+        model.setCheckSecurityPoliciesAccordance(policyDefined);
+        model.setSecurityPolicies(policyDefined ? JsonPolicyHelper.serialize(policy) : "");
         return model;
     }
 }
