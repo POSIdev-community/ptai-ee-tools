@@ -258,23 +258,27 @@ public class ReportsConverter {
     }
 
     private static void applyStatusFilters(UserReportFiltersModel apiModel, Reports.IssuesFilter uniqModel) {
-        Reports.IssuesFilter.ApprovalState confirmationStatus = uniqModel.getConfirmationStatus();
-        if (confirmationStatus != null) {
-            apiModel.setStatusConfirmed(confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.APPROVED) || confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.ALL));
-            apiModel.setStatusConfirmedAuto(confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.AUTOAPPROVED) || confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.ALL));
-            apiModel.setStatusRejected(confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.DISCARDED) || confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.ALL));
-            apiModel.setStatusUndefined(confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.NONE) || confirmationStatus.equals(Reports.IssuesFilter.ApprovalState.ALL));
+        List<Reports.IssuesFilter.ApprovalState> confirmationStatuses = uniqModel.effectiveConfirmationStatuses();
+        if (confirmationStatuses.isEmpty()) {
             return;
         }
 
-        List<Reports.IssuesFilter.ApprovalState> confirmationStatuses = uniqModel.getConfirmationStatuses();
-        if (confirmationStatuses == null) {
-            return;
+        boolean all = confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.ALL);
+        boolean confirmed = all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.APPROVED);
+        boolean confirmedAuto = all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.AUTOAPPROVED);
+        boolean rejected = all || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.DISCARDED);
+        boolean undefined = all
+                || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.UNDEFINED)
+                || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.NONE);
+
+        apiModel.setStatusConfirmed(confirmed);
+        apiModel.setStatusConfirmedAuto(confirmedAuto);
+        apiModel.setStatusRejected(rejected);
+        apiModel.setStatusUndefined(undefined);
+
+        if (!confirmed && !confirmedAuto && !rejected && !undefined) {
+            throw new IllegalArgumentException("Unsupported confirmation status report filter value: " + confirmationStatuses);
         }
-        apiModel.setStatusConfirmed(confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.APPROVED) || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.ALL));
-        apiModel.setStatusConfirmedAuto(confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.AUTOAPPROVED) || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.ALL));
-        apiModel.setStatusRejected(confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.DISCARDED) || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.ALL));
-        apiModel.setStatusUndefined(confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.NONE) || confirmationStatuses.contains(Reports.IssuesFilter.ApprovalState.ALL));
     }
 
     private static UserReportFiltersModel createDefaultFilters() {

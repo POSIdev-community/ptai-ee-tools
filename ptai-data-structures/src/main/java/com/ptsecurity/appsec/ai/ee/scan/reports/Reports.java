@@ -114,6 +114,18 @@ public class Reports {
         @JsonProperty("confirmationStatuses")
         private List<ApprovalState> confirmationStatuses;
 
+        public List<ApprovalState> effectiveConfirmationStatuses() {
+            if (confirmationStatuses != null && !confirmationStatuses.isEmpty()) {
+                return confirmationStatuses;
+            }
+
+            if (confirmationStatus == null) {
+                return Collections.emptyList();
+            }
+
+            return Collections.singletonList(confirmationStatus);
+        }
+
         public enum ProgrammingLanguage {
             JAVA,
             CSHARP,
