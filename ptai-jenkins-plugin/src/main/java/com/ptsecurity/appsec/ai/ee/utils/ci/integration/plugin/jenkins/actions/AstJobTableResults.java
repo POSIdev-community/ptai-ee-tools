@@ -47,10 +47,7 @@ public class AstJobTableResults implements Action {
             do {
                 final AstJobSingleResult action = build.getAction(AstJobSingleResult.class);
                 if (null == action) break;
-                if (null == action.getScanDataPacked()) break;
-                ScanDataPacked scanDataPacked = action.getScanDataPacked();
-                if (!scanDataPacked.getType().equals(SCAN_BRIEF_DETAILED)) break;
-                scanBriefDetailed = ScanDataPacked.unpackData(scanDataPacked.getData(), ScanBriefDetailed.class);
+                scanBriefDetailed = AstJobSingleResult.unpack(action.getScanDataPacked());
             } while (false);
 
             ObjectMapper objectMapper = new ObjectMapper();

@@ -21,6 +21,10 @@ class ChartDataModelTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
+
             ProjectTemplate projectTemplate = getTemplate(ProjectTemplate.ID.PHP_OWASP_BRICKS);
             String json = ResourcesHelper.getResource7ZipString("json/scan/result/" + version.name().toLowerCase() + "/" + projectTemplate.getName() + ".json.7z");
             Assertions.assertFalse(StringUtils.isEmpty(json));

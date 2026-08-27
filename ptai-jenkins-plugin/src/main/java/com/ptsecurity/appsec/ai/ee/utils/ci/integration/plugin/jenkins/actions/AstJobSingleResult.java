@@ -19,6 +19,7 @@ import hudson.model.Run;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,6 +31,7 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.ch
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 
 @RequiredArgsConstructor
+@Slf4j
 public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuildAction {
     @NonNull
     @Getter
@@ -62,12 +64,26 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
 
     public ScanBriefDetailed loadScanBriefDetailed() {
         if (null != scanBriefDetailed) return scanBriefDetailed;
-
-        if (null == scanDataPacked) return null;
-        if (SCAN_BRIEF_DETAILED != scanDataPacked.getType()) return null;
-        scanBriefDetailed = scanDataPacked.unpackData(ScanBriefDetailed.class);
-
+        scanBriefDetailed = unpack(scanDataPacked);
         return scanBriefDetailed;
+    }
+
+    public static ScanBriefDetailed unpack(final ScanDataPacked packed) {
+        if (packed == null) {
+            return null;
+        }
+
+        if (SCAN_BRIEF_DETAILED != packed.getType()) {
+            return null;
+        }
+
+        try {
+            return ScanDataPacked.unpackData(packed.getData(), ScanBriefDetailed.class);
+        } catch (Exception e) {
+            log.warn("PT AI scan results were saved by another plugin version and can't be shown");
+            log.debug("Scan results unpack failed", e);
+            return null;
+        }
     }
 
     @Override

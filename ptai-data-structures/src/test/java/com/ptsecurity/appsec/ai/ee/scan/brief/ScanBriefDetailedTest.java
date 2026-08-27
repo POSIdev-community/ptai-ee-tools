@@ -46,6 +46,7 @@ public class ScanBriefDetailedTest extends BaseTest {
             assertTrue(briefDetailed.toFile().mkdirs());
             for (ScanBrief.ApiVersion version : ScanBrief.ApiVersion.values()) {
                 if (version.isDeprecated()) continue;
+                if (!ProjectTemplate.hasSamples("json/scan/result", version)) continue;
                 Path destination = briefDetailed.resolve(version.name().toLowerCase());
                 assertTrue(destination.toFile().mkdirs());
                 for (ProjectTemplate.ID templateId : ID.values()) {
