@@ -39,4 +39,13 @@ public interface FileOperations {
      * @param data Artifact data to save
      */
     void saveArtifact(@NonNull final String name, @NonNull final String data);
+
+    /** Method saves a file that aictl has created on a host where it runs. Jenkins
+     * executes aictl on a build agent while a build step itself runs in a controller
+     * JVM, so an implementation is expected to move such a file within an agent
+     * instead of pulling its contents through a controller and pushing them back
+     * @param name File name to be saved
+     * @param path Absolute path of a file on a host that runs aictl
+     */
+    void saveArtifactFromScanHost(@NonNull final String name, @NonNull final String path);
 }

@@ -1,188 +1,244 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks;
 
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
+import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
-import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ScanBriefBuilder;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
-import com.ptsecurity.appsec.ai.ee.server.v530.api.model.BranchModel;
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
+import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AgentInfo;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlReport;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.BranchInfo;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.ScanProgress;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.StageConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.AieJsonReport;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.UnsupportedReportSchemaException;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings.SettingInfo.AST_JOB_POLL_INTERVAL;
 
 @Slf4j
 public class GenericAstTask extends AbstractTaskImpl {
+    public static final String DEFAULT_BRANCH_NAME = "default";
+
+    private static final Map<String, ScanBrief.ScanSettings.Engine> ENGINES = new HashMap<>();
+
+    static {
+        ENGINES.put("patternmatching", ScanBrief.ScanSettings.Engine.PM);
+        ENGINES.put("staticcodeanalysis", ScanBrief.ScanSettings.Engine.STATICCODEANALYSIS);
+        ENGINES.put("blackbox", ScanBrief.ScanSettings.Engine.BLACKBOX);
+        ENGINES.put("configuration", ScanBrief.ScanSettings.Engine.CONFIGURATION);
+        ENGINES.put("components", ScanBrief.ScanSettings.Engine.DC);
+        ENGINES.put("softwarecompositionanalysis", ScanBrief.ScanSettings.Engine.DC);
+        ENGINES.put("dataflowanalysis", ScanBrief.ScanSettings.Engine.TAINT);
+        ENGINES.put("vulnerablesourcecode", ScanBrief.ScanSettings.Engine.AI);
+    }
+
     public GenericAstTask(@NonNull final AictlClient client) {
         super(client);
     }
 
+    @NonNull
+    public UUID resolveBranch(
+            @NonNull final UUID projectId,
+            final String branchName,
+            final String sourcesPath) throws GenericException {
+        String name = StringUtils.isBlank(branchName) ? DEFAULT_BRANCH_NAME : branchName.trim();
+        return client.createBranch(projectId, name, sourcesPath, null);
+    }
+
     public void upload(
             @NonNull final UUID projectId,
-            @NonNull final File sources,
-            final String branchName) throws GenericException {
-        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
+            @NonNull final UUID branchId,
+            @NonNull final String sourcesPath) throws GenericException {
+        client.updateSources(projectId, branchId, sourcesPath, null);
+    }
 
-        String defaultBranchName = "default";
-        UUID branchId = null;
-        if (!branches.isEmpty()) {
-            branchId = getTargetBranchId(branches, branchName, defaultBranchName, projectId);
+    public void setProjectSettings(
+            @NonNull final UUID projectId,
+            @NonNull final String jsonSettings) throws GenericException {
+        String path = client.getEnvironment()
+                .write("aiproj-" + projectId + ".json", jsonSettings.getBytes(StandardCharsets.UTF_8));
+
+        try {
+            client.setProjectSettings(projectId, path);
+        } finally {
+            client.getEnvironment().delete(path);
         }
+    }
 
-        String targetBranchName = branchName != null ? branchName : defaultBranchName;
-        if (branchId == null) {
-            client.createBranch(projectId, targetBranchName, sources);
+    public void setProjectPolicy(
+            @NonNull final UUID projectId,
+            @NonNull final String jsonPolicy) throws GenericException {
+        String path = client.getEnvironment()
+                .write("policy-" + projectId + ".json", jsonPolicy.getBytes(StandardCharsets.UTF_8));
+
+        try {
+            client.setProjectPolicies(projectId, path);
+        } finally {
+            client.getEnvironment().delete(path);
+        }
+    }
+
+    @NonNull
+    public UUID startScan(
+            @NonNull final UUID projectId,
+            @NonNull final UUID branchId,
+            final boolean fullScanMode,
+            final String scanLabel) throws GenericException {
+        return client.startScan(projectId, branchId, fullScanMode, scanLabel);
+    }
+
+    public void waitForComplete(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            final Consumer<ScanProgress> onProgress) throws GenericException {
+        if (onProgress == null) {
+            client.awaitScan(projectId, scanResultId);
             return;
         }
 
-        client.updateSources(projectId, branchId, sources);
-    }
+        ProgressReporter reporter = new ProgressReporter(onProgress);
+        AtomicBoolean scanning = new AtomicBoolean(true);
+        ExecutorService poller = Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "ptai-scan-stage-poll");
+            thread.setDaemon(true);
+            return thread;
+        });
 
-    public void setProjectSettings(@NonNull UUID projectId, @NonNull String jsonSettings) throws GenericException {
+        poller.submit(() -> pollStages(projectId, scanResultId, scanning, reporter));
         try {
-            File aiprojFile = Files.write(
-                    Files.createTempFile("aiproj-", ".json"),
-                    jsonSettings.getBytes(StandardCharsets.UTF_8)
-            ).toFile();
-
-            aiprojFile.deleteOnExit();
-            client.setProjectSettings(projectId, aiprojFile);
-        } catch (IOException e) {
-            throw GenericException.raise("Failed to create temp aiproj file", e);
+            client.awaitScan(projectId, scanResultId, reporter::report);
+        } finally {
+            scanning.set(false);
+            poller.shutdownNow();
+            if (!reporter.sawProgress()) {
+                try {
+                    reporter.report(ScanProgress.of(client.getScanStage(projectId, scanResultId)));
+                } catch (Exception e) {
+                    log.debug("PT AI terminal scan stage read failed", e);
+                }
+            }
         }
     }
 
-    public UUID startScan(
-            @NonNull UUID projectId,
-            boolean fullScanMode, // TODO
-            String branchName,
-            String scanLabel) throws GenericException {
-        UUID branchId = getBranchIdByName(projectId, branchName);
-        return client.startScan(projectId, branchId, scanLabel);
-    }
+    private static class ProgressReporter {
+        private final Consumer<ScanProgress> consumer;
+        private String reported = null;
+        private boolean fromProgressStream = false;
 
-    public String getWorkingOrDefaultBranchName(@NonNull UUID projectId) {
-        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
-
-        if (branches.isEmpty()) {
-            return "default";
+        ProgressReporter(@NonNull final Consumer<ScanProgress> consumer) {
+            this.consumer = consumer;
         }
 
-        String workingBranchName = Objects.requireNonNull(getWorkingBranchModel(projectId, branches)).getName();
+        synchronized void report(final ScanProgress progress) {
+            if (progress == null || progress.getStage() == Stage.UNKNOWN){
+                return;
+            }
 
-        if (workingBranchName != null) {
-            return workingBranchName;
+            if (progress.getPercent() >= 0) {
+                fromProgressStream = true;
+            }
+
+            String text = progress.text();
+            if (text.equals(reported)) {
+                return;
+            }
+
+            reported = text;
+            consumer.accept(progress);
         }
 
-        return "default";
+        synchronized boolean sawProgress() {
+            return fromProgressStream;
+        }
     }
 
-    public UUID getBranchIdByName(
+    private static final int PROGRESS_GRACE_PERIOD = 3;
+
+    private void pollStages(
             @NonNull final UUID projectId,
-            @NonNull final String branchName
-    ) {
-        List<BranchModel> branches = getBranchModelsByProjectId(projectId);
-        return filterBranchModelByName(branches, branchName).getId();
-    }
+            @NonNull final UUID scanResultId,
+            @NonNull final AtomicBoolean scanning,
+            @NonNull final ProgressReporter reporter) {
+        int interval = Math.max(1, client.getAdvancedSettings().getInt(AST_JOB_POLL_INTERVAL));
 
-    // TODO
-    private UUID getTargetBranchId(
-            List<BranchModel> branches,
-            String branchName,
-            @NonNull String defaultBranchName,
-            @NonNull UUID projectId
-    ) {
-        UUID branchId = null;
-        BranchModel targetBranch;
-        if (branchName != null) {
-            targetBranch = filterBranchModelByName(branches, branchName);
-        } else {
-            targetBranch = getWorkingBranchModel(projectId, branches);
+        if (!sleep(Math.min(interval, PROGRESS_GRACE_PERIOD))) {
+            return;
         }
 
-        if (branchName != null && targetBranch == null) {
+        while (scanning.get() && !reporter.sawProgress()) {
+            try {
+                reporter.report(ScanProgress.of(client.getScanStage(projectId, scanResultId)));
+            } catch (Exception e) {
+                log.debug("PT AI scan stage poll failed", e);
+            }
+
+            if (!sleep(interval)) {
+                return;
+            }
+        }
+    }
+
+    private static boolean sleep(final int seconds) {
+        try {
+            TimeUnit.SECONDS.sleep(seconds);
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    @NonNull
+    public Stage getStage(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        return client.getScanStage(projectId, scanResultId);
+    }
+
+    public List<Error> getScanErrors(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        List<String> lines = client.getScanErrors(projectId, scanResultId);
+        if (lines.isEmpty()) {
             return null;
         }
 
-        if (targetBranch == null) {
-            targetBranch = filterBranchModelByName(branches, defaultBranchName);
+        List<Error> result = new ArrayList<>();
+        for (String line : lines) {
+            result.add(Error.builder().message(line).build());
         }
 
-        if (targetBranch != null) {
-            branchId = targetBranch.getId();
-        }
-
-        return branchId;
+        return result;
     }
 
-    // TODO
-    private List<BranchModel> getBranchModelsByProjectId(@NonNull UUID projectId) {
-        return Collections.emptyList();
-//        return call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdBranchesGet(projectId),
-//                "PT AI get branches failed"
-//        );
-    }
-
-    private BranchModel filterBranchModelByName(
-            @NonNull final List<BranchModel> branches,
-            @NonNull final String branchName
-    ) {
-        return branches.stream()
-                .filter(branch -> branchName.equals(branch.getName()))
-                .findFirst()
-                .orElse(null);
-    }
-
-    // TODO
-    private BranchModel getWorkingBranchModel(@NonNull UUID projectId, List<BranchModel> branches) {
-        return new BranchModel();
-//        BranchModel workingBranch = branches.stream()
-//                .filter(BranchModel::getIsWorking)
-//                .findFirst()
-//                .orElse(null);
-//
-//        if (workingBranch != null) {
-//            return workingBranch;
-//        }
-//
-//        List<BranchWithScanInfoModel> branchesWithScanInfoModel = call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdBranchesWithScansGet(projectId),
-//                "PT AI get branches failed"
-//        );
-//
-//        BranchWithScanInfoModel workingBranchWithScanInfoModel = branchesWithScanInfoModel.stream()
-//                .filter(BranchWithScanInfoModel::getIsWorking)
-//                .findFirst()
-//                .orElse(null);
-//
-//        if (workingBranchWithScanInfoModel == null) {
-//            return null;
-//        }
-//
-//        UUID branchId = workingBranchWithScanInfoModel.getId();
-//
-//        return branches.stream()
-//                .filter(branch -> branchId.equals(branch.getId()))
-//                .findFirst()
-//                .orElse(null);
-    }
-
-    public void waitForComplete(@NonNull UUID projectId, @NonNull UUID scanResultId) {
-        client.awaitScan(projectId, scanResultId);
-    }
-
-    public void stop(@NonNull UUID projectId, @NonNull UUID scanResultId) throws GenericException {
+    public void stop(@NonNull final UUID scanResultId) throws GenericException {
         log.debug("Calling scan stop for scan result ID {}", scanResultId);
-        client.stopScan(projectId, scanResultId);
+        client.stopScan(scanResultId);
     }
 
     @NonNull
@@ -190,119 +246,211 @@ public class GenericAstTask extends AbstractTaskImpl {
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId,
             @NonNull final UUID branchId,
-            @NonNull final String scanLabel) throws GenericException {
-        String projectName = new ProjectTask(client).searchProjectName(projectId);
-        String aieVersion = client.getVersion();
+            final String branchName,
+            final String scanLabel,
+            final String projectName) throws GenericException {
+        String serverVersion = client.getServerVersion();
+        AgentInfo agent = soleAgent();
 
-        ScanBriefBuilder scanBriefBuilder = ScanBrief.builder()
-                .apiVersion(ScanBrief.ApiVersion.fromString(aieVersion))
+        return ScanBrief.builder()
+                .apiVersion(apiVersion(serverVersion))
                 .ptaiServerUrl(client.getConnectionSettings().getUrl())
-                .ptaiServerVersion(aieVersion)
-                //.ptaiAgentVersion(versions.get(ServerVersionTasks.Component.AIC))  TODO
+                .ptaiServerVersion(serverVersion)
+                .ptaiAgentVersion(agent == null ? "" : agent.getVersion())
+                .ptaiAgentName(agent == null ? null : agent.getName())
                 .id(scanResultId)
                 .projectId(projectId)
-                .projectName(projectName)
+                .projectName(projectName == null ? "" : projectName)
                 .branchId(branchId.toString())
-                .scanLabel(scanLabel);
-                // .scanSettings(convert(scanSettings)); TODO
-
-//        ScanAgentInfoModel scanAgentInfoModel = scanResult.getScanAgentInfo(); TODO
-//        if (scanAgentInfoModel != null) {
-//            scanBriefBuilder.ptaiAgentName(scanAgentInfoModel.getName());
-//        }
-
-        return scanBriefBuilder.build();
+                .scanLabel(scanLabel)
+                .scanSettings(loadScanSettings(projectId, scanResultId, branchName))
+                .build();
     }
 
-    /**
-     * Adds finished scan execution statistics to scan brief
-     * @param scanBrief Scan brief where statistics is to be added to
-     * @throws GenericException
-     */
-    // TODO
-    public void appendStatistics(@NonNull final ScanBrief scanBrief) throws GenericException {
-//        log.trace("Getting project {} scan results {}", scanBrief.getProjectId(), scanBrief.getId());
-//        ScanResultModel scanResult = call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(scanBrief.getProjectId(), scanBrief.getId()),
-//                "Get project scan result with formatted date failed");
-//        log.debug("Project {} scan result {} load complete", scanBrief.getProjectId(), scanBrief.getId());
-//
-//        log.trace("Getting scan result statistics");
-//        ScanStatisticModel statistic = call(
-//                () -> Objects.requireNonNull(scanResult.getStatistic(), "Scan result statistics is null"),
-//                "Get scan result statistics failed");
-//
-//        log.trace("Converting v.4.3 scan result statistics to version-independent data");
-//        call(
-//                () -> scanBrief.setStatistics(convert(statistic, scanResult)),
-//                "Scan result statistics conversion failed");
-//        log.trace("Setting scan brief policy assessment state");
-//        call(
-//                () -> scanBrief.setPolicyState(IssuesConverter.convert(Objects.requireNonNull(statistic.getPolicyState(), "Scan result policy state is null"))),
-//                "Scan result policy state stage conversion failed");
+    private AgentInfo soleAgent() {
+        try {
+            List<AgentInfo> agents = client.getAgents();
+            if (agents.size() == 1) {
+                return agents.get(0);
+            }
+
+            log.debug("Scan agent is left unnamed: server has {} of them and aictl does not "
+                    + "tell which one runs a scan", agents.size());
+        } catch (Exception e) {
+            log.debug("PT AI scan agents read failed", e);
+        }
+
+        return null;
     }
 
-    // TODO
-    public ScanResult getScanResult(@NonNull UUID projectId, @NonNull UUID scanResultId) throws GenericException {
-//        ScanResultModel scanResult = call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdGet(projectId, scanResultId),
-//                "Get project scan result with formatted date failed");
-//        log.debug("Project {} scan result {} load complete", projectId, scanResultId);
-//        List<VulnerabilityModel> issues = call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdIssuesGet(projectId, scanResultId),
-//                "Get project scan result failed");
-//        log.debug("Project {} scan result {} issues load complete", projectId, scanResultId);
-//
-//        log.trace("Loading issues into temporal files");
-//        Map<Reports.Locale, Map<String, String>> localizedIssuesHeaders = new HashMap<>();
-//        for (Reports.Locale locale : Reports.Locale.values()) {
-//            log.trace("Getting issues data using {} locale", locale);
-//            Map<String, String> headers = call(
-//                    () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdIssuesHeadersGet(projectId, scanResultId, locale.getValue()),
-//                    "PT AI project localized scan status JSON read failed");
-//            log.debug("Localized ({}) issues load complete", locale);
-//            localizedIssuesHeaders.put(locale, headers);
-//        }
-//
-//        log.trace("Loading project {} scan settings {}", projectId, scanResult.getSettingsId());
-//        ScanSettingsModel scanSettings = call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdScanSettingsScanSettingsIdGet(projectId, scanResult.getSettingsId()),
-//                "Get project scan settings failed");
-//        log.debug("Project {} scan result {} settings loaded", projectId, scanResultId);
-//
-//        String projectName = call(() -> Objects.requireNonNull(new ProjectTasksImpl(client).searchProject(projectId)), "Project not found");
-//        ServerVersionTasks serverVersionTasks = new ServerVersionTasksImpl(client);
-//        Map<ServerVersionTasks.Component, String> versions = call(serverVersionTasks::current, "PT AI server API version read ailed");
-//
-//        ScanResult res = call(
-//                () -> convert(projectName, scanResult, issues, localizedIssuesHeaders, scanSettings, client.getConnectionSettings().getUrl()), "Project scan result convert failed");
-//
-//        log.debug("Project scan result conversion complete");
-//        return res;
-        return new ScanResult();
+    @NonNull
+    public ScanBrief.ScanSettings loadScanSettings(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            final String branchName) {
+        ScanBrief.ScanSettings.ScanSettingsBuilder builder = ScanBrief.ScanSettings.builder()
+                .id(scanResultId)
+                .branchName(branchName);
+
+        String path = null;
+        try {
+            path = String.join(client.getEnvironment().separator(),
+                    client.getEnvironment().scratchDir(), "scan-settings-" + scanResultId + ".aiproj");
+
+            client.getScanAiproj(projectId, scanResultId, path);
+            byte[] aiproj = client.getEnvironment().read(path);
+            appendAiproj(builder, aiproj);
+        } catch (Exception e) {
+            log.warn("PT AI scan settings load failed, scan results will carry no settings details");
+            log.debug("Exception details", e);
+        } finally {
+            if (path != null) {
+                client.getEnvironment().delete(path);
+            }
+        }
+
+        return builder.build();
     }
 
-    public ScanResult getScanResult(@NonNull ScanBrief scanBrief) throws GenericException {
-        ScanResult scanResult = getScanResult(scanBrief.getProjectId(), scanBrief.getId());
-        // Scan state may differ between brief and result. This may happen if job was
-        // terminated from CI side. In this case we call stop() and load scan results
-        // from PT AI server. But if time interval between these two calls is short
-        // enough scan result state may stay UNKNOWN
-        // So we need to set state from brief
-        scanResult.setState(scanBrief.getState());
-        scanResult.setPtaiAgentName(scanBrief.getPtaiAgentName());
-        scanResult.setBranchId(scanBrief.getBranchId());
-        scanResult.setScanLabel(scanBrief.getScanLabel());
-        return scanResult;
+    private void appendAiproj(
+            @NonNull final ScanBrief.ScanSettings.ScanSettingsBuilder builder,
+            final byte[] aiproj) throws Exception {
+        JsonNode root = BaseJsonHelper.createObjectMapper().readTree(aiproj);
+
+        Set<ScanBrief.ScanSettings.Engine> engines = new HashSet<>();
+        for (JsonNode module : root.path("ScanModules")) {
+            ScanBrief.ScanSettings.Engine engine =
+                    ENGINES.get(module.asText("").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", ""));
+            if (engine != null) {
+                engines.add(engine);
+            }
+        }
+
+        List<ScanBrief.ScanSettings.Language> languages = new ArrayList<>();
+        for (JsonNode language : root.path("ProgrammingLanguages")) {
+            try {
+                languages.add(ScanBrief.ScanSettings.Language.fromString(language.asText("")));
+            } catch (IllegalArgumentException e) {
+                log.debug("Skipping unknown programming language {}", language.asText(""));
+            }
+        }
+
+        builder.engines(engines)
+                .languages(languages)
+                .language(languages.isEmpty() ? null : languages.get(0))
+                .usePublicAnalysisMethod(anyFlag(root, "UsePublicAnalysisMethod"))
+                .downloadDependencies(anyFlag(root, "DownloadDependencies"))
+                .unpackUserPackages(anyFlag(root, "UnpackUserPackages"))
+                .customParameters(firstText(root, "CustomParameters"))
+                .autocheckAfterScan(root.path("BlackBoxSettings").path("RunAutocheckAfterScan").asBoolean(false));
     }
 
-    // TODO
-    public List<Error> getScanErrors(@NonNull final UUID projectId, @NonNull final UUID scanResultId) throws GenericException {
-        return Collections.emptyList();
-//        List<ScanErrorModel> errors = call(
-//                () -> client.getProjectsApi().apiProjectsProjectIdScanResultsScanResultIdErrorsGet(projectId, scanResultId),
-//                "PT AI project scan errors read failed");
-//        if (null == errors || errors.isEmpty()) return null;
-//        return errors.stream().map(ScanErrorsConverter::convert).collect(Collectors.toList());
+    private static boolean anyFlag(@NonNull final JsonNode root, @NonNull final String name) {
+        if (root.path(name).isBoolean()) {
+            return root.path(name).asBoolean(false);
+        }
+
+        for (JsonNode child : root) {
+            if (child.isObject() && child.path(name).asBoolean(false)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static String firstText(@NonNull final JsonNode root, @NonNull final String name) {
+        String value = root.path(name).asText("");
+        if (!value.isEmpty()) {
+            return value;
+        }
+
+        for (JsonNode child : root) {
+            if (!child.isObject()) {
+                continue;
+            }
+            value = child.path(name).asText("");
+            if (!value.isEmpty()) {
+                return value;
+            }
+        }
+        return "";
+    }
+
+    public void appendResults(@NonNull final ScanBrief scanBrief) throws GenericException {
+        Stage stage = getStage(scanBrief.getProjectId(), scanBrief.getId());
+        scanBrief.setState(StageConverter.state(stage));
+        scanBrief.setPolicyState(getPolicyState(scanBrief));
+    }
+
+    @NonNull
+    public Policy.State getPolicyState(@NonNull final ScanBrief scanBrief) throws GenericException {
+        return client.checkPolicies(scanBrief.getProjectId(), scanBrief.getId());
+    }
+
+    @NonNull
+    public ScanReports loadScanReports(@NonNull final ScanBrief scanBrief) throws GenericException {
+        AictlReport format = AictlReport.scanResults(scanBrief.getPtaiServerVersion());
+        AieJsonReport english;
+
+        try {
+            english = downloadScanResultReport(scanBrief, format, Reports.Locale.EN);
+        } catch (UnsupportedReportSchemaException e) {
+            log.warn("PT AI {} report layout is not supported yet, reading scan results from {} report instead",
+                    format.getValue(), AictlReport.JSON.getValue());
+
+            format = AictlReport.JSON;
+            english = downloadScanResultReport(scanBrief, format, Reports.Locale.EN);
+        }
+
+        AieJsonReport russian = null;
+        try {
+            russian = downloadScanResultReport(scanBrief, format, Reports.Locale.RU);
+        } catch (UnsupportedReportSchemaException | GenericException e) {
+            log.warn("Localized PT AI scan results report load failed, falling back to English issue titles");
+            log.debug("Exception details", e);
+        }
+        return new ScanReports(english, russian);
+    }
+
+    @NonNull
+    public static ScanResult applyBrief(
+            @NonNull final ScanResult result,
+            @NonNull final ScanBrief scanBrief) {
+        result.setState(scanBrief.getState());
+        result.setPtaiAgentName(scanBrief.getPtaiAgentName());
+        result.setBranchId(scanBrief.getBranchId());
+        result.setScanLabel(scanBrief.getScanLabel());
+        result.setPolicyState(scanBrief.getPolicyState());
+        return result;
+    }
+
+    @NonNull
+    private AieJsonReport downloadScanResultReport(
+            @NonNull final ScanBrief scanBrief,
+            @NonNull final AictlReport format,
+            @NonNull final Reports.Locale locale) throws GenericException {
+        String path = String.join(client.getEnvironment().separator(),
+                client.getEnvironment().scratchDir(),
+                "scan-result-" + scanBrief.getId() + "-" + locale.name().toLowerCase() + ".json");
+
+        try {
+            client.getScanReport(scanBrief.getProjectId(), scanBrief.getId(), format.getValue(),
+                    locale, false, false, path);
+            return AieJsonReport.parse(client.getEnvironment().read(path));
+        } finally {
+            client.getEnvironment().delete(path);
+        }
+    }
+
+    @NonNull
+    private ScanBrief.ApiVersion apiVersion(@NonNull final String serverVersion) {
+        try {
+            return ScanBrief.ApiVersion.fromString(serverVersion);
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown PT AI server version {}, reporting the latest known one", serverVersion);
+            ScanBrief.ApiVersion[] versions = ScanBrief.ApiVersion.values();
+            return versions[versions.length - 1];
+        }
     }
 }

@@ -5,15 +5,12 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.JenkinsAstJob;
 import hudson.Extension;
-import hudson.util.ListBoxModel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.Arrays;
 
 @ToString
 public class Report extends Export {

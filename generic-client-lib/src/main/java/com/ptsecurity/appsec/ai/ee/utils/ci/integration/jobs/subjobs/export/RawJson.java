@@ -26,7 +26,7 @@ public class RawJson extends Export {
             @NonNull final ScanBrief scanBrief) throws GenericException {
         ReportsTask reportsTask = new ReportsTask(owner.getClient());
         try {
-            reportsTask.exportRawJson(scanBrief.getProjectId(), scanBrief.getId(), rawData, owner.getFileOps());
+            reportsTask.exportRawJson(scanBrief, rawData, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

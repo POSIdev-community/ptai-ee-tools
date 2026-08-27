@@ -43,9 +43,10 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPac
 public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericException> {
     protected final Executor executor;
 
-    public static FilePath collect(
-            @NonNull final JenkinsAstJob jenkinsAstJob) throws GenericException {
-        Collector collector = new Collector(jenkinsAstJob);
+    public static FilePath stage(
+            @NonNull final JenkinsAstJob jenkinsAstJob,
+            @NonNull final String target) throws GenericException {
+        Collector collector = new Collector(jenkinsAstJob, target);
         collector.setVerbose(jenkinsAstJob.isVerbose());
 
         return CallHelper.call(
@@ -198,9 +199,10 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
     }
 
     protected static class Collector extends RemoteAbstractTool implements Executor, Serializable {
-        public Collector(@NonNull final JenkinsAstJob jenkinsAstJob) {
+        public Collector(@NonNull final JenkinsAstJob jenkinsAstJob, @NonNull final String target) {
             super(jenkinsAstJob);
             dir = jenkinsAstJob.getWorkspace().getRemote();
+            this.target = target;
 
             transfers = new Transfers();
             for (Transfer transfer : jenkinsAstJob.getTransfers())
@@ -216,10 +218,11 @@ public class RemoteFileUtils extends MasterToSlaveCallable<FilePath, GenericExce
         }
         protected final Transfers transfers;
         protected final String dir;
+        protected final String target;
 
         @SneakyThrows
         public File execute() throws GenericException {
-            return FileCollector.collect(transfers, new File(dir), this);
+            return FileCollector.collectToFolder(transfers, new File(dir), new File(target), this);
         }
     }
 

@@ -1,9 +1,11 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.operations;
 
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AbstractFileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.JenkinsAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.RemoteFileUtils;
+import hudson.FilePath;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -34,5 +36,22 @@ public class JenkinsFileOperations extends AbstractFileOperations implements Fil
     protected void saveInMemoryData(@NonNull String name, byte[] data) {
         byte[] safeData = (null == data) ? new byte[0] : data;
         RemoteFileUtils.saveReport(owner, name, safeData);
+    }
+
+    @Override
+    @SneakyThrows
+    public void saveArtifactFromScanHost(@NonNull String name, @NonNull String path) {
+        log.trace("Started: move {} into build artifacts as {}", path, name);
+        FilePath source = new FilePath(owner.getWorkspace().getChannel(), path);
+        FilePath destination = owner.getWorkspace().child(AbstractJob.DEFAULT_OUTPUT_FOLDER).child(name);
+        destination.getParent().mkdirs();
+
+        if (destination.exists()) {
+            owner.warning("Existing report " + name + " will be overwritten");
+            destination.delete();
+        }
+
+        source.renameTo(destination);
+        log.trace("Finished: move {} into build artifacts as {}", path, name);
     }
 }

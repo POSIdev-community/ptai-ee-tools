@@ -33,7 +33,9 @@ import java.util.Map;
         @JsonSubTypes.Type(value = YaraMatchIssue.class, name = "YARAMATCH"),
         @JsonSubTypes.Type(value = PygrepIssue.class, name = "PYGREP"),
         @JsonSubTypes.Type(value = ScaIssue.class, name = "SCA"),
-        @JsonSubTypes.Type(value = FingerprintScaIssue.class, name = "FINGERPRINT_SCA")
+        @JsonSubTypes.Type(value = FingerprintScaIssue.class, name = "FINGERPRINT_SCA"),
+        @JsonSubTypes.Type(value = SecretIssue.class, name = "SECRET"),
+        @JsonSubTypes.Type(value = MaliciousCodeIssue.class, name = "MALICIOUSCODE")
 })
 public abstract class BaseIssue {
     public static Map<Class<? extends BaseIssue>, Type> TYPES = new HashMap<>();
@@ -49,6 +51,8 @@ public abstract class BaseIssue {
         TYPES.put(PygrepIssue.class, Type.PYGREP);
         TYPES.put(ScaIssue.class, Type.SCA);
         TYPES.put(FingerprintScaIssue.class, Type.FINGERPRINT_SCA);
+        TYPES.put(SecretIssue.class, Type.SECRET);
+        TYPES.put(MaliciousCodeIssue.class, Type.MALICIOUSCODE);
     }
 
     /**
@@ -70,7 +74,11 @@ public abstract class BaseIssue {
     protected String typeId;
 
     public enum Type {
-        VULNERABILITY, WEAKNESS, FINGERPRINT, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, SCA, FINGERPRINT_SCA, UNKNOWN
+        VULNERABILITY, WEAKNESS, FINGERPRINT, CONFIGURATION, BLACKBOX, YARAMATCH, PYGREP, SCA, FINGERPRINT_SCA,
+        SECRET, MALICIOUSCODE,
+
+        @JsonEnumDefaultValue
+        UNKNOWN
     }
 
     public static String getIssueTypeKey(@NonNull final BaseIssue issue) {

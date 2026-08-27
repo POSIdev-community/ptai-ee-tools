@@ -1,16 +1,20 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
+import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanDiagnostic;
+import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Export;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
@@ -22,6 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.State.*;
@@ -50,6 +55,9 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
     @Builder.Default
     protected String jsonSettings = null;
+
+    @Builder.Default
+    protected String jsonPolicy = null;
 
     @Getter
     @Setter
@@ -90,9 +98,22 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Builder.Default
     protected List<Base> subJobs = new ArrayList<>();
 
+    @Builder.Default
+    @ToString.Exclude
+    protected transient ScanReports scanReports = null;
+
     public void addSubJob(@NonNull final Base job) {
         job.setOwner(this);
         subJobs.add(job);
+    }
+
+    @NonNull
+    public ScanReports scanReports() throws GenericException {
+        if (scanReports == null) {
+            scanReports = new GenericAstTask(client).loadScanReports(scanBrief);
+        }
+
+        return scanReports;
     }
 
     /**
@@ -100,39 +121,49 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
      * - AST complete, policy assessment failed and "fail-if-failed" is defined
      * - AST complete, minor errors / warnings are thrown and "fail-if-unstable" is defined
      * Method throws an exception if:
-     * - there were API exceptions
+     * - there were aictl execution errors
      * - there were settings errors like JSON problems, project not found etc.
-     * - sources zip / upload failed
+     * - sources staging / upload failed
      * - any of {@link GenericAstJob#subJobs} thrown an exception during validation or execution
      * - minor errors during scan
      * @throws GenericException Error details
      */
     protected void unsafeExecute() throws GenericException {
         process(Stage.SETUP);
+        ZonedDateTime scanStarted = ZonedDateTime.now();
+
         // Check if all the reports exist. Throw an exception if there are problems
         // Validate postprocessing tasks
         for (Base job : subJobs) {
             job.validate();
         }
 
+        GenericAstTask genericAstTask = new GenericAstTask(client);
+        setupProject(genericAstTask);
+
+        process(Stage.ZIP);
+        String sourcesPath = astOps.stageSources();
+        try {
+            branchId = genericAstTask.resolveBranch(projectId, branchName, null);
+            if (branchName == null || branchName.trim().isEmpty()) {
+                branchName = GenericAstTask.DEFAULT_BRANCH_NAME;
+            }
+
+            if (StringUtils.isNotEmpty(sourcesPath)) {
+                process(Stage.UPLOAD);
+                genericAstTask.upload(projectId, branchId, sourcesPath);
+            } else {
+                info("No files match transfer settings, scan will use previously uploaded sources");
+            }
+        } finally {
+            astOps.cleanupSources(sourcesPath);
+        }
+
         // Start scan
         process(Stage.ENQUEUED);
-        GenericAstTask genericAstTask = new GenericAstTask(client);
-        if (branchName == null) {
-            branchName = genericAstTask.getWorkingOrDefaultBranchName(projectId);
-        }
+        scanResultId = genericAstTask.startScan(projectId, branchId, fullScanMode, scanLabel);
 
-        if (branchId == null) {
-            branchId = genericAstTask.getBranchIdByName(projectId, branchName);
-        }
-
-        if (jsonSettings != null) {
-            genericAstTask.setProjectSettings(projectId, jsonSettings);
-        }
-
-        scanResultId = genericAstTask.startScan(projectId, fullScanMode, branchName, scanLabel);
-
-        boolean isScanLabelEmpty =  scanLabel == null || scanLabel.trim().isEmpty();
+        boolean isScanLabelEmpty = scanLabel == null || scanLabel.trim().isEmpty();
         String scanEnqueuedFormat = "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s" +
                 (!isScanLabelEmpty ? ", scan label: %s" : "") +
                 ", result id: %s";
@@ -144,7 +175,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         info(scanEnqueuedFormat, scanEnqueuedArgs);
 
         // Now we know scan result ID, so create initial scan brief with ID's and scan settings
-        scanBrief = genericAstTask.createScanBrief(projectId, scanResultId, branchId, scanLabel);
+        scanBrief = genericAstTask.createScanBrief(projectId, scanResultId, branchId, branchName, scanLabel, projectName);
         scanBrief.setUseAsyncScan(async);
 
         // Notify descendants about scan started event
@@ -169,12 +200,23 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             return;
         }
 
-        genericAstTask.waitForComplete(projectId, scanResultId);
+        process(Stage.SCAN);
+        genericAstTask.waitForComplete(projectId, scanResultId, progress -> {
+            process(progress.getStage());
+            info(progress.text());
+        });
+        process(Stage.DONE);
+
+        genericAstTask.appendResults(scanBrief);
+        appendDuration(scanStarted);
+
         String diagnosticFileName = client.getAdvancedSettings().getString(AST_DIAGNOSTIC_JSON_FILENAME);
-        // Remember that at this point diagnostic still have policy state set to NONE regardless of actual value
+        List<Error> scanErrors = StringUtils.isEmpty(diagnosticFileName)
+                ? null
+                : genericAstTask.getScanErrors(projectId, scanResultId);
         ScanDiagnostic diagnostic = StringUtils.isEmpty(diagnosticFileName)
                 ? null
-                : ScanDiagnostic.create(scanBrief, genericAstTask.getScanErrors(projectId, scanResultId), performance());
+                : ScanDiagnostic.create(scanBrief, scanErrors, performance());
 
         String scanFinishedFormat = "Scan finished, project name: %s, project id: %s, branch name: %s, branch id: %s" +
                 (!isScanLabelEmpty ? ", scan label: %s" : "") +
@@ -188,14 +230,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
         fine("Resulting state is " + scanBrief.getState());
         if (!EnumSet.of(DONE, ABORTED, FAILED, ABORTED_FROM_CI).contains(scanBrief.getState())) {
-            // Invalid task state, save diagnostic file "as is" i.e. with policy state set to NONE
-            if (null != diagnostic) {
-                // Save AST diagnostic to artifacts
-                log.debug("Save AST diagnostic to {} file", diagnosticFileName);
-                call(
-                        () -> fileOps.saveArtifact(diagnosticFileName, BaseJsonHelper.serialize(diagnostic)),
-                        "AST result diagnostic save failed");
-            }
+            saveDiagnostic(diagnosticFileName, diagnostic);
             throw GenericException.raise(
                     "Unexpected finished scan result state",
                     new IllegalArgumentException(String.valueOf(scanBrief.getState())));
@@ -206,7 +241,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         // vulnerabilities are found already
         boolean resultsAvailable = true;
         try {
-            genericAstTask.appendStatistics(scanBrief);
+            appendStatistics();
             log.debug("Scan brief for project / scan ID {} / {} loaded successfully", projectId, scanResultId);
             fine("Resulting statistics is " + scanBrief.getStatistics());
         } catch (GenericException e) {
@@ -214,14 +249,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             log.debug("Scan brief for project / scan ID {} / {} load failed", projectId, scanResultId);
             log.debug("Exception details", e);
         }
-        if (null != diagnostic) {
-            diagnostic.setPolicyState(scanBrief.getPolicyState());
-            // Save AST diagnostic to artifacts
-            log.debug("Save AST diagnostic to {} file", diagnosticFileName);
-            call(
-                    () -> fileOps.saveArtifact(diagnosticFileName, BaseJsonHelper.serialize(diagnostic)),
-                    "AST result diagnostic save failed");
-        }
+        saveDiagnostic(diagnosticFileName, diagnostic);
         astOps.scanCompleteCallback(scanBrief, ScanBriefDetailed.Performance.builder().stages(durations()).build());
 
         if (FAILED == scanBrief.getState()) {
@@ -250,9 +278,78 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         info(Resources.i18n_ast_result_status_success_label());
     }
 
+    protected void setupProject(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+        ProjectTask projectTask = new ProjectTask(client);
+
+        if (StringUtils.isEmpty(jsonSettings)) {
+            if (StringUtils.isEmpty(projectName)) {
+                throw GenericException.raise(
+                        "PT AI project name is not defined",
+                        new IllegalArgumentException("projectName"));
+            }
+
+            projectId = projectTask.searchProjectId(projectName);
+            if (projectId == null) {
+                throw GenericException.raise(
+                        "PT AI project not found",
+                        new IllegalArgumentException(projectName));
+            }
+
+            fine("PT AI project %s id is %s", projectName, projectId);
+            return;
+        }
+
+        UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
+        projectName = settings.getProjectName();
+        projectId = client.createProject(projectName);
+        fine("PT AI project %s id is %s", projectName, projectId);
+
+        genericAstTask.setProjectSettings(projectId, jsonSettings);
+        if (StringUtils.isNotEmpty(jsonPolicy)) {
+            genericAstTask.setProjectPolicy(projectId, jsonPolicy);
+        }
+    }
+
+    protected void appendStatistics() throws GenericException {
+        ScanBrief.Statistics reported = scanReports().convert(scanBrief).getStatistics();
+        ScanBrief.Statistics current = scanBrief.getStatistics();
+        if (reported == null) {
+            return;
+        }
+
+        if (current != null) {
+            reported.setScanDateIso8601(current.getScanDateIso8601());
+            reported.setScanDurationIso8601(current.getScanDurationIso8601());
+        }
+
+        scanBrief.setStatistics(reported);
+    }
+
+    protected void appendDuration(@NonNull final ZonedDateTime scanStarted) {
+        scanBrief.setStatistics(ScanBrief.Statistics.builder()
+                .scanDateIso8601(scanStarted.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .scanDurationIso8601(Duration.between(scanStarted, ZonedDateTime.now()).toString())
+                .build());
+    }
+
+    protected void saveDiagnostic(final String fileName, final ScanDiagnostic diagnostic) {
+        if (diagnostic == null || StringUtils.isEmpty(fileName)) {
+            return;
+        }
+
+        diagnostic.setState(scanBrief.getState());
+        diagnostic.setPolicyState(scanBrief.getPolicyState());
+        log.debug("Save AST diagnostic to {} file", fileName);
+        call(() -> fileOps.saveArtifact(fileName, BaseJsonHelper.serialize(diagnostic)), "AST result diagnostic save failed");
+    }
+
     public void stop() throws GenericException {
+        if (scanResultId == null) {
+            return;
+        }
+
         GenericAstTask projectTasks = new GenericAstTask(client);
-        projectTasks.stop(projectId, scanResultId);
+        projectTasks.stop(scanResultId);
     }
 
     /**
