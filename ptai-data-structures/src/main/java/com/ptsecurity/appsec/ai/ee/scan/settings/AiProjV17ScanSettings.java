@@ -2,13 +2,14 @@ package com.ptsecurity.appsec.ai.ee.scan.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.BlackBoxSettings.FormAuthentication.DetectionType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ProgrammingLanguage____;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.DotNetProjectType;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.blackbox.*;
 import com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.v12.siteaddress.Format;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.ResourcesHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
-import static com.networknt.schema.ValidatorTypeCode.FORMAT;
 import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.JavaSettings.JavaVersion.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__6.Version.*;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule__.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.JavaSettings__8.Version.*;
+import static com.ptsecurity.appsec.ai.ee.scan.settings.aiproj.ScanModule____.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_csharp_error;
 import static com.ptsecurity.misc.tools.helpers.CollectionsHelper.isEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
@@ -107,11 +108,11 @@ public class AiProjV17ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
-    public Set<ParseResult.Message> processErrorMessages(Set<ValidationMessage> errors) {
+    public Set<ParseResult.Message> processErrorMessages(List<Error> errors) {
         Set<ParseResult.Message> result = new HashSet<>();
-        for (ValidationMessage error : errors) {
-            ParseResult.Message.Type type = error.getCode().equals(FORMAT.getErrorCode()) &&
-                    error.getSchemaPath().equals("#/properties/MailingProjectSettings/properties/EmailRecipients/items")
+        for (Error error : errors) {
+            ParseResult.Message.Type type = error.getKeyword().equals("format") &&
+                    error.getSchemaLocation().toString().equals("#/properties/MailingProjectSettings/properties/EmailRecipients/items")
                     ? ParseResult.Message.Type.WARNING
                     : ParseResult.Message.Type.ERROR;
             result.add(ParseResult.Message.builder()
@@ -134,7 +135,18 @@ public class AiProjV17ScanSettings extends UnifiedAiProjScanSettings {
 
     @Override
     public String getBranchName() {
-        return S("BranchName");
+        String branchName = S("BranchName");
+        return isEmpty(branchName) ? null : branchName;
+    }
+
+    @Override
+    protected void validateBranchName() {
+        String branchName = getBranchName();
+        if (branchName == null) {
+            throw GenericException.raise(
+                    i18n_ast_settings_branch_from_json_message_empty(),
+                    new IllegalArgumentException());
+        }
     }
 
     @Override

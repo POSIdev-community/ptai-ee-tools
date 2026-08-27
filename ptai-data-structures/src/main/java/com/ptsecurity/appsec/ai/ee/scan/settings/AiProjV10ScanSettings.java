@@ -108,6 +108,11 @@ public class AiProjV10ScanSettings extends UnifiedAiProjScanSettings {
     }
 
     @Override
+    protected void validateBranchName() {
+        getBranchName();
+    }
+
+    @Override
     public @NonNull ScanBrief.ScanSettings.Language getProgrammingLanguage() {
         return PROGRAMMING_LANGUAGE_MAP.get(S("ProgrammingLanguage"));
     }

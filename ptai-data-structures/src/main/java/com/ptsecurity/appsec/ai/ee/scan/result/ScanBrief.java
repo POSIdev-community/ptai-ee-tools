@@ -179,7 +179,9 @@ public class ScanBrief {
             KOTLIN("Kotlin"),
             RUBY("Ruby"),
             SOLIDITY("Solidity"),
-            SCALA("Scala"),;
+            SCALA("Scala"),
+            ONE_C("OneC"),
+            DART("Dart");
 
             public static Language fromString(@NonNull final String value) {
                 for (Language language : Language.values())
