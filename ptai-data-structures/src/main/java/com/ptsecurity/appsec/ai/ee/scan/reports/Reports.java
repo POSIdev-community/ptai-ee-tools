@@ -18,6 +18,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"sonarGiif"})
 @ToString
 public class Reports {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
