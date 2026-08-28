@@ -306,13 +306,7 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiReportingSarifFilter", elem)
             },
 
-            onPtaiReportingSonarGiifFileError: function (elem) {
-                this.handle("ptaiReportingSonarGiifFile", elem);
-            },
 
-            onPtaiReportingSonarGiifFilterError: function (elem) {
-                this.handle("ptaiReportingSonarGiifFilter", elem)
-            },
 
             onPtaiReportingJsonSettingsError: function (elem) {
                 this.handle("ptaiReportingJsonSettings", elem);

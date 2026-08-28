@@ -1,7 +1,9 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl;
 
-import com.ptsecurity.appsec.ai.ee.AictlContext;
 import com.ptsecurity.appsec.ai.ee.ProjectInfo;
+import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
+import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
@@ -9,32 +11,22 @@ import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Getter
 public class AictlClient {
-    private final String aictlCommand = "aictl";
-
-    private final String contextCommand = "ctx";
-    private final String scanCommand = "scan";
-    private final String reportCommand = "report";
-    private final String createCommand = "create";
-    private final String branchCommand = "branch";
-    private final String getCommand = "get";
-    private final String setCommand = "set";
-
-    private final String projectIdFlag = "--project-id";
-
-    @Setter
-    protected TextOutput console = null;
+    @NonNull
+    protected final AictlEnvironment environment;
 
     @NonNull
     protected final ConnectionSettings connectionSettings;
@@ -42,259 +34,499 @@ public class AictlClient {
     @NonNull
     protected final AdvancedSettings advancedSettings;
 
-    public AictlClient(@NonNull ConnectionSettings connectionSettings, @NonNull AdvancedSettings advancedSettings) {
+    @Setter
+    protected TextOutput console = null;
+
+    @Setter
+    protected boolean verbose = false;
+
+    protected String caCertsFile = null;
+
+    public AictlClient(
+            @NonNull final AictlEnvironment environment,
+            @NonNull final ConnectionSettings connectionSettings,
+            @NonNull final AdvancedSettings advancedSettings) {
+        this.environment = environment;
         this.connectionSettings = connectionSettings;
         this.advancedSettings = advancedSettings;
-        updateContext();
-    }
-
-    public void updateContext() throws GenericException {
         connectionSettings.setUrl(StringUtils.removeEnd(connectionSettings.getUrl().trim(), "/"));
-        String aieUrl = connectionSettings.getUrl();
-        String token = connectionSettings.getCredentials().getToken();
-        String tlsSkip = connectionSettings.isInsecure() ? "--tls-skip" : "";
-
-        execute(contextCommand, setCommand, "-u", aieUrl, "-t", token, tlsSkip);
     }
 
-    public void setProjectIdContext(@NonNull UUID projectId) {
-        execute(contextCommand, setCommand, "-p", projectId.toString());
+    public AictlResult healthcheck() throws GenericException {
+        return execute(command("get", "healthcheck"));
     }
 
-    public UUID startScan(@NonNull UUID projectId, @NonNull UUID branchId, String scanLabel) throws GenericException {
-        List<String> args = new ArrayList<>(Arrays.asList(scanCommand, "start", branchCommand, branchId.toString()));
-        if (scanLabel != null && !scanLabel.trim().isEmpty()) {
-            args.add("--scan-label");
-            args.add(scanLabel);
-        }
-
-        setProjectIdContext(projectId);
-        AictlResult result = execute(args.toArray(new String[0]));
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "PT AI project scan start failed: " + result.getStderr(),
-                    new RuntimeException());
-        }
-
-        return UUID.fromString(result.getStdout());
+    @NonNull
+    public String getServerVersion() throws GenericException {
+        return checked("PT AI server version read failed", command("get", "version")).getStdout();
     }
 
-    public void stopScan(@NonNull UUID projectId, @NonNull UUID scanResultId) throws GenericException {
-        AictlResult result = execute(
-                scanCommand,
-                "stop",
-                scanResultId.toString(),
-                projectIdFlag,
-                projectId.toString());
 
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "PT AI project scan stop failed: " + result.getStderr(),
-                    new RuntimeException());
-        }
-    }
-
-    @SneakyThrows
-    public boolean awaitScan(@NonNull UUID projectId, @NonNull UUID scanResultId) {
-        ProcessBuilder builder = new ProcessBuilder(
-                aictlCommand,
-                scanCommand,
-                "await",
-                scanResultId.toString(),
-                projectIdFlag,
-                projectId.toString());
-
-        builder.redirectErrorStream(true);
-        Process process = builder.start();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                console.info(line);
-            }
-        }
-
-        return process.waitFor() == 0;
-    }
-
-    public void createBranch(
-            @NonNull UUID projectId,
-            @NonNull String branchName,
-            @NonNull File sources) throws GenericException {
-        AictlResult result = execute(
-                createCommand,
-                branchCommand,
-                branchName,
-                projectIdFlag,
-                projectId.toString(),
-                "--scan-target",
-                sources.getAbsolutePath());
-
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "Failed to update sources: " + result.getStderr(),
-                    new RuntimeException());
-        }
-    }
-
-    public void updateSources(
-            @NonNull UUID projectId,
-            @NonNull UUID branchId,
-            @NonNull File sources) throws GenericException {
-        AictlResult result = execute(
-                "update",
-                "sources",
-                sources.getAbsolutePath(),
-                projectIdFlag,
-                projectId.toString(),
-                "--branch-id",
-                branchId.toString());
-
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "Failed to update sources: " + result.getStderr(),
-                    new RuntimeException());
-        }
-    }
-
-    public void setProjectSettings(@NonNull UUID projectId, @NonNull File aiproj) throws GenericException {
-        AictlResult result = execute(
-                setCommand,
-                "project",
-                "settings",
-                projectIdFlag,
-                projectId.toString(),
-                "--file",
-                aiproj.getAbsolutePath());
-
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "Failed to set project settings: " + result.getStderr(),
-                    new RuntimeException());
-        }
-    }
-
-    public String getVersion() {
-        AictlResult result = execute(getCommand, "version");
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "Failed to get version: " + result.getStderr(),
-                    new RuntimeException());
-        }
-
-        return result.getStdout();
-    }
-
-    public String getScanResultUrl(@NonNull UUID projectId, @NonNull UUID scanResultId) {
-        return String.format("%s/api/projects/%s/scanResults/%s",
-                connectionSettings.getUrl(),
-                projectId,
-                scanResultId);
-    }
-
-    public AictlResult healthcheck() {
-        return execute(getCommand, "healthcheck");
-    }
-
+    @NonNull
     public List<ProjectInfo> getProjects() throws GenericException {
-        AictlResult result = execute(getCommand, "projects");
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "Failed to get projects: " + result.getStderr(),
-                    new RuntimeException());
-        }
+        AictlResult result = checked("PT AI projects list read failed", command("get", "projects"));
+        List<ProjectInfo> projects = new ArrayList<>();
+        for (String[] row : TableParser.rows(result.getStdout())) {
+            String id = TableParser.cell(row, 0);
+            if (!isUuid(id)) {
+                continue;
+            }
 
-        return parseGetProjects(result.getStdout());
+            projects.add(new ProjectInfo(UUID.fromString(id), TableParser.cell(row, 1)));
+        }
+        return projects;
     }
 
-    public AictlContext showContext() throws GenericException {
-        AictlResult result = execute(contextCommand, "show");
-        if (!result.isSuccess()) {
-            throw GenericException.raise(
-                    "Failed to show context: " + result.getStderr(),
-                    new RuntimeException());
+    public UUID searchProjectId(@NonNull final String name) throws GenericException {
+        AictlResult result = checked(
+                "PT AI project search failed",
+                command("get", "projects", exactMatch(name), "-q"));
+        List<UUID> ids = uuids(result.getStdout());
+        if (ids.isEmpty()) {
+            return null;
         }
 
-        return parseShowContext(result.getStdout());
+        if (ids.size() > 1) {
+            log.warn("More than one PT AI project matches name {}, using the first one", name);
+        }
+
+        return ids.get(0);
     }
 
-    private List<ProjectInfo> parseGetProjects(String output) {
-        if (output == null || output.isEmpty()) {
+    @NonNull
+    public UUID createProject(@NonNull final String name) throws GenericException {
+        AictlResult result = checked(
+                "PT AI project create failed",
+                command("create", "project", name, "--safe"));
+
+        List<UUID> ids = uuids(result.getStdout());
+        if (ids.isEmpty()) {
+            throw GenericException.raise(
+                    "PT AI project create returned no identifier",
+                    new IllegalStateException(result.getStdout()));
+        }
+
+        return ids.get(0);
+    }
+
+    public void setProjectSettings(
+            @NonNull final UUID projectId,
+            @NonNull final String aiprojPath) throws GenericException {
+        checked("PT AI project settings save failed",
+                command("set", "project", "settings", "-p", projectId.toString(), "-f", aiprojPath));
+    }
+
+    public void setProjectPolicies(
+            @NonNull final UUID projectId,
+            @NonNull final String policyPath) throws GenericException {
+        checked("PT AI project policy save failed",
+                command("set", "project", "policies", "-p", projectId.toString(), "-f", policyPath));
+    }
+
+    @NonNull
+    public List<AgentInfo> getAgents() throws GenericException {
+        AictlResult result = execute(command("get", "agents"));
+        if (!result.isSuccess()) {
+            log.debug("PT AI scan agents read failed: {}", result.errorMessage());
             return Collections.emptyList();
         }
 
-        return Arrays.stream(output.split("\\R"))
-                .skip(1)
+        List<AgentInfo> agents = new ArrayList<>();
+        for (String[] row : TableParser.rows(result.getStdout())) {
+            String id = TableParser.cell(row, 0);
+            if (id.isEmpty()) {
+                continue;
+            }
+
+            agents.add(new AgentInfo(id,
+                    TableParser.cell(row, 1),
+                    TableParser.cell(row, 2),
+                    TableParser.cell(row, 3),
+                    TableParser.cell(row, 4)));
+        }
+        return agents;
+    }
+
+    @NonNull
+    public List<BranchInfo> getBranches(@NonNull final UUID projectId) throws GenericException {
+        AictlResult result = checked(
+                "PT AI project branches read failed",
+                command("get", "branches", "-p", projectId.toString()));
+
+        List<BranchInfo> branches = new ArrayList<>();
+        for (String[] row : TableParser.rows(result.getStdout())) {
+            String id = TableParser.cell(row, 0);
+            if (!isUuid(id)) {
+                continue;
+            }
+
+            branches.add(new BranchInfo(UUID.fromString(id), TableParser.cell(row, 1)));
+        }
+        return branches;
+    }
+
+    public UUID searchBranchId(
+            @NonNull final UUID projectId,
+            @NonNull final String branchName) throws GenericException {
+        AictlResult result = checked(
+                "PT AI project branch search failed",
+                command("get", "branches", exactMatch(branchName), "-p", projectId.toString(), "-q"));
+
+        List<UUID> ids = uuids(result.getStdout());
+        return ids.isEmpty() ? null : ids.get(0);
+    }
+
+    @NonNull
+    public UUID createBranch(
+            @NonNull final UUID projectId,
+            @NonNull final String branchName,
+            final String sourcesPath,
+            final List<String> excludes) throws GenericException {
+        Command.CommandBuilder builder = commandBuilder(
+                "create", "branch", branchName, "-p", projectId.toString(), "--safe");
+
+        if (StringUtils.isNotEmpty(sourcesPath)) {
+            builder.arg("-s").arg(sourcesPath);
+            builder.arg("--temp-dir").arg(environment.scratchDir());
+        }
+
+        if (excludes != null) {
+            for (String exclude : excludes) {
+                builder.arg("-e").arg(exclude);
+            }
+        }
+
+        AictlResult result = checked("PT AI project branch create failed", builder.build());
+        List<UUID> ids = uuids(result.getStdout());
+        if (ids.isEmpty()) {
+            throw GenericException.raise(
+                    "PT AI project branch create returned no identifier",
+                    new IllegalStateException(result.getStdout()));
+        }
+
+        return ids.get(0);
+    }
+
+    public void updateSources(
+            @NonNull final UUID projectId,
+            @NonNull final UUID branchId,
+            @NonNull final String sourcesPath,
+            final List<String> excludes) throws GenericException {
+        Command.CommandBuilder builder = commandBuilder(
+                "update", "sources", sourcesPath,
+                "-p", projectId.toString(), "-b", branchId.toString(),
+                "--temp-dir", environment.scratchDir());
+
+        if (excludes != null) {
+            for (String exclude : excludes) {
+                builder.arg("-e").arg(exclude);
+            }
+        }
+
+        checked("PT AI project sources upload failed", builder.build());
+    }
+
+    @NonNull
+    public UUID startScan(
+            @NonNull final UUID projectId,
+            @NonNull final UUID branchId,
+            final boolean fullScanMode,
+            final String scanLabel) throws GenericException {
+        Command.CommandBuilder builder = commandBuilder(
+                "scan", "start", "branch", branchId.toString(), "-p", projectId.toString());
+
+        if (fullScanMode) {
+            builder.arg("--full-scan");
+        }
+
+        if (StringUtils.isNotBlank(scanLabel)) {
+            builder.arg("--scan-label").arg(scanLabel.trim());
+        }
+
+        AictlResult result = checked("PT AI project scan start failed", builder.build());
+        List<UUID> ids = uuids(result.getStdout());
+        if (ids.isEmpty()) {
+            throw GenericException.raise(
+                    "PT AI project scan start returned no scan result identifier",
+                    new IllegalStateException(result.getStdout()));
+        }
+
+        return ids.get(0);
+    }
+
+    public void awaitScan(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        awaitScan(projectId, scanResultId, null);
+    }
+
+    public void awaitScan(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            final Consumer<ScanProgress> onProgress) throws GenericException {
+        Command.CommandBuilder builder = commandBuilder(
+                "scan", "await", scanResultId.toString(), "-p", projectId.toString());
+
+        if (onProgress != null) {
+            if (!verbose) {
+                builder.arg("-v");
+            }
+
+            builder.lineConsumer(new ProgressLines(onProgress));
+        }
+
+        AictlResult result = execute(builder.build());
+
+        if (AictlResult.ExitCode.API == result.kind() || AictlResult.ExitCode.UNKNOWN == result.kind()) {
+            throw failure("PT AI project scan await failed", result.errorMessage());
+        }
+    }
+
+    private static class ProgressLines implements Consumer<String> {
+        private final Consumer<ScanProgress> onProgress;
+        private String reported = null;
+
+        ProgressLines(@NonNull final Consumer<ScanProgress> onProgress) {
+            this.onProgress = onProgress;
+        }
+
+        @Override
+        public synchronized void accept(final String line) {
+            ScanProgress progress = ScanProgress.parse(line);
+            if (progress == null) {
+                return;
+            }
+
+            String text = progress.text();
+            if (text.equals(reported)) {
+                return;
+            }
+
+            reported = text;
+            onProgress.accept(progress);
+        }
+    }
+
+    public void stopScan(@NonNull final UUID scanResultId) throws GenericException {
+        checked("PT AI project scan stop failed", command("scan", "stop", scanResultId.toString()));
+    }
+
+    @NonNull
+    public Stage getScanStage(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        AictlResult result = checked(
+                "PT AI project scan stage read failed",
+                command("get", "scan", "stage", scanResultId.toString(), "-p", projectId.toString()));
+
+        return StageConverter.convert(result.getStdout());
+    }
+
+    @NonNull
+    public List<String> getScanErrors(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        AictlResult result = execute(
+                command("get", "scan", "errors", scanResultId.toString(), "-p", projectId.toString()));
+
+        if (!result.isSuccess()) {
+            log.debug("PT AI project scan errors read failed: {}", result.errorMessage());
+            return Collections.emptyList();
+        }
+
+        if (result.getStdout().trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return java.util.Arrays.stream(result.getStdout().split("\\R"))
                 .map(String::trim)
                 .filter(line -> !line.isEmpty())
-                .map(line -> line.split("\\s+", 2))
-                .filter(parts -> parts.length == 2)
-                .map(parts -> new ProjectInfo(
-                        UUID.fromString(parts[0]),
-                        parts[1]
-                ))
                 .collect(Collectors.toList());
     }
 
-    private AictlContext parseShowContext(@NonNull String input) {
-        Map<String, String> dataMap = new HashMap<>();
-
-        Arrays.stream(input.split("\\R"))
-                .map(String::trim)
-                .filter(line -> line.contains(":"))
-                .forEach(line -> {
-                    String[] parts = line.split(":", 2);
-                    String key = parts[0].trim();
-                    String value = parts[1].trim();
-
-                    if ("<unset>".equals(value)) {
-                        value = null;
-                    }
-                    dataMap.put(key, value);
-                });
-
-        boolean tlsSkip = false;
-        if (dataMap.get("tls-skip") != null) {
-            tlsSkip = Boolean.parseBoolean(dataMap.get("tls-skip"));
-        }
-
-        return new AictlContext(
-                dataMap.get("uri"),
-                dataMap.get("token"),
-                tlsSkip,
-                dataMap.get("projectId"),
-                dataMap.get("branchId")
-        );
+    @NonNull
+    public String getScanStatisticJson(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        return checked(
+                "PT AI project scan statistics read failed",
+                command("get", "scan", "statistic", scanResultId.toString(), "-p", projectId.toString(), "--json")).getStdout();
     }
 
-    private AictlResult execute(String... args) {
-        try {
-            List<String> commandList = new ArrayList<>();
-            commandList.add(this.aictlCommand);
-            if (args != null) {
-                commandList.addAll(Arrays.asList(args));
+    @NonNull
+    public Policy.State checkPolicies(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        AictlResult result = execute(
+                command("scan", "check-policies", scanResultId.toString(), "-p", projectId.toString()));
+
+        if (!result.isSuccess()) {
+            log.debug("PT AI project scan policy state read failed: {}", result.errorMessage());
+            return Policy.State.NONE;
+        }
+
+        String state = result.getStdout().trim();
+        if ("Rejected".equalsIgnoreCase(state)) {
+            return Policy.State.REJECTED;
+        }
+
+        if ("Confirmed".equalsIgnoreCase(state)) {
+            return Policy.State.CONFIRMED;
+        }
+
+        return Policy.State.NONE;
+    }
+
+    public void getScanAiproj(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            @NonNull final String outputPath) throws GenericException {
+        checked("PT AI scan settings read failed",
+                command("get", "scan", "aiproj", scanResultId.toString(),
+                        "-p", projectId.toString(), "-o", outputPath, "-f"));
+    }
+
+    public void getScanReport(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            @NonNull final String report,
+            @NonNull final Reports.Locale locale,
+            final boolean includeDfd,
+            final boolean includeGlossary,
+            @NonNull final String outputPath) throws GenericException {
+        Command.CommandBuilder builder = commandBuilder(
+                "get", "scan", "report", report, scanResultId.toString(),
+                "-p", projectId.toString(),
+                "--localization", localization(locale),
+                "-o", outputPath, "-f");
+
+        if (includeDfd) {
+            builder.arg("--include-dfd");
+        }
+
+        if (includeGlossary) {
+            builder.arg("--include-glossary");
+        }
+
+        checked("PT AI report generation failed", builder.build());
+    }
+
+    @NonNull
+    public String getScanResultUrl(@NonNull final UUID projectId, @NonNull final UUID scanResultId) {
+        return String.format("%s/api/projects/%s/scanResults/%s",
+                connectionSettings.getUrl(), projectId, scanResultId);
+    }
+
+    @NonNull
+    protected Command command(@NonNull final String... args) {
+        return commandBuilder(args).build();
+    }
+
+    @NonNull
+    protected Command.CommandBuilder commandBuilder(@NonNull final String... args) {
+        Command.CommandBuilder builder = Command.builder();
+        for (String arg : args) {
+            builder.arg(arg);
+        }
+
+        builder.arg("-u").arg(connectionSettings.getUrl());
+        builder.arg("-t").arg(connectionSettings.getCredentials().getToken());
+        if (connectionSettings.isInsecure()) {
+            builder.arg("--tls-skip");
+        }
+
+        String caCerts = caCertsFile();
+        if (caCerts != null) {
+            builder.arg("--cacert").arg(caCerts);
+        }
+
+        if (verbose) {
+            builder.arg("-v");
+        }
+
+        return builder;
+    }
+
+    protected synchronized String caCertsFile() throws GenericException {
+        if (caCertsFile != null) {
+            return caCertsFile;
+        }
+
+        String pem = connectionSettings.getCaCertsPem();
+        if (StringUtils.isEmpty(pem)) {
+            return null;
+        }
+
+        caCertsFile = environment.write("ca-certificates.pem", pem.getBytes(StandardCharsets.UTF_8));
+        log.debug("CA certificates from plugin settings saved to {}", caCertsFile);
+        return caCertsFile;
+    }
+
+    @NonNull
+    protected AictlResult execute(@NonNull final Command command) throws GenericException {
+        return environment.execute(command);
+    }
+
+    @NonNull
+    protected AictlResult checked(
+            @NonNull final String message,
+            @NonNull final Command command) throws GenericException {
+        AictlResult result = execute(command);
+        if (result.isSuccess()) {
+            return result;
+        }
+
+        throw failure(message, result.errorMessage());
+    }
+
+    @NonNull
+    protected static GenericException failure(@NonNull final String message, final String raw) {
+        return GenericException.raise(
+                message, AictlErrors.details(raw), new IllegalStateException(AictlErrors.message(raw)));
+    }
+
+    @NonNull
+    protected static String exactMatch(@NonNull final String value) {
+        StringBuilder result = new StringBuilder("^");
+        for (char c : value.toCharArray()) {
+            if ("\\.+*?()|[]{}^$".indexOf(c) >= 0) {
+                result.append('\\');
             }
 
-            ProcessBuilder processBuilder = new ProcessBuilder(commandList);
-            Process process = processBuilder.start();
+            result.append(c);
+        }
 
-            String stdout = readStream(process.getInputStream());
-            String stderr = readStream(process.getErrorStream());
-            boolean isSuccess = process.waitFor() == 0;
+        return result.append('$').toString();
+    }
 
-            return new AictlResult(isSuccess, stdout.trim(), stderr.trim());
-        } catch (IOException | InterruptedException e) {
-            return new AictlResult(false, "", e.getMessage());
+    @NonNull
+    protected static List<UUID> uuids(final String output) {
+        if (output == null) {
+            return Collections.emptyList();
+        }
+
+        List<UUID> result = new ArrayList<>();
+        for (String line : output.split("\\R")) {
+            String value = line.trim();
+            if (isUuid(value)) {
+                result.add(UUID.fromString(value));
+            }
+        }
+        return result;
+    }
+
+    protected static boolean isUuid(final String value) {
+        if (value == null || value.length() != 36) return false;
+        try {
+            UUID.fromString(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
-    private String readStream(@NonNull InputStream inputStream) {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            return "Error reading stream: " + e.getMessage();
-        }
+    @NonNull
+    protected static String localization(@NonNull final Reports.Locale locale) {
+        return Reports.Locale.RU == locale ? "ru" : "en";
     }
 }

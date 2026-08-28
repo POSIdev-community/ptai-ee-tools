@@ -3,6 +3,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.misc.tools.BaseTest;
 import com.ptsecurity.misc.tools.helpers.ArchiveHelper;
+import lombok.NonNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -107,6 +108,13 @@ public class ProjectTemplate {
     public static ProjectTemplate randomClone(@NonNull final ProjectTemplate.ID sourceTemplate) {
         ProjectTemplate projectTemplate = TEMPLATES.get(sourceTemplate);
         return randomClone(sourceTemplate, BaseTest.randomProjectName(projectTemplate.getName()));
+    }
+
+    public static boolean hasSamples(
+            @NonNull final String folder,
+            @NonNull final com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief.ApiVersion version) {
+        String probe = folder + "/" + version.name().toLowerCase() + "/" + getTemplate(ID.values()[0]).getName() + ".json.7z";
+        return ProjectTemplate.class.getClassLoader().getResource(probe) != null;
     }
 }
 

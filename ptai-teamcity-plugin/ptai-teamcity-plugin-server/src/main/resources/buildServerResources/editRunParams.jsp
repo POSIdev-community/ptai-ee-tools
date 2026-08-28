@@ -127,17 +127,6 @@
         };
 
         // Array of table row identifiers that are to be shown if SARIF report export option is checked
-        var ptaiReportingSonarGiifFieldRows = [
-            'row_${REPORTING_SONARGIIF_FILE}',
-            'row_${REPORTING_SONARGIIF_FILTER}' ];
-
-        ptaiReportingSonarGiifShowHide = function (show) {
-            if (true == show)
-                BS.Util.show(...ptaiReportingSonarGiifFieldRows);
-            else
-                BS.Util.hide(...ptaiReportingSonarGiifFieldRows);
-            BS.MultilineProperties.updateVisible();
-        };
 
         ptaiReportingJsonShowHide = function (show) {
             if (true == show)
@@ -159,9 +148,6 @@
             ptaiReportingSarifShowHide($('${REPORTING_SARIF}').checked)
         };
 
-        ptaiReportingSonarGiifClick = function () {
-            ptaiReportingSonarGiifShowHide($('${REPORTING_SONARGIIF}').checked)
-        };
 
         ptaiReportingJsonClick = function () {
             ptaiReportingJsonShowHide($('${REPORTING_JSON}').checked)
@@ -173,7 +159,6 @@
             'row_${REPORTING_REPORT}',
             'row_${REPORTING_RAWDATA}',
             'row_${REPORTING_SARIF}',
-            'row_${REPORTING_SONARGIIF}',
             'row_${REPORTING_JSON}' ];
 
         ptaiAstWorkModeChange = function () {
@@ -183,7 +168,6 @@
                 ptaiReportingReportShowHide(false);
                 ptaiReportingRawDataShowHide(false);
                 ptaiReportingSarifShowHide(false);
-                ptaiReportingSonarGiifShowHide(false);
                 ptaiReportingJsonShowHide(false);
             }
             if (mode === '${AST_MODE_SYNC}') {
@@ -191,7 +175,6 @@
                 ptaiReportingReportClick();
                 ptaiReportingRawDataClick();
                 ptaiReportingSarifClick();
-                ptaiReportingSonarGiifClick();
                 ptaiReportingJsonClick();
             }
             BS.MultilineProperties.updateVisible();
@@ -583,48 +566,6 @@
     </tr>
 
 
-    <tr id="row_${REPORTING_SONARGIIF}">
-        <th class="noBorder dense">
-            <label for="${REPORTING_SONARGIIF}">${LABEL_REPORTING_SONARGIIF}</label>
-        </th>
-        <td>
-            <props:checkboxProperty name="${REPORTING_SONARGIIF}" onclick="ptaiReportingSonarGiifClick()"/>
-            <span class="smallNote">${HINT_REPORTING_SONARGIIF}</span>
-        </td>
-    </tr>
-    <tr id="row_${REPORTING_SONARGIIF_FILE}">
-        <th class="noBorder dense">
-            <label for="${REPORTING_SONARGIIF_FILE}">${LABEL_REPORTING_SONARGIIF_FILE}<l:star/></label>
-        </th>
-        <td class="noBorder dense">
-            <props:textProperty
-                    name="${REPORTING_SONARGIIF_FILE}"
-                    value="${
-                        propertiesBean.properties[REPORTING_SONARGIIF] == FALSE
-                        ? DEFAULT_REPORTING_SONARGIIF_FILE
-                        : propertiesBean.properties[REPORTING_SONARGIIF_FILE]
-                    }"
-                    className="longField"/>
-            <span class="smallNote">${HINT_REPORTING_SONARGIIF_FILE}</span>
-            <span class="error" id="error_${REPORTING_SONARGIIF_FILE}"></span>
-        </td>
-    </tr>
-    <tr id="row_${REPORTING_SONARGIIF_FILTER}">
-        <th class="noBorder dense">
-            <label for="${REPORTING_SONARGIIF_FILTER}">${LABEL_REPORTING_SONARGIIF_FILTER}</label>
-        </th>
-        <td class="noBorder dense">
-            <props:multilineProperty
-                    name="${REPORTING_SONARGIIF_FILTER}"
-                    className="longField"
-                    linkTitle=""
-                    rows="3"
-                    cols="49"
-                    expanded="${true}"
-                    note="${HINT_REPORTING_SONARGIIF_FILTER}"/>
-            <span class="error" id="error_${REPORTING_SONARGIIF_FILTER}"></span>
-        </td>
-    </tr>
 
     <tr id="row_${REPORTING_JSON}">
         <th class="noBorder dense">

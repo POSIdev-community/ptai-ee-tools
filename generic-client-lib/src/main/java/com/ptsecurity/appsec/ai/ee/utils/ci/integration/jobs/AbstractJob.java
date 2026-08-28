@@ -2,6 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
@@ -12,6 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,9 +46,21 @@ public abstract class AbstractJob extends AbstractTool {
     @Builder.Default
     protected AictlClient client = null;
 
+    @Getter
+    @Setter
+    @Builder.Default
+    @ToString.Exclude
+    protected AictlEnvironment environment = null;
+
     public JobExecutionResult execute() {
         try {
             init();
+            if (environment == null) {
+                throw GenericException.raise(
+                        "aictl execution environment is not initialized",
+                        new IllegalStateException(getClass().getName() + ".init()"));
+            }
+
             client = Factory.client(this);
 
             unsafeExecute();

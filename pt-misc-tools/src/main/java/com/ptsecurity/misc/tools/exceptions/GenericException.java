@@ -52,6 +52,18 @@ public class GenericException extends RuntimeException {
         return new GenericException(caption, extractDetails(cause), cause);
     }
 
+    @NonNull
+    public static GenericException raise(
+            @NonNull final String caption,
+            final String details,
+            @NonNull final Throwable cause) {
+        if (cause instanceof GenericException) {
+            return (GenericException) cause;
+        }
+
+        return new GenericException(caption, details, cause);
+    }
+
     protected GenericException(@NonNull final String message, final String details, @NonNull final Throwable inner) {
         // Let's check if inner is an instance of BaseException itself
         super(message);

@@ -158,11 +158,6 @@ public class Defaults {
     public static final String REPORTING_SARIF = FALSE;
 
     /**
-     * See {@link Params#REPORTING_SONARGIIF}
-     */
-    public static final String REPORTING_SONARGIIF = FALSE;
-
-    /**
      * See {@link Params#REPORTING_JSON}
      */
     public static final String REPORTING_JSON = FALSE;
@@ -202,15 +197,6 @@ public class Defaults {
      */
 
     public static final String REPORTING_SARIF_FILTER = EMPTY;
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILE}
-     */
-    public static final String REPORTING_SONARGIIF_FILE = "sonar_giif_report.json";
-
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILTER}
-     */
-    public static final String REPORTING_SONARGIIF_FILTER = EMPTY;
 
     /**
      * See {@link Params#REPORTING_JSON_SETTINGS}

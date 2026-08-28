@@ -8,7 +8,6 @@ group = "${rootGroup}"
 dependencies {
     api project(':pt-misc-tools')
     api project(':ptai-data-structures')
-    api project(':ptai-rest-api')
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
     implementation 'org.apache.commons:commons-compress:1.21'
@@ -86,3 +85,191 @@ jar {
         attributes 'Jenkins-ClassFilter-Whitelisted': 'true'
     }
 }
+
+def aictlResources = layout.buildDirectory.dir("generated/aictl").get().asFile
+def aictlCache = rootProject.file(".aictl-cache")
+
+def knownAictlPlatforms = ["linux-amd64", "linux-arm64", "darwin-amd64", "darwin-arm64", "windows-amd64"]
+def aictlBinaryName = { String platform -> platform.startsWith("windows") ? "aictl.exe" : "aictl" }
+
+def aictlPlatformsValue = (project.findProperty("aictlPlatforms")?.toString() ?: "").trim()
+
+def preparedAictlDirs = (project.findProperty("aictlBinariesDir")?.toString() ?: "")
+        .split(",")*.trim().findAll { it }
+
+def resolveAictlPlatforms = { String value ->
+    def resolved = value.split(",")*.trim().findAll { it }.unique()
+    def unknown = resolved - knownAictlPlatforms
+    if (!unknown.isEmpty()) {
+        throw new GradleException(
+                "aictlPlatforms has unknown platforms ${unknown}, expected any of ${knownAictlPlatforms}")
+    }
+
+    return resolved
+}
+
+def aictlVersionPin = (project.findProperty("aictlVersion")?.toString() ?: "").trim().replaceFirst('^v', '')
+def aictlReleasesUrl = "https://github.com/POSIdev-community/aictl/releases"
+def aictlLatestUrl = "${aictlReleasesUrl}/latest"
+def aictlLatestCache = new File(aictlCache, "latest-version.txt")
+def aictlVersionHolder = new java.util.concurrent.atomic.AtomicReference<String>()
+
+def latestAictlVersion = {
+    def connection = null
+    try {
+        connection = new URL(aictlLatestUrl).openConnection()
+        connection.instanceFollowRedirects = false
+        connection.requestMethod = "HEAD"
+        connection.connectTimeout = 15000
+        connection.readTimeout = 15000
+
+        def location = connection.getHeaderField("Location")
+        def tag = location == null ? "" : location.substring(location.lastIndexOf("/") + 1).trim()
+        if (tag.isEmpty()) {
+            throw new IllegalStateException("${aictlLatestUrl} did not redirect to a release tag")
+        }
+
+        return tag.replaceFirst('^v', '')
+    } finally {
+        connection?.disconnect()
+    }
+}
+
+def aictlVersionOf = {
+    def known = aictlVersionHolder.get()
+    if (known != null) {
+        return known
+    }
+
+    def version = aictlVersionPin
+    if (version.isEmpty()) {
+        try {
+            version = latestAictlVersion()
+            aictlCache.mkdirs()
+            aictlLatestCache.text = version
+            logger.lifecycle("Latest aictl release is ${version}")
+        } catch (Exception e) {
+            if (!aictlLatestCache.isFile()) {
+                throw new GradleException("Cannot find out the latest aictl release at ${aictlLatestUrl}. " +
+                        "Build with -PaictlVersion=<x.y.z> to pick one yourself", e)
+            }
+
+            version = aictlLatestCache.text.trim()
+            logger.warn("Cannot reach ${aictlLatestUrl}, bundling aictl ${version} seen by an earlier build")
+        }
+    }
+
+    aictlVersionHolder.set(version)
+    return version
+}
+
+task downloadAictlBinaries {
+    description = "Bundle aictl binaries as plugin resources, from a release or from aictlBinariesDir"
+    group = "build"
+
+    inputs.property("version", provider { aictlVersionOf() })
+    inputs.property("platforms", preparedAictlDirs.isEmpty() ? resolveAictlPlatforms(aictlPlatformsValue).join(",") : "")
+    inputs.property("binariesDir", preparedAictlDirs.join(","))
+    preparedAictlDirs.findAll { new File(it).isDirectory() }.each { inputs.dir(it) }
+    outputs.dir(aictlResources)
+
+    doLast {
+        def version = aictlVersionOf()
+        def target = new File(aictlResources, "aictl")
+        target.deleteDir()
+        target.mkdirs()
+
+        if (!preparedAictlDirs.isEmpty()) {
+            def picked = [:]
+            preparedAictlDirs.each { path ->
+                def source = new File(path)
+                if (!source.isDirectory()) {
+                    throw new GradleException("aictlBinariesDir is not a folder: ${source}")
+                }
+
+                def found = source.listFiles()?.findAll { it.isDirectory() }?.sort { it.name } ?: []
+                def unknown = found*.name - knownAictlPlatforms
+                if (!unknown.isEmpty()) {
+                    throw new GradleException("aictlBinariesDir ${source} has unexpected folders ${unknown}, " +
+                            "expected any of ${knownAictlPlatforms}")
+                }
+
+                if (found.isEmpty()) {
+                    throw new GradleException("aictlBinariesDir ${source} holds no binaries: " +
+                            "expected an <os>-<arch>/aictl layout")
+                }
+
+                found.each { platformDir ->
+                    def binary = new File(platformDir, aictlBinaryName(platformDir.name))
+                    if (!binary.isFile()) {
+                        throw new GradleException("aictl binary not found: ${binary}")
+                    }
+
+                    if (picked.containsKey(platformDir.name)) {
+                        throw new GradleException("aictlBinariesDir gives ${platformDir.name} twice: " +
+                                "${picked[platformDir.name]} and ${binary}. Leave it in one folder only")
+                    }
+
+                    picked[platformDir.name] = binary
+                }
+            }
+
+            picked.keySet().sort().each { platform ->
+                def binary = picked[platform]
+                def copy = new File(new File(target, platform), aictlBinaryName(platform))
+                copy.parentFile.mkdirs()
+                copy.bytes = binary.bytes
+                logger.lifecycle("aictl ${platform} taken from ${binary}")
+            }
+        } else {
+            resolveAictlPlatforms(aictlPlatformsValue).each { platform ->
+                def windows = platform.startsWith("windows")
+                def binaryName = aictlBinaryName(platform)
+                def platformDir = new File(target, platform)
+                platformDir.mkdirs()
+                def binary = new File(platformDir, binaryName)
+
+                def archiveName = "aictl_${version}_${platform}." + (windows ? "zip" : "tar.gz")
+                aictlCache.mkdirs()
+                def archive = new File(aictlCache, archiveName)
+                if (!archive.isFile()) {
+                    def url = "${aictlReleasesUrl}/download/v${version}/${archiveName}"
+                    logger.lifecycle("Downloading ${url}")
+                    def partial = new File(aictlCache, archiveName + ".part")
+                    try {
+                        new URL(url).withInputStream { input -> partial.withOutputStream { it << input } }
+                    } catch (FileNotFoundException e) {
+                        partial.delete()
+                        throw new GradleException(
+                                "aictl ${version} has no ${platform} release at ${url}. " +
+                                        "Pin another one with -PaictlVersion, " +
+                                        "or supply binaries with aictlBinariesDir", e)
+                    }
+
+                    partial.renameTo(archive)
+                }
+
+                def unpacked = new File(temporaryDir, platform)
+                unpacked.deleteDir()
+                copy {
+                    from windows ? zipTree(archive) : tarTree(resources.gzip(archive))
+                    into unpacked
+                }
+
+                def found = fileTree(unpacked).matching { include "**/${binaryName}" }.files
+                if (found.isEmpty()) {
+                    throw new GradleException("No ${binaryName} inside ${archive}")
+                }
+
+                binary.bytes = found.first().bytes
+                logger.lifecycle("aictl ${version} ${platform} bundled (${binary.length()} bytes)")
+            }
+        }
+
+        new File(target, "aictl.properties").text =
+                "# Generated by downloadAictlBinaries task, do not edit\nversion=${version}\n"
+    }
+}
+
+sourceSets.main.resources.srcDir aictlResources
+processResources.dependsOn downloadAictlBinaries

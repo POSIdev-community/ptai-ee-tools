@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/aiproj-1.11.json",
+  "Version": "1.11",
+  "ProjectName": "Dart App",
+  "ProgrammingLanguages": ["Dart"],
+  "ScanModules": [
+    "StaticCodeAnalysis"
+  ]
+}

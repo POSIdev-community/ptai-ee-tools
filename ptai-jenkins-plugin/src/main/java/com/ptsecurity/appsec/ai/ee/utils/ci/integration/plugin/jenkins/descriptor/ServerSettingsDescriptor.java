@@ -6,6 +6,8 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
@@ -88,7 +90,8 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
             AdvancedSettings advancedSettings = new AdvancedSettings();
             advancedSettings.apply(pluginDescriptor.getAdvancedSettings());
 
-            AictlClient client = new AictlClient(
+            AictlClient client = Factory.client(
+                    ControllerEnvironment.get(),
                     ConnectionSettings.builder()
                             .url(serverUrl)
                             .credentials(TokenCredentials.builder().token(ptAiToken).build())

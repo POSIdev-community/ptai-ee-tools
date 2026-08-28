@@ -77,11 +77,6 @@ public class Validator {
 
     @NonNull
     public static Result validateJsonReports(String value) {
-        Result schemaValidationResult = validateViaException(() -> ReportUtils.validateJsonReportSettings(value));
-        if (schemaValidationResult.fail()) {
-            return schemaValidationResult;
-        }
-
         return validateViaException(() -> ReportUtils.validateJsonReports(value));
     }
 

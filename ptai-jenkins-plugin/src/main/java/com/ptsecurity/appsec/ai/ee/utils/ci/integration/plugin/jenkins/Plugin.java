@@ -244,8 +244,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
-                .settings(selectedScanSettingsUi ? null : jsonSettings)
-                .policy(selectedScanSettingsUi ?  null : jsonPolicy)
                 .console(listener.getLogger())
                 .verbose(verbose)
                 .prefix(CONSOLE_PREFIX)
@@ -264,7 +262,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .buildInfo(buildInfo)
                 .transfers(transfers)
                 .fullScanMode(fullScanMode)
-                .jsonSettings(jsonSettings)
+                .jsonSettings(selectedScanSettingsUi ? null : jsonSettings)
+                .jsonPolicy(selectedScanSettingsUi ? null : jsonPolicy)
                 .advancedSettings(advancedSettings)
                 .build();
         if (workMode instanceof WorkModeSync) {

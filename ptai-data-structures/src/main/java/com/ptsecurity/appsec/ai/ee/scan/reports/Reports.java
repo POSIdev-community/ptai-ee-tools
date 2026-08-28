@@ -18,6 +18,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"sonarGiif"})
 @ToString
 public class Reports {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -336,27 +337,6 @@ public class Reports {
         protected IssuesFilter filters = null;
     }
 
-    @Getter
-    @Setter
-    @ToString
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @SuperBuilder
-    public static class SonarGiif {
-        /**
-         * File name where report should be saved to
-         */
-        @NonNull
-        @JsonProperty
-        protected String fileName;
-
-        /**
-         * Report property that contain report generation filters
-         */
-        @JsonProperty
-        @Builder.Default
-        protected IssuesFilter filters = null;
-    }
 
     /**
      * List of human-readable reports to be generated. Such report type
@@ -378,8 +358,6 @@ public class Reports {
     @JsonProperty
     protected List<Sarif> sarif = new ArrayList<>();
 
-    @JsonProperty
-    protected List<SonarGiif> sonarGiif = new ArrayList<>();
 
     /**
      * Builder-like method that adds reports and returns "this" instance
@@ -390,7 +368,6 @@ public class Reports {
         getReport().addAll(reports.getReport());
         getRaw().addAll(reports.getRaw());
         getSarif().addAll(reports.getSarif());
-        getSonarGiif().addAll(reports.getSonarGiif());
         return this;
     }
 }

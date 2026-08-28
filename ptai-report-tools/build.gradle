@@ -6,7 +6,6 @@ group = "${rootGroup}"
 
 dependencies {
     api project(':ptai-data-structures')
-    api project(':ptai-rest-api')
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     implementation 'org.apache.commons:commons-lang3:3.12.0'

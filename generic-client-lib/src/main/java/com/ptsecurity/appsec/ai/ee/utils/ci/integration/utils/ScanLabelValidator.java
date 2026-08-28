@@ -1,6 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.util.Collections;
 import java.util.Set;
@@ -22,11 +22,11 @@ public class ScanLabelValidator {
         ALLOWED_CHARS_SET = Collections.unmodifiableSet(tempSet);
     }
 
-    public static boolean containOnlyCommonAndRussianChars(@NotNull String scanLabel) {
+    public static boolean containOnlyCommonAndRussianChars(@NonNull String scanLabel) {
         return scanLabel.chars().allMatch(ALLOWED_CHARS_SET::contains);
     }
 
-    public static boolean validateMaxLength(@NotNull String scanLabel) {
+    public static boolean validateMaxLength(@NonNull String scanLabel) {
         return scanLabel.length() <= SCAN_LABEL_MAX_LENGTH;
     }
 }

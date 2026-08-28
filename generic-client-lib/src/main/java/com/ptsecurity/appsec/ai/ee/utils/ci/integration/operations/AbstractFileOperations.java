@@ -33,5 +33,9 @@ public abstract class AbstractFileOperations implements FileOperations {
         log.trace("Finished: save in-memory data as build artifact {}. Data is {} bytes long", name, safeData.length);
     }
 
+    public void saveArtifactFromScanHost(@NonNull String name, @NonNull String path) {
+        saveArtifact(name, new File(path));
+    }
+
     protected abstract void saveInMemoryData(@NonNull String name, byte[] data);
 }

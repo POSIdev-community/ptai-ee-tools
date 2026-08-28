@@ -40,7 +40,10 @@ public class ScanBrief {
         V4110("4.11.0"),
         V500("5.0.0"),
         V520("5.2.0"),
-        V530("5.3.0");
+        V530("5.3.0"),
+        V600("6.0.0"),
+        V610("6.1.0"),
+        V620("6.2.0");
 
         private final String prefix;
 
@@ -179,7 +182,9 @@ public class ScanBrief {
             KOTLIN("Kotlin"),
             RUBY("Ruby"),
             SOLIDITY("Solidity"),
-            SCALA("Scala"),;
+            SCALA("Scala"),
+            ONE_C("OneC"),
+            DART("Dart");
 
             public static Language fromString(@NonNull final String value) {
                 for (Language language : Language.values())

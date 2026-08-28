@@ -1,18 +1,17 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service;
 
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
-import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
@@ -168,9 +167,6 @@ public class AstSettingsService {
         res.fill(REPORTING_SARIF, request)
                 .fill(REPORTING_SARIF_FILE, request)
                 .fill(REPORTING_SARIF_FILTER, request);
-        res.fill(REPORTING_SONARGIIF, request)
-                .fill(REPORTING_SONARGIIF_FILE, request)
-                .fill(REPORTING_SONARGIIF_FILTER, request);
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
 
@@ -303,16 +299,6 @@ public class AstSettingsService {
             }
         }
 
-        if (bean.isTrue(REPORTING_SONARGIIF)) {
-            if (bean.empty(REPORTING_SONARGIIF_FILE))
-                results.add(REPORTING_SONARGIIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_message_empty());
-            if (!bean.empty(REPORTING_SONARGIIF_FILTER)) {
-                Validator.Result result = Validator.validateJsonIssuesFilter(bean.get(REPORTING_SONARGIIF_FILTER));
-                if (result.fail())
-                    results.add(REPORTING_SONARGIIF_FILTER, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid_details(result.getDetails()));
-            }
-        }
-
         if (bean.isTrue(REPORTING_JSON)) {
             if (bean.empty(REPORTING_JSON_SETTINGS))
                 results.add(REPORTING_JSON_SETTINGS, Resources.i18n_ast_settings_mode_synchronous_subjob_export_advanced_settings_message_empty());
@@ -358,7 +344,7 @@ public class AstSettingsService {
     }
 
     private static AictlClient createApiClient(@NonNull PropertiesBean bean) {
-        return Factory.client(ConnectionSettings.builder()
+        return Factory.client(ServerEnvironment.get(), ConnectionSettings.builder()
                 .url(bean.get(URL))
                 .credentials(TokenCredentials.builder().token(bean.get(TOKEN)).build())
                 .caCertsPem(bean.get(CERTIFICATES))
@@ -366,11 +352,6 @@ public class AstSettingsService {
                 .build());
     }
 
-    /**
-     * @param bean PT AI server connection settings bean
-     * @param results Response that contains diagnostic messages
-     *            that are related to connection check results
-     */
     protected static void checkConnectionSettings(@NonNull PropertiesBean bean, @NonNull final VerificationResults results) {
         // Check connection
         try {
@@ -418,16 +399,13 @@ public class AstSettingsService {
             boolean isAnyReportSelected = bean.eq(REPORTING_REPORT, TRUE) ||
                     bean.eq(REPORTING_RAWDATA, TRUE) ||
                     bean.eq(REPORTING_SARIF, TRUE) ||
-                    bean.eq(REPORTING_SONARGIIF, TRUE) ||
                     bean.eq(REPORTING_JSON, TRUE);
 
             if (!isAnyReportSelected) {
                 return;
             }
 
-            Reports reports = bean.convert();
-            reports = ReportUtils.validate(reports);
-            new ReportsTask(client).check(reports);
+            ReportUtils.validate(bean.convert());
         } catch (GenericException e) {
             log.warn(e.getDetailedMessage(), e);
             results.add(e);
