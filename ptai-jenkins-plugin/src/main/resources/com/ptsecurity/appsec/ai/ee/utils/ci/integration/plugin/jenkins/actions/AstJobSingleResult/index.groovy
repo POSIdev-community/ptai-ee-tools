@@ -18,10 +18,6 @@ import java.time.format.DateTimeFormatter
 def l = namespace(LayoutTagLib)
 def st = namespace("jelly:stapler")
 
-link(rel: 'stylesheet', href: "${rootURL}/plugin/ptai-jenkins-plugin/css/plugin.css")
-script(src: "${rootURL}/plugin/ptai-jenkins-plugin/webjars/echarts/echarts.min.js")
-script(src: "${rootURL}/plugin/ptai-jenkins-plugin/js/charts.js")
-
 /**
  * Set AST settings table cell class in accordance with its coordinates. Like bold
  * line for left border in the leftmost cells etc.
@@ -128,6 +124,10 @@ l.layout(title: Resources.i18n_ast_result_label()) {
     }
 
     l.main_panel() {
+        link(rel: 'stylesheet', href: "${rootURL}/plugin/ptai-jenkins-plugin/css/plugin.css")
+        script(src: "${rootURL}/plugin/ptai-jenkins-plugin/webjars/echarts/echarts.min.js")
+        script(src: "${rootURL}/plugin/ptai-jenkins-plugin/js/charts.js")
+
         def scanBriefDetailed = my.loadScanBriefDetailed()
 
         h1(Resources.i18n_ast_result_singlebuild_title_label())
