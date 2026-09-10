@@ -97,6 +97,21 @@ public class Hints {
     public static final String REPORTING_REPORT_TEMPLATE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_template_hint();
 
     /**
+     * See {@link Params#REPORTING_REPORT_LOCALE}
+     */
+    public static final String REPORTING_REPORT_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_hint();
+
+    /**
+     * See {@link Params#REPORTING_RAWDATA_LOCALE}
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_hint();
+
+    /**
+     * See {@link Params#REPORTING_SARIF_LOCALE}
+     */
+    public static final String REPORTING_SARIF_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_hint();
+
+    /**
      * See {@link Params#REPORTING_REPORT_DATAFLOW}
      */
     public static final String REPORTING_REPORT_DATAFLOW = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_includedfd_hint();

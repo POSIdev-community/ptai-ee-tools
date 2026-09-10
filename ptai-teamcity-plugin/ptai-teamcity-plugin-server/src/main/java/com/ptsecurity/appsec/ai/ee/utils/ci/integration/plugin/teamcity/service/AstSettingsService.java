@@ -160,13 +160,16 @@ public class AstSettingsService {
                 .fill(REPORTING_REPORT_TEMPLATE, request)
                 .fill(REPORTING_REPORT_DATAFLOW, request)
                 .fill(REPORTING_REPORT_SUMMARY, request)
-                .fill(REPORTING_REPORT_FILTER, request);
+                .fill(REPORTING_REPORT_FILTER, request)
+                .fill(REPORTING_REPORT_LOCALE, request);
         res.fill(REPORTING_RAWDATA, request)
                 .fill(REPORTING_RAWDATA_FILE, request)
-                .fill(REPORTING_RAWDATA_FILTER, request);
+                .fill(REPORTING_RAWDATA_FILTER, request)
+                .fill(REPORTING_RAWDATA_LOCALE, request);
         res.fill(REPORTING_SARIF, request)
                 .fill(REPORTING_SARIF_FILE, request)
-                .fill(REPORTING_SARIF_FILTER, request);
+                .fill(REPORTING_SARIF_FILTER, request)
+                .fill(REPORTING_SARIF_LOCALE, request);
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
 

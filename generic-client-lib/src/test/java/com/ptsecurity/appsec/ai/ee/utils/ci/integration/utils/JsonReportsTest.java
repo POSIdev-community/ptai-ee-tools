@@ -31,6 +31,33 @@ public class JsonReportsTest {
     }
 
     @Test
+    @DisplayName("Every report section carries its own language")
+    public void keepsLocalePerSection() {
+        String json = "{"
+                + "\"report\": [ { \"fileName\": \"a.html\", \"template\": \"t\", \"locale\": \"RU\" } ],"
+                + "\"sarif\": [ { \"fileName\": \"a.sarif\", \"locale\": \"RU\" } ],"
+                + "\"raw\": [ { \"fileName\": \"a.json\" } ]"
+                + "}";
+
+        Reports reports = ReportUtils.validateJsonReports(json);
+        assertEquals(Reports.Locale.RU, reports.getReport().get(0).getLocale());
+        assertEquals(Reports.Locale.RU, reports.getSarif().get(0).getLocale());
+        assertNull(reports.getRaw().get(0).getLocale(), "an omitted language must stay unset");
+    }
+
+    @Test
+    @DisplayName("A report definition may spell the language either way, but not wrongly")
+    public void acceptsBothLocaleSpellings() {
+        String asEnum = "{ \"report\": [ { \"fileName\": \"a.html\", \"template\": \"t\", \"locale\": \"RU\" } ] }";
+        String asValue = "{ \"report\": [ { \"fileName\": \"a.html\", \"template\": \"t\", \"locale\": \"ru-RU\" } ] }";
+        String typo = "{ \"report\": [ { \"fileName\": \"a.html\", \"template\": \"t\", \"locale\": \"russian\" } ] }";
+
+        assertEquals(Reports.Locale.RU, ReportUtils.validateJsonReports(asEnum).getReport().get(0).getLocale());
+        assertEquals(Reports.Locale.RU, ReportUtils.validateJsonReports(asValue).getReport().get(0).getLocale());
+        assertThrows(Exception.class, () -> ReportUtils.validateJsonReports(typo));
+    }
+
+    @Test
     @DisplayName("Reject a mistyped attribute")
     public void rejectsTypos() {
         String json = "{ \"report\": [ { \"fileName\": \"a.html\", \"template\": \"t\","

@@ -8,9 +8,12 @@ import hudson.Extension;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.Map;
 
 @ToString
 public class Report extends Export {
@@ -29,15 +32,20 @@ public class Report extends Export {
     @Getter
     protected boolean includeGlossary;
 
+    @Getter
+    private final String locale;
+
     @DataBoundConstructor
     public Report(final String template, final String fileName,
                   final String filter,
-                  final boolean includeDfd, final boolean includeGlossary) {
+                  final boolean includeDfd, final boolean includeGlossary,
+                  final String locale) {
         this.template = template;
         this.fileName = fileName;
         this.filter = filter;
         this.includeDfd = includeDfd;
         this.includeGlossary = includeGlossary;
+        this.locale = locale;
     }
 
     @Override
@@ -48,6 +56,7 @@ public class Report extends Export {
         Reports.Report report = Reports.Report.builder()
                 .fileName(fileName)
                 .template(template)
+                .locale(Reports.Locale.of(locale))
                 .includeDfd(includeDfd)
                 .includeGlossary(includeGlossary)
                 .filters(StringUtils.isNotEmpty(filter) ? ReportUtils.validateJsonFilter(filter) : null)
@@ -66,9 +75,17 @@ public class Report extends Export {
 
         @SuppressWarnings("unused")
         public String getDefaultTemplate() {
-            return Reports.Locale.RU == getDefaultLocale()
-                    ? "Отчет по результатам сканирования"
-                    : "Scan results report";
+            return Reports.Report.DEFAULT_TEMPLATE_NAME.get(Reports.Locale.DEFAULT);
+        }
+
+        @SuppressWarnings("unused")
+        public String getDefaultTemplates() {
+            JSONObject result = new JSONObject();
+            for (Map.Entry<Reports.Locale, String> entry : Reports.Report.DEFAULT_TEMPLATE_NAME.entrySet()) {
+                result.put(entry.getKey().getValue(), entry.getValue());
+            }
+
+            return result.toString();
         }
     }
 }

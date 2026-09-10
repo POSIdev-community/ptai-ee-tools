@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils;
 
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
@@ -124,6 +125,19 @@ public class Validator {
 
     public static FormValidation doCheckFieldAdvancedSettings(String value, String errorMessage) {
         return doCheckFieldAdvancedSettings(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
+    }
+
+    public static FormValidation doCheckLocale(String value) {
+        if (StringUtils.isBlank(value)) {
+            return FormValidation.ok();
+        }
+
+        if (Reports.Locale.from(value.trim()) == null) {
+            return FormValidation.error(
+                    Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_message_error());
+        }
+
+        return FormValidation.ok();
     }
 
     public static FormValidation doCheckScanLabelMaxLength(String value, String errorMessage) {
