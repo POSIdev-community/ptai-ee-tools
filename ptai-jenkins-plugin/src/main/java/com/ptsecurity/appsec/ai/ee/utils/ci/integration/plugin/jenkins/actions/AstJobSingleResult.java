@@ -12,7 +12,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.PieChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.I18nHelper;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.export.Export;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import hudson.model.Action;
 import hudson.model.Run;
@@ -160,7 +159,7 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
     public String getVulnerabilityTypeDistribution() {
         loadScanBriefDetailed();
         if (isEmpty()) return null;
-        Reports.Locale locale = Export.ExportDescriptor.getDefaultLocale();
+        Reports.Locale locale = I18nHelper.uiLocale();
         List<BaseIssueCount> baseIssues = scanBriefDetailed.getDetails().getChartData().getBaseIssueDistributionData();
         Map<Pair<BaseIssue.Level, String>, Long> levelTitleCountMap = baseIssues.stream()
                 .filter(issue -> BaseIssue.ApprovalState.DISCARD != issue.getApprovalState())

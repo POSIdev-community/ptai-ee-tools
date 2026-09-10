@@ -395,7 +395,7 @@ public class AictlClient {
             final boolean includeGlossary,
             @NonNull final String outputPath) throws GenericException {
         Command.CommandBuilder builder = commandBuilder(
-                "get", "scan", "report", report, scanResultId.toString(),
+                "get", "scan", "report", reportArgument(report, locale), scanResultId.toString(),
                 "-p", projectId.toString(),
                 "--localization", localization(locale),
                 "-o", outputPath, "-f");
@@ -409,6 +409,12 @@ public class AictlClient {
         }
 
         checked("PT AI report generation failed", builder.build());
+    }
+
+    @NonNull
+    protected static String reportArgument(@NonNull final String report, @NonNull final Reports.Locale locale) {
+        AictlReportTemplate builtin = AictlReportTemplate.of(report, locale);
+        return builtin == null ? report : builtin.getCommand();
     }
 
     @NonNull

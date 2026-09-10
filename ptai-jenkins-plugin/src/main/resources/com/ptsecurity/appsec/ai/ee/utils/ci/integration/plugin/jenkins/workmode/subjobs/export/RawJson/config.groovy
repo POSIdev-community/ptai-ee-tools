@@ -12,6 +12,12 @@ f.entry(
             default: 'report.json')
 }
 
+f.entry(
+        title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label(),
+        field: 'locale') {
+    f.select()
+}
+
 f.advanced() {
     f.entry(
             title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_rawjson_filter_label(),

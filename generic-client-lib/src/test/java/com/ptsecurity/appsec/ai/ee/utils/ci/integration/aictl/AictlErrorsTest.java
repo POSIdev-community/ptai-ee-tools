@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl;
 
+import com.ptsecurity.misc.tools.exceptions.GenericException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,28 @@ public class AictlErrorsTest {
                     + "initialize ai client: no compatible client found\n"
                     + "'get healthcheck' usecase call: initialize with retry: initialize ai adapter: "
                     + "initialize ai client: no compatible client found";
+
+    @Test
+    @DisplayName("Verbose progress lines never pass for the reason a command failed")
+    public void skipsVerboseTrace() {
+        String raw = "2026-09-01T19:47:59.209+0300\tgetting 'Scan results report' scan report, "
+                + "scan-id 'd1bf4846-5ec9-4ff8-b615-47850c8cf71e'\n"
+                + "2026-09-01T19:47:59.512+0300\trequesting report template by name\n"
+                + "Error: 'get scan report' usecase call: report template 'Scan results report' not found";
+
+        String message = AictlErrors.message(raw);
+        assertFalse(message.startsWith("2026-"), message);
+        assertTrue(message.contains("not found"), message);
+    }
+
+    @Test
+    @DisplayName("Without an Error line the first non-trace line is used")
+    public void fallsBackToPlainOutput() {
+        String raw = "2026-09-01T19:47:59.209+0300\tgetting scan report\n"
+                + "something went sideways";
+
+        assertEquals("something went sideways", AictlErrors.message(raw));
+    }
 
     @Test
     @DisplayName("A malformed URL is named as such")
@@ -80,5 +103,26 @@ public class AictlErrorsTest {
         assertTrue(details.contains("no compatible client found"), details);
         assertNull(AictlErrors.details(null));
         assertNull(AictlErrors.details("   "));
+    }
+
+    @Test
+    @DisplayName("An empty template lookup answer reads as a missing template")
+    public void missingTemplate() {
+        GenericException failure = GenericException.raise(
+                "PT AI report generation failed",
+                new IllegalStateException(
+                        "'get scan report' usecase call: unexpected end of JSON input"));
+
+        assertTrue(AictlErrors.noReportTemplate(failure));
+    }
+
+    @Test
+    @DisplayName("Any other failure is not blamed on the template")
+    public void otherFailureIsNotAMissingTemplate() {
+        GenericException failure = GenericException.raise(
+                "PT AI report generation failed", new IllegalStateException(NO_CLIENT));
+
+        assertFalse(AictlErrors.noReportTemplate(failure));
+        assertFalse(AictlErrors.noReportTemplate(null));
     }
 }

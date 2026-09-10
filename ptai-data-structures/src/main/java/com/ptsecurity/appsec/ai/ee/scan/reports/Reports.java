@@ -43,6 +43,35 @@ public class Reports {
             return VALUES.get(value);
         }
 
+        public static final Locale DEFAULT = EN;
+
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static Locale parse(final String value) {
+            String text = value == null ? "" : value.trim();
+            for (Locale locale : values()) {
+                if (locale.name().equalsIgnoreCase(text)) {
+                    return locale;
+                }
+            }
+
+            Locale result = VALUES.get(text);
+            if (result == null) {
+                throw new IllegalArgumentException("Unknown report locale: " + value);
+            }
+
+            return result;
+        }
+
+        @NonNull
+        public static Locale of(final String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return DEFAULT;
+            }
+
+            Locale result = VALUES.get(value.trim());
+            return result == null ? DEFAULT : result;
+        }
+
         /**
          * Human-readable locale definition like "ru-RU", "en-US" etc.
          */
@@ -313,6 +342,12 @@ public class Reports {
         @JsonProperty
         @Builder.Default
         protected IssuesFilter filters = null;
+
+        /**
+         * Language the report is rendered in
+         */
+        @JsonProperty
+        protected Reports.Locale locale;
     }
 
     @Getter
@@ -335,6 +370,12 @@ public class Reports {
         @JsonProperty
         @Builder.Default
         protected IssuesFilter filters = null;
+
+        /**
+         * Language the report is rendered in
+         */
+        @JsonProperty
+        protected Reports.Locale locale;
     }
 
 
