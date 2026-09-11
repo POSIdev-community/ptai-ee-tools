@@ -14,12 +14,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,6 +39,10 @@ public class AictlClient {
     protected boolean verbose = false;
 
     protected String caCertsFile = null;
+
+    protected Boolean reportFiltersSupported = null;
+
+    protected static final Pattern REPORT_FILTERS_LISTED = Pattern.compile("^\\s+with-filters\\s", Pattern.MULTILINE);
 
     public AictlClient(
             @NonNull final AictlEnvironment environment,
@@ -393,12 +395,28 @@ public class AictlClient {
             @NonNull final Reports.Locale locale,
             final boolean includeDfd,
             final boolean includeGlossary,
+            final Reports.IssuesFilter filters,
             @NonNull final String outputPath) throws GenericException {
-        Command.CommandBuilder builder = commandBuilder(
-                "get", "scan", "report", reportArgument(report, locale), scanResultId.toString(),
+        List<String> filterArgs = AictlReportFilters.arguments(filters);
+        boolean filtered = !filterArgs.isEmpty() && supportsReportFilters();
+
+        List<String> args = new ArrayList<>(Arrays.asList("get", "scan", "report"));
+        if (filtered) {
+            args.add("with-filters");
+        }
+
+        args.add(reportArgument(report, locale));
+        args.add(scanResultId.toString());
+        args.addAll(Arrays.asList(
                 "-p", projectId.toString(),
                 "--localization", localization(locale),
-                "-o", outputPath, "-f");
+                "-o", outputPath, "-f"));
+
+        if (filtered) {
+            args.addAll(filterArgs);
+        }
+
+        Command.CommandBuilder builder = commandBuilder(args.toArray(new String[0]));
 
         if (includeDfd) {
             builder.arg("--include-dfd");
@@ -409,6 +427,18 @@ public class AictlClient {
         }
 
         checked("PT AI report generation failed", builder.build());
+    }
+
+    public synchronized boolean supportsReportFilters() throws GenericException {
+        if (reportFiltersSupported == null) {
+            AictlResult result = execute(Command.builder()
+                    .arg("get").arg("scan").arg("report").arg("--help").build());
+
+            reportFiltersSupported = result.isSuccess() && REPORT_FILTERS_LISTED.matcher(result.getStdout()).find();
+            log.debug("aictl {} report filters", reportFiltersSupported ? "takes" : "does not take");
+        }
+
+        return reportFiltersSupported;
     }
 
     @NonNull

@@ -109,6 +109,7 @@ def resolveAictlPlatforms = { String value ->
 }
 
 def aictlVersionPin = (project.findProperty("aictlVersion")?.toString() ?: "").trim().replaceFirst('^v', '')
+
 def aictlReleasesUrl = "https://github.com/POSIdev-community/aictl/releases"
 def aictlLatestUrl = "${aictlReleasesUrl}/latest"
 def aictlLatestCache = new File(aictlCache, "latest-version.txt")
@@ -142,6 +143,11 @@ def aictlVersionOf = {
     }
 
     def version = aictlVersionPin
+    if (version.isEmpty() && !preparedAictlDirs.isEmpty()) {
+        version = "local"
+        logger.lifecycle("Bundling aictl ${version} from ${preparedAictlDirs.join(", ")}")
+    }
+
     if (version.isEmpty()) {
         try {
             version = latestAictlVersion()
@@ -181,36 +187,38 @@ task downloadAictlBinaries {
 
         if (!preparedAictlDirs.isEmpty()) {
             def picked = [:]
+            def take = { String platform, File binary ->
+                if (picked.containsKey(platform)) {
+                    throw new GradleException("aictlBinariesDir gives ${platform} twice: " +
+                            "${picked[platform]} and ${binary}. Leave it in one place only")
+                }
+
+                picked[platform] = binary
+            }
+
             preparedAictlDirs.each { path ->
                 def source = new File(path)
                 if (!source.isDirectory()) {
                     throw new GradleException("aictlBinariesDir is not a folder: ${source}")
                 }
 
-                def found = source.listFiles()?.findAll { it.isDirectory() }?.sort { it.name } ?: []
-                def unknown = found*.name - knownAictlPlatforms
+                def taken = picked.size()
+                def platformOf = { String name -> name.substring("aictl_".length()).replaceFirst(/\.exe$/, "") }
+                def found = (source.listFiles() ?: new File[0])
+                        .findAll { it.isFile() && it.name.startsWith("aictl_") }
+                        .sort { it.name }
+
+                def unknown = found*.name.collect(platformOf) - knownAictlPlatforms
                 if (!unknown.isEmpty()) {
-                    throw new GradleException("aictlBinariesDir ${source} has unexpected folders ${unknown}, " +
-                            "expected any of ${knownAictlPlatforms}")
+                    throw new GradleException("aictlBinariesDir ${source} names binaries of unexpected " +
+                            "platforms ${unknown}, expected any of ${knownAictlPlatforms}")
                 }
 
-                if (found.isEmpty()) {
+                found.each { binary -> take(platformOf(binary.name), binary) }
+
+                if (picked.size() == taken) {
                     throw new GradleException("aictlBinariesDir ${source} holds no binaries: " +
-                            "expected an <os>-<arch>/aictl layout")
-                }
-
-                found.each { platformDir ->
-                    def binary = new File(platformDir, aictlBinaryName(platformDir.name))
-                    if (!binary.isFile()) {
-                        throw new GradleException("aictl binary not found: ${binary}")
-                    }
-
-                    if (picked.containsKey(platformDir.name)) {
-                        throw new GradleException("aictlBinariesDir gives ${platformDir.name} twice: " +
-                                "${picked[platformDir.name]} and ${binary}. Leave it in one folder only")
-                    }
-
-                    picked[platformDir.name] = binary
+                            "expected an aictl_<os>-<arch> one per platform")
                 }
             }
 
