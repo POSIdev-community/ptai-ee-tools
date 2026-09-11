@@ -125,4 +125,23 @@ public class AictlErrorsTest {
         assertFalse(AictlErrors.noReportTemplate(failure));
         assertFalse(AictlErrors.noReportTemplate(null));
     }
+
+    @Test
+    @DisplayName("Advice aictl gives about itself never passes for the reason a command failed")
+    public void skipsAdvice() {
+        String renamed = "Warning: 'scan start branch' is obsolete; use 'aictl scan branch'\n"
+                + "Bad request: 'ACTIVE_SCAN_AGENTS_NOT_FOUND'";
+        assertEquals("Bad request: 'ACTIVE_SCAN_AGENTS_NOT_FOUND'", AictlErrors.message(renamed));
+
+        String deprecated = "Command \"branch\" is deprecated, use 'aictl scan branch'\n"
+                + "Bad request: 'ACTIVE_SCAN_AGENTS_NOT_FOUND'";
+        assertEquals("Bad request: 'ACTIVE_SCAN_AGENTS_NOT_FOUND'", AictlErrors.message(deprecated));
+    }
+
+    @Test
+    @DisplayName("With nothing but advice to go on, the advice is still named")
+    public void adviceIsBetterThanSilence() {
+        String advice = "Warning: 'scan start branch' is obsolete; use 'aictl scan branch'";
+        assertEquals(advice, AictlErrors.message(advice));
+    }
 }

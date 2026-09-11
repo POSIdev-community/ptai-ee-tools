@@ -44,6 +44,10 @@ public class AictlClient {
 
     protected static final Pattern REPORT_FILTERS_LISTED = Pattern.compile("^\\s+with-filters\\s", Pattern.MULTILINE);
 
+    protected Boolean scanBranchSupported = null;
+
+    protected static final Pattern SCAN_BRANCH_LISTED = Pattern.compile("^\\s+branch\\s", Pattern.MULTILINE);
+
     public AictlClient(
             @NonNull final AictlEnvironment environment,
             @NonNull final ConnectionSettings connectionSettings,
@@ -234,8 +238,16 @@ public class AictlClient {
             @NonNull final UUID branchId,
             final boolean fullScanMode,
             final String scanLabel) throws GenericException {
-        Command.CommandBuilder builder = commandBuilder(
-                "scan", "start", "branch", branchId.toString(), "-p", projectId.toString());
+        List<String> args = new ArrayList<>(Collections.singletonList("scan"));
+        if (!supportsScanBranch()) {
+            args.add("start");
+        }
+
+        args.add("branch");
+        args.add(branchId.toString());
+        args.addAll(Arrays.asList("-p", projectId.toString()));
+
+        Command.CommandBuilder builder = commandBuilder(args.toArray(new String[0]));
 
         if (fullScanMode) {
             builder.arg("--full-scan");
@@ -427,6 +439,16 @@ public class AictlClient {
         }
 
         checked("PT AI report generation failed", builder.build());
+    }
+
+    public synchronized boolean supportsScanBranch() throws GenericException {
+        if (scanBranchSupported == null) {
+            AictlResult result = execute(Command.builder().arg("scan").arg("--help").build());
+            scanBranchSupported = result.isSuccess() && SCAN_BRANCH_LISTED.matcher(result.getStdout()).find();
+            log.debug("aictl starts a branch scan by {}", scanBranchSupported ? "scan branch" : "scan start branch");
+        }
+
+        return scanBranchSupported;
     }
 
     public synchronized boolean supportsReportFilters() throws GenericException {
