@@ -1,9 +1,9 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration;
 
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ptsecurity.misc.tools.BaseTest;
 import com.ptsecurity.misc.tools.helpers.ArchiveHelper;
-import lombok.NonNull;
+import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class ProjectTemplate {
 
     @Getter
     @Setter
-    protected UnifiedAiProjScanSettings settings;
+    protected String settings;
 
     @Getter
     protected final String sourcesZipResourceName;
@@ -81,7 +81,7 @@ public class ProjectTemplate {
     @SneakyThrows
     private ProjectTemplate(@NonNull final String name, @NonNull final String sourcesZipResourceName, @NonNull final String settingsResourceName) {
         this.name = name;
-        this.settings = UnifiedAiProjScanSettings.loadSettings(getResourceString(settingsResourceName));
+        this.settings = getResourceString(settingsResourceName);
         this.sourcesZipResourceName = sourcesZipResourceName;
     }
 
@@ -93,18 +93,19 @@ public class ProjectTemplate {
         return TEMPLATES.get(sourceTemplate);
     }
 
+    @SneakyThrows
     public static ProjectTemplate randomClone(@NonNull final ProjectTemplate.ID sourceTemplate, @NonNull final String projectName) {
         ProjectTemplate projectTemplate = TEMPLATES.get(sourceTemplate);
         log.trace("Cloned project name {}", projectName);
-        String json = projectTemplate.getSettings().toJson();
-        UnifiedAiProjScanSettings randomSettings = UnifiedAiProjScanSettings.loadSettings(json);
-        randomSettings.setProjectName(projectName);
+        ObjectNode randomSettings = (ObjectNode) BaseJsonHelper.createObjectMapper().readTree(projectTemplate.getSettings());
+        randomSettings.put("ProjectName", projectName);
 
         return ProjectTemplate.builder()
                 .name(projectName)
-                .settings(randomSettings)
+                .settings(randomSettings.toString())
                 .sourcesZipResourceName(projectTemplate.getSourcesZipResourceName()).build();
     }
+
     public static ProjectTemplate randomClone(@NonNull final ProjectTemplate.ID sourceTemplate) {
         ProjectTemplate projectTemplate = TEMPLATES.get(sourceTemplate);
         return randomClone(sourceTemplate, BaseTest.randomProjectName(projectTemplate.getName()));

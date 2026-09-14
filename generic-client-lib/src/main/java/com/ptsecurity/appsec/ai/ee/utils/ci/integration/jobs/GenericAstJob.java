@@ -5,8 +5,8 @@ import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanDiagnostic;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
@@ -299,8 +299,20 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             return;
         }
 
-        UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
-        projectName = settings.getProjectName();
+        AictlAiproj.Result aiproj = AictlAiproj.check(client.getEnvironment(), jsonSettings);
+        if (!aiproj.isValid()) {
+            throw GenericException.raise(
+                    Resources.i18n_ast_settings_type_manual_json_settings_message_invalid(),
+                    new IllegalArgumentException(String.join("\n", aiproj.getErrors())));
+        }
+
+        projectName = aiproj.getProjectName();
+        if (StringUtils.isEmpty(projectName)) {
+            throw GenericException.raise(
+                    "PT AI project name is not defined",
+                    new IllegalArgumentException("ProjectName"));
+        }
+
         projectId = client.createProject(projectName);
         fine("PT AI project %s id is %s", projectName, projectId);
 
