@@ -51,7 +51,24 @@ public class JenkinsFileOperations extends AbstractFileOperations implements Fil
             destination.delete();
         }
 
-        source.renameTo(destination);
+        try {
+            source.copyTo(destination);
+        } catch (Exception e) {
+            try {
+                destination.delete();
+            } catch (Exception cleanup) {
+                log.debug("Failed to delete partially copied report {}", destination, cleanup);
+            }
+
+            throw e;
+        }
+
+        try {
+            source.delete();
+        } catch (Exception e) {
+            log.debug("Failed to delete temporal report {}", source, e);
+        }
+
         log.trace("Finished: move {} into build artifacts as {}", path, name);
     }
 }

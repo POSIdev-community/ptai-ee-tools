@@ -489,13 +489,17 @@ public class AictlClient {
 
         builder.arg("-u").arg(connectionSettings.getUrl());
         builder.arg("-t").arg(connectionSettings.getCredentials().getToken());
+
         if (connectionSettings.isInsecure()) {
             builder.arg("--tls-skip");
-        }
-
-        String caCerts = caCertsFile();
-        if (caCerts != null) {
-            builder.arg("--cacert").arg(caCerts);
+            if (StringUtils.isNotEmpty(connectionSettings.getCaCertsPem())) {
+                log.debug("TLS verification is skipped, so CA certificates from plugin settings are not passed to aictl");
+            }
+        } else {
+            String caCerts = caCertsFile();
+            if (caCerts != null) {
+                builder.arg("--cacert").arg(caCerts);
+            }
         }
 
         if (verbose) {
@@ -539,8 +543,7 @@ public class AictlClient {
 
     @NonNull
     protected static GenericException failure(@NonNull final String message, final String raw) {
-        return GenericException.raise(
-                message, AictlErrors.details(raw), new IllegalStateException(AictlErrors.message(raw)));
+        return GenericException.raise(message, new IllegalStateException(AictlErrors.message(raw)));
     }
 
     @NonNull

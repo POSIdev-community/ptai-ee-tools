@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,9 +48,9 @@ public class AieJsonReport {
     }
 
     @NonNull
-    public static AieJsonReport parse(@NonNull final byte[] data) throws GenericException {
+    public static AieJsonReport parse(@NonNull final InputStream data) throws GenericException {
         try {
-            JsonNode root = MAPPER.readTree(stripBom(new String(data, StandardCharsets.UTF_8)));
+            JsonNode root = MAPPER.readTree(data);
             JsonNode scanInfo = Nodes.get(root, "scanInfo");
             if (scanInfo.isMissingNode()) {
                 throw new UnsupportedReportSchemaException(
@@ -78,10 +78,5 @@ public class AieJsonReport {
         } catch (Exception e) {
             throw GenericException.raise("PT AI scan results report parse failed", e);
         }
-    }
-
-    @NonNull
-    private static String stripBom(@NonNull final String value) {
-        return value.startsWith("﻿") ? value.substring(1) : value;
     }
 }

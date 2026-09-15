@@ -62,6 +62,11 @@ public class FilePathBinaryStore implements BinaryStore {
         } finally {
             try {
                 data.close();
+            } catch (Exception e) {
+                log.debug("Failed to close bundled aictl stream", e);
+            }
+
+            try {
                 if (temp.exists()) temp.delete();
             } catch (Exception e) {
                 log.debug("Failed to clean up {}", temp, e);

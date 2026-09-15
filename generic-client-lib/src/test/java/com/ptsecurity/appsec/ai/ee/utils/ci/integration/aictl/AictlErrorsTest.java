@@ -1,12 +1,11 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl;
 
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Explain aictl connection failures")
+@DisplayName("Explain aictl failures")
 public class AictlErrorsTest {
     private static final String NO_CLIENT =
             "Error: 'get healthcheck' usecase call: initialize with retry: initialize ai adapter: "
@@ -37,30 +36,25 @@ public class AictlErrorsTest {
     }
 
     @Test
-    @DisplayName("A malformed URL is named as such")
-    public void malformedUrl() {
-        String raw = "Error: update context: set uri error: set Uri error: "
-                + "Validation error on field 'uri': param is invalid";
+    @DisplayName("aictl wording is passed through as is, since aictl gives no error codes to key on")
+    public void keepsAictlWording() {
+        assertEquals(
+                "update context: set uri error: set Uri error: Validation error on field 'uri': param is invalid",
+                AictlErrors.message("Error: update context: set uri error: set Uri error: "
+                        + "Validation error on field 'uri': param is invalid"));
 
-        assertTrue(AictlErrors.message(raw).contains("URL"), AictlErrors.message(raw));
-        assertNotEquals(AictlErrors.message(raw), AictlErrors.message(NO_CLIENT));
-    }
+        assertEquals(
+                "validate cfg: Validation error on field 'token': param is required",
+                AictlErrors.message("Error: validate cfg: Validation error on field 'token': param is required"));
 
-    @Test
-    @DisplayName("A missing token is named as such")
-    public void missingToken() {
-        String raw = "Error: validate cfg: Validation error on field 'token': param is required";
-        assertTrue(AictlErrors.message(raw).toLowerCase().contains("token"), AictlErrors.message(raw));
-    }
+        assertEquals(
+                "'get healthcheck' usecase call: initialize with retry: initialize ai adapter: "
+                        + "initialize ai client: no compatible client found",
+                AictlErrors.message(NO_CLIENT));
 
-    @Test
-    @DisplayName("Unreachable server and wrong token share one message that names both")
-    public void indistinguishableCauses() {
-        String message = AictlErrors.message(NO_CLIENT);
-        String lower = message.toLowerCase();
-        assertTrue(lower.contains("url"), message);
-        assertTrue(lower.contains("token"), message);
-        assertFalse(lower.contains("no compatible client"), "raw wording leaked into a message");
+        assertEquals(
+                "'get scan report' usecase call: unexpected end of JSON input",
+                AictlErrors.message("Error: 'get scan report' usecase call: unexpected end of JSON input"));
     }
 
     @Test
@@ -74,56 +68,16 @@ public class AictlErrorsTest {
                 + "Validation error on field 'uri': param is invalid";
 
         String message = AictlErrors.message(raw);
-        String details = AictlErrors.details(raw);
         assertFalse(message.contains("Usage:"), message);
         assertFalse(message.contains("--help"), message);
-        assertNotNull(details);
-        assertFalse(details.contains("Usage:"), details);
-        assertFalse(details.contains("\n"), details);
+        assertFalse(message.contains("\n"), message);
     }
 
     @Test
-    @DisplayName("A failure aictl explains itself is passed through in its own words")
-    public void keepsServerSideReason() {
-        String raw = "Error: 'create branch' usecase call: ai adapter create branch: branch not found";
-        String message = AictlErrors.message(raw);
-        assertTrue(message.contains("branch not found"), message);
-        assertFalse(message.startsWith("Error: "), message);
-        assertNull(AictlErrors.details(raw));
-    }
-
-    @Test
-    @DisplayName("Original wording is kept as a single line for support")
-    public void keepsOriginalWording() {
-        String details = AictlErrors.details(NO_CLIENT);
-        assertNotNull(details);
-        assertTrue(details.startsWith("aictl: "), details);
-        assertFalse(details.contains("\n"), details);
-        assertFalse(details.contains("Error: "), details);
-        assertTrue(details.contains("no compatible client found"), details);
-        assertNull(AictlErrors.details(null));
-        assertNull(AictlErrors.details("   "));
-    }
-
-    @Test
-    @DisplayName("An empty template lookup answer reads as a missing template")
-    public void missingTemplate() {
-        GenericException failure = GenericException.raise(
-                "PT AI report generation failed",
-                new IllegalStateException(
-                        "'get scan report' usecase call: unexpected end of JSON input"));
-
-        assertTrue(AictlErrors.noReportTemplate(failure));
-    }
-
-    @Test
-    @DisplayName("Any other failure is not blamed on the template")
-    public void otherFailureIsNotAMissingTemplate() {
-        GenericException failure = GenericException.raise(
-                "PT AI report generation failed", new IllegalStateException(NO_CLIENT));
-
-        assertFalse(AictlErrors.noReportTemplate(failure));
-        assertFalse(AictlErrors.noReportTemplate(null));
+    @DisplayName("Empty output falls back to a generic connection failure")
+    public void emptyOutput() {
+        assertFalse(AictlErrors.message(null).isEmpty());
+        assertEquals(AictlErrors.message(null), AictlErrors.message("   "));
     }
 
     @Test

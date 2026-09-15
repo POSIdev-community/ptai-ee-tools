@@ -5,7 +5,10 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.RawData;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.Report;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.Sarif;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.*;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlReport;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlReportFilters;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.BundledBinary;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
@@ -54,13 +57,9 @@ public class ReportsTask extends AbstractTaskImpl {
         Reports.Locale locale = locale(report.getLocale());
         String path = scratchPath("report-" + scanBrief.getId() + "-" + UUID.randomUUID());
         try {
-            try {
-                client.getScanReport(
-                        scanBrief.getProjectId(), scanBrief.getId(), report.getTemplate(), locale,
-                        report.isIncludeDfd(), report.isIncludeGlossary(), report.getFilters(), path);
-            } catch (GenericException e) {
-                throw templateMissing(report.getTemplate(), e);
-            }
+            client.getScanReport(
+                    scanBrief.getProjectId(), scanBrief.getId(), report.getTemplate(), locale,
+                    report.isIncludeDfd(), report.isIncludeGlossary(), report.getFilters(), path);
 
             fileOps.saveArtifactFromScanHost(report.getFileName(), path);
         } finally {
@@ -119,20 +118,6 @@ public class ReportsTask extends AbstractTaskImpl {
         } finally {
             client.getEnvironment().delete(path);
         }
-    }
-
-    @NonNull
-    protected static GenericException templateMissing(
-            @NonNull final String template,
-            @NonNull final GenericException failure) {
-        if (!AictlErrors.noReportTemplate(failure)) {
-            return failure;
-        }
-
-        log.debug("PT AI report generation failed", failure);
-        return GenericException.raise(
-                "Report template '" + template + "' not found on PT AI server",
-                new IllegalStateException());
     }
 
     @NonNull

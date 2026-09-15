@@ -11,6 +11,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -40,6 +41,27 @@ public class ScanResultConverterTest extends BaseTest {
         }
     }
 
+    private static InputStream stream(final String name) {
+        return new ByteArrayInputStream(resource(name));
+    }
+
+    @Test
+    @DisplayName("A report saved with a UTF-8 BOM parses the same as one without")
+    public void parsesReportWithBom() {
+        byte[] plain = resource(EN);
+        byte[] bom = new byte[plain.length + 3];
+        bom[0] = (byte) 0xEF;
+        bom[1] = (byte) 0xBB;
+        bom[2] = (byte) 0xBF;
+        System.arraycopy(plain, 0, bom, 3, plain.length);
+
+        AieJsonReport expected = AieJsonReport.parse(new ByteArrayInputStream(plain));
+        AieJsonReport actual = AieJsonReport.parse(new ByteArrayInputStream(bom));
+        assertEquals(expected.getSchema(), actual.getSchema());
+        assertEquals(expected.getItems().size(), actual.getItems().size());
+        assertEquals(expected.getScanInfo(), actual.getScanInfo());
+    }
+
     private static ScanBrief brief() {
         return ScanBrief.builder()
                 .ptaiServerUrl("https://ai.example")
@@ -54,13 +76,13 @@ public class ScanResultConverterTest extends BaseTest {
 
     private static ScanResult convert() {
         return ScanResultConverter.convert(
-                brief(), AieJsonReport.parse(resource(EN)), AieJsonReport.parse(resource(RU)));
+                brief(), AieJsonReport.parse(stream(EN)), AieJsonReport.parse(stream(RU)));
     }
 
     @Test
     @DisplayName("Parse a report that contains escape sequences invalid for JSON")
     public void parseInvalidEscapes() {
-        AieJsonReport report = AieJsonReport.parse(resource(EN));
+        AieJsonReport report = AieJsonReport.parse(stream(EN));
         assertFalse(report.getItems().isEmpty());
         assertTrue(new String(resource(EN), StandardCharsets.UTF_8).contains("\\v"),
                 "Fixture is expected to keep an invalid escape sequence");
