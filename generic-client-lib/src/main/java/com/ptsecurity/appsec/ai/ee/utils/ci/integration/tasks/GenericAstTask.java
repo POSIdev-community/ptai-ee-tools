@@ -1,42 +1,29 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
-import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AgentInfo;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlReport;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.BranchInfo;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.ScanProgress;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.StageConverter;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.AieJsonReport;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.UnsupportedReportSchemaException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.UnsupportedReportSchemaException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings.SettingInfo.AST_JOB_POLL_INTERVAL;
 
@@ -436,7 +423,7 @@ public class GenericAstTask extends AbstractTaskImpl {
 
         try {
             client.getScanReport(scanBrief.getProjectId(), scanBrief.getId(), format.getValue(),
-                    locale, false, false, path);
+                    locale, false, false, null, path);
             return AieJsonReport.parse(client.getEnvironment().read(path));
         } finally {
             client.getEnvironment().delete(path);
