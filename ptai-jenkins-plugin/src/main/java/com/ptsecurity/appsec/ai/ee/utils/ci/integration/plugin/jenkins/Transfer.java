@@ -4,7 +4,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descripto
 import hudson.model.Describable;
 import jenkins.model.Jenkins;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.ToString;
 import org.kohsuke.stapler.DataBoundConstructor;
 

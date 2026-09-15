@@ -36,15 +36,16 @@ public class LocalBinaryStore implements BinaryStore {
     @Override
     public void installExecutable(@NonNull final String path, @NonNull final InputStream data) {
         File target = new File(path);
-        File folder = target.getParentFile();
+        File folder = target.getAbsoluteFile().getParentFile();
+        Path temp = null;
         try {
-            if (folder != null && !folder.isDirectory() && !folder.mkdirs() && !folder.isDirectory()) {
+            if (!folder.isDirectory() && !folder.mkdirs() && !folder.isDirectory()) {
                 throw GenericException.raise(
                         "Failed to create aictl folder",
                         new java.io.IOException(folder.getAbsolutePath()));
             }
 
-            Path temp = Files.createTempFile(folder.toPath(), "aictl-", ".tmp");
+            temp = Files.createTempFile(folder.toPath(), "aictl-", ".tmp");
             Files.copy(data, temp, StandardCopyOption.REPLACE_EXISTING);
             if (!temp.toFile().setExecutable(true, false)) {
                 log.debug("Failed to set executable permission on {}", temp);
@@ -65,6 +66,14 @@ public class LocalBinaryStore implements BinaryStore {
                 data.close();
             } catch (Exception e) {
                 log.debug("Failed to close bundled aictl stream", e);
+            }
+
+            if (temp != null) {
+                try {
+                    Files.deleteIfExists(temp);
+                } catch (Exception e) {
+                    log.debug("Failed to delete temporal file {}", temp, e);
+                }
             }
         }
     }

@@ -9,7 +9,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.I18nHelper;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -24,7 +23,6 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
-import static com.ptsecurity.appsec.ai.ee.scan.ScanDataPacked.Type.SCAN_BRIEF_DETAILED;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.BaseJsonChartDataModel.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 

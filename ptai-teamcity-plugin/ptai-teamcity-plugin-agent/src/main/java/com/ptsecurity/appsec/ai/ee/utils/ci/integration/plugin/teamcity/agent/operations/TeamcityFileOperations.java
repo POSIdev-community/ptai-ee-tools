@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.operations;
 
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AbstractFileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;

@@ -49,12 +49,6 @@ PtaiAbstractSettingsForm = OO.extend(BS.AbstractPasswordForm, {
                     return;
                 }
                 // As we do not implement "modify" event listener we need to show diagnostic messages even if error fields are already marked red
-                // if (err) return;
-
-                // If we are editing then no need to show TestConnectionDialog
-                // TODO Investigate if on-the-fly fields verification is required
-                // if ("modify" === mode) return;
-
                 let status = xml.getElementsByTagName("testConnectionResult")[0].textContent;
                 let success = status && status.includes("SUCCESS");
 
@@ -225,7 +219,6 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
     url: null,
 
     formElement: function() {
-        // return $('ptai-scan-settings');
         return $('editBuildTypeForm');
     },
 

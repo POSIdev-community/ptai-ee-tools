@@ -112,7 +112,6 @@ public class ChartDataModel extends BaseJsonChartDataModel {
         List<Series> vulnerabilityTypeSeries = new ArrayList<>();
         for (Level level : Level.values()) {
             // SCA isues may have NONE vulnerability level so we can't ignore them
-            // if (Level.NONE.equals(level)) continue;
             legend.data.add(I18nHelper.i18n(level));
             ChartDataModel.Series series = Series.builder()
                     .name(I18nHelper.i18n(level))

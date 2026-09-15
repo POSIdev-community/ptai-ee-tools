@@ -4,6 +4,8 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 
+import java.io.InputStream;
+
 public interface AictlEnvironment {
     @NonNull
     String binary() throws GenericException;
@@ -21,7 +23,7 @@ public interface AictlEnvironment {
     String write(@NonNull final String name, @NonNull final byte[] data) throws GenericException;
 
     @NonNull
-    byte[] read(@NonNull final String path) throws GenericException;
+    InputStream read(@NonNull final String path) throws GenericException;
 
     void delete(@NonNull final String path);
 

@@ -171,17 +171,6 @@ public class AictlClient {
         return branches;
     }
 
-    public UUID searchBranchId(
-            @NonNull final UUID projectId,
-            @NonNull final String branchName) throws GenericException {
-        AictlResult result = checked(
-                "PT AI project branch search failed",
-                command("get", "branches", exactMatch(branchName), "-p", projectId.toString(), "-q"));
-
-        List<UUID> ids = uuids(result.getStdout());
-        return ids.isEmpty() ? null : ids.get(0);
-    }
-
     @NonNull
     public UUID createBranch(
             @NonNull final UUID projectId,
@@ -359,15 +348,6 @@ public class AictlClient {
     }
 
     @NonNull
-    public String getScanStatisticJson(
-            @NonNull final UUID projectId,
-            @NonNull final UUID scanResultId) throws GenericException {
-        return checked(
-                "PT AI project scan statistics read failed",
-                command("get", "scan", "statistic", scanResultId.toString(), "-p", projectId.toString(), "--json")).getStdout();
-    }
-
-    @NonNull
     public Policy.State checkPolicies(
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId) throws GenericException {
@@ -489,13 +469,17 @@ public class AictlClient {
 
         builder.arg("-u").arg(connectionSettings.getUrl());
         builder.arg("-t").arg(connectionSettings.getCredentials().getToken());
+
         if (connectionSettings.isInsecure()) {
             builder.arg("--tls-skip");
-        }
-
-        String caCerts = caCertsFile();
-        if (caCerts != null) {
-            builder.arg("--cacert").arg(caCerts);
+            if (StringUtils.isNotEmpty(connectionSettings.getCaCertsPem())) {
+                log.debug("TLS verification is skipped, so CA certificates from plugin settings are not passed to aictl");
+            }
+        } else {
+            String caCerts = caCertsFile();
+            if (caCerts != null) {
+                builder.arg("--cacert").arg(caCerts);
+            }
         }
 
         if (verbose) {
@@ -539,8 +523,7 @@ public class AictlClient {
 
     @NonNull
     protected static GenericException failure(@NonNull final String message, final String raw) {
-        return GenericException.raise(
-                message, AictlErrors.details(raw), new IllegalStateException(AictlErrors.message(raw)));
+        return GenericException.raise(message, new IllegalStateException(AictlErrors.message(raw)));
     }
 
     @NonNull

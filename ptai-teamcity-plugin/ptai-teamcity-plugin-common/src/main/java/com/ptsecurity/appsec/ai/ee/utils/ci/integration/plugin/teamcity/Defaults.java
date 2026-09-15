@@ -50,8 +50,6 @@ public class Defaults {
      */
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "";
 
-    public static final String BRANCH_SETTINGS_EXISTING_BRANCH_NAME = "";
-
     /**
      * See {@link Params#SCAN_LABEL}
      */

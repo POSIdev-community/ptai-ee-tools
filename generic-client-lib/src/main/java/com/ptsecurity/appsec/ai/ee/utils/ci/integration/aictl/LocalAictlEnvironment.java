@@ -6,11 +6,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -115,9 +111,10 @@ public class LocalAictlEnvironment implements AictlEnvironment {
     }
 
     @Override
-    public byte[] read(@NonNull final String path) throws GenericException {
+    @NonNull
+    public InputStream read(@NonNull final String path) throws GenericException {
         try {
-            return Files.readAllBytes(Paths.get(path));
+            return Files.newInputStream(Paths.get(path));
         } catch (IOException e) {
             throw GenericException.raise("Failed to read " + path, e);
         }

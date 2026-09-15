@@ -41,10 +41,6 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
         return Plugin.getPluginUrl() + "/icons/logo.svg";
     }
 
-    public String getLogo48() {
-        return Plugin.getPluginUrl() + "/icons/logo.48x48.svg";
-    }
-
     @Override
     public String getDisplayName() {
         return Resources.i18n_ast_result_charts_scan_label();

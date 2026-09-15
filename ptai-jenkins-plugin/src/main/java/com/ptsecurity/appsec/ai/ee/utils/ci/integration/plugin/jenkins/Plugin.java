@@ -52,7 +52,6 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_empty;
-import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @Slf4j
 @ToString
@@ -288,27 +287,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
         return Jenkins.get().getDescriptorByType(PluginDescriptor.class);
     }
 
-    protected static String getCurrentItem(Run<?, ?> run, String currentItem){
-        String runItem = null;
-        String curItem = trimToNull(currentItem);
-        if(run != null && run.getParent() != null)
-            runItem = trimToNull(run.getParent().getFullName());
-
-        if(runItem != null && curItem != null) {
-            if(runItem.equals(curItem)) {
-                return runItem;
-            } else {
-                throw new IllegalArgumentException(String.format("Current Item ('%s') and Parent Item from Run ('%s') differ!", curItem, runItem));
-            }
-        } else if(runItem != null) {
-            return runItem;
-        } else if(curItem != null) {
-            return curItem;
-        } else {
-            throw new IllegalArgumentException("Both null, Run and Current Item!");
-        }
-    }
-
     protected List<Action> projectActions;
 
     @Override
@@ -316,8 +294,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
         if (null == projectActions) {
             projectActions = new ArrayList<>();
-            // projectActions.add(new AstJobMultipleResults(project));
-            // projectActions.add(new AstJobTableResults(project));
         }
         return projectActions;
     }
@@ -329,7 +305,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
             String branchName = ((CustomNameBranchSettings) branchSettings).getBranchName();
             log.trace("Custom branch name before macro replacement is {}", branchName);
             branchName = Util.replaceMacro(branchName, buildInfo.getEnvVars());
-            log.trace("Custom branch name after macro replacement is {}", projectName);
+            log.trace("Custom branch name after macro replacement is {}", branchName);
             return branchName;
         }
 

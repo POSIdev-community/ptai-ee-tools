@@ -17,6 +17,8 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -274,8 +276,9 @@ public class GenericAstTask extends AbstractTaskImpl {
                     client.getEnvironment().scratchDir(), "scan-settings-" + scanResultId + ".aiproj");
 
             client.getScanAiproj(projectId, scanResultId, path);
-            byte[] aiproj = client.getEnvironment().read(path);
-            appendAiproj(builder, aiproj);
+            try (InputStream aiproj = client.getEnvironment().read(path)) {
+                appendAiproj(builder, aiproj);
+            }
         } catch (Exception e) {
             log.warn("PT AI scan settings load failed, scan results will carry no settings details");
             log.debug("Exception details", e);
@@ -290,7 +293,7 @@ public class GenericAstTask extends AbstractTaskImpl {
 
     private void appendAiproj(
             @NonNull final ScanBrief.ScanSettings.ScanSettingsBuilder builder,
-            final byte[] aiproj) throws Exception {
+            @NonNull final InputStream aiproj) throws Exception {
         JsonNode root = BaseJsonHelper.createObjectMapper().readTree(aiproj);
 
         List<ScanBrief.ScanSettings.Language> languages = new ArrayList<>();
@@ -366,7 +369,11 @@ public class GenericAstTask extends AbstractTaskImpl {
         try {
             client.getScanReport(scanBrief.getProjectId(), scanBrief.getId(), format.getValue(),
                     locale, false, false, null, path);
-            return AieJsonReport.parse(client.getEnvironment().read(path));
+            try (InputStream report = client.getEnvironment().read(path)) {
+                return AieJsonReport.parse(report);
+            } catch (IOException e) {
+                throw GenericException.raise("Failed to close " + path, e);
+            }
         } finally {
             client.getEnvironment().delete(path);
         }

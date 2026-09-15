@@ -1,8 +1,9 @@
 package com.ptsecurity.appsec.ai.ee.scan;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter

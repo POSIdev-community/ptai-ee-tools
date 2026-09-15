@@ -1,11 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl;
 
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlEnvironment;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlResult;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Command;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.LineOutputStream;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Platform;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Provisioner;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import hudson.FilePath;
@@ -15,10 +10,10 @@ import hudson.model.Node;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -125,11 +120,13 @@ public class JenkinsAictlEnvironment implements AictlEnvironment {
     }
 
     @Override
-    public byte[] read(@NonNull final String path) throws GenericException {
-        try (java.io.InputStream stream = new FilePath(workspace.getChannel(), path).read()) {
-            ByteArrayOutputStream result = new ByteArrayOutputStream();
-            IOUtils.copy(stream, result);
-            return result.toByteArray();
+    @NonNull
+    public InputStream read(@NonNull final String path) throws GenericException {
+        try {
+            return new FilePath(workspace.getChannel(), path).read();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw GenericException.raise("Reading " + path + " from build agent interrupted", e);
         } catch (Exception e) {
             throw GenericException.raise("Failed to read " + path + " from build agent", e);
         }
