@@ -43,6 +43,8 @@ public class BaseJsonChartDataModel {
         TYPE_COLORS.put(BaseIssue.Type.PYGREP, 0x810fc2);
         TYPE_COLORS.put(BaseIssue.Type.SCA, 0xa7ffd7);
         TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT_SCA, 0xffb8ff);
+        TYPE_COLORS.put(BaseIssue.Type.SECRET, 0x00a2a5);
+        TYPE_COLORS.put(BaseIssue.Type.MALICIOUSCODE, 0xb3001b);
 
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.AUTO_APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
@@ -88,6 +90,11 @@ public class BaseJsonChartDataModel {
         SCANSTAGE_COLORS.put(Stage.FAILED, 0xffffff);
         SCANSTAGE_COLORS.put(Stage.ABORTED, 0xffffff);
         SCANSTAGE_COLORS.put(Stage.UNKNOWN, 0xffffff);
+    }
+
+    public static String typeColor(final BaseIssue.Type type) {
+        Integer color = TYPE_COLORS.get(type);
+        return "#" + Integer.toHexString(color == null ? LEVEL_COLORS.get(BaseIssue.Level.NONE) : color);
     }
 
     public static int createShade(final float index, final float total) {

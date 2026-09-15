@@ -236,7 +236,7 @@ public class AstJobTableResults implements Action {
                     = ChartDataModel.Series.builder()
                     .name(I18nHelper.i18n(value))
                     .itemStyle(ChartDataModel.Series.DataItem.ItemStyle.builder()
-                            .color("#" + Integer.toHexString(TYPE_COLORS.get(value)))
+                            .color(typeColor(value))
                             .build())
                     .build();
             // Prepare series to fill with data

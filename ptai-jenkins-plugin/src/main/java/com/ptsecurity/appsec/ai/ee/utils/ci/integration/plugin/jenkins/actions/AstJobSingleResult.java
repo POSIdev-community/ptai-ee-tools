@@ -223,7 +223,7 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
             PieChartDataModel.Series.DataItem typeItem = PieChartDataModel.Series.DataItem.builder()
                     .name(I18nHelper.i18n(type))
                     .itemStyle(PieChartDataModel.Series.DataItem.ItemStyle.builder()
-                            .color("#" + Integer.toHexString(TYPE_COLORS.get(type)))
+                            .color(typeColor(type))
                             .build())
                     .value(count)
                     .build();
