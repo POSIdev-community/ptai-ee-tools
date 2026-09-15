@@ -7,11 +7,11 @@ import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.serversettings.ServerSettings;
@@ -24,9 +24,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
@@ -50,18 +48,6 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
         }
 
         return Validator.doCheckFieldUrl(value, Resources.i18n_ast_settings_server_url_message_invalid());
-    }
-
-    public static String lowerFirstLetter(@NonNull final String text) {
-        if (StringUtils.isEmpty(text)) {
-            return "";
-        }
-
-        if (1 == text.length()) {
-            return text.toLowerCase();
-        }
-
-        return String.valueOf(text.charAt(0)).toLowerCase() + text.substring(1);
     }
 
     public FormValidation doTestServer(

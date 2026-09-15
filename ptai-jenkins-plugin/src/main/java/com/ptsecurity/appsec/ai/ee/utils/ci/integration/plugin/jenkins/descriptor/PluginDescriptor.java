@@ -205,11 +205,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
         return BranchSettings.getAll();
     }
 
-    @SuppressWarnings("unused")
-    public static ScanLabelSettings.ScanLabelSettingsDescriptor getDefaulScanLabelSettingsDescriptor() {
-        return Jenkins.get().getDescriptorByType(ScanLabelSettings.ScanLabelSettingsDescriptor.class);
-    }
-
     public static List<WorkMode.WorkModeDescriptor> getWorkModeDescriptors() {
         return WorkMode.getAll();
     }

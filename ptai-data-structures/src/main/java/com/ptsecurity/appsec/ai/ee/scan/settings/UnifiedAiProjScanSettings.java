@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.*;
 import com.networknt.schema.Error;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.TempFile;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
@@ -297,10 +296,6 @@ public abstract class UnifiedAiProjScanSettings {
             );
         }
         return result.getSettings();
-    }
-
-    public Boolean hasPath(@NonNull final String path) {
-        return !N(path).isMissingNode();
     }
 
     protected Boolean B(@NonNull final String path) {

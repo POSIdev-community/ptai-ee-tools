@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
 
 import java.io.PrintStream;
 
@@ -69,16 +68,6 @@ public class GenericException extends RuntimeException {
         super(message);
         this.details = details;
         this.initCause(inner);
-    }
-
-    public static String getApiReason(@NonNull final Throwable e) {
-        if (isNotApi(e)) return null;
-        int code = on(e).call("getCode").get();
-        if (0 != code) {
-            String reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, null);
-            return String.format("%s (%d)", reason, code);
-        } else
-            return null;
     }
 
     public static Integer getCode(@NonNull final Throwable error) {

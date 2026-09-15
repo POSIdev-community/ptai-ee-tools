@@ -91,7 +91,6 @@ public abstract class BaseIssue {
     @JsonProperty("issueTypeKey")
     public String getIssueTypeKey() {
         if (null == issueTypeKey) issueTypeKey = getIssueTypeKey(this);
-        // return getIssueTypeKey(this);
         return issueTypeKey;
     }
 

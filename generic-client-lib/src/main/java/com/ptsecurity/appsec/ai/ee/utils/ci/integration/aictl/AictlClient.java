@@ -171,17 +171,6 @@ public class AictlClient {
         return branches;
     }
 
-    public UUID searchBranchId(
-            @NonNull final UUID projectId,
-            @NonNull final String branchName) throws GenericException {
-        AictlResult result = checked(
-                "PT AI project branch search failed",
-                command("get", "branches", exactMatch(branchName), "-p", projectId.toString(), "-q"));
-
-        List<UUID> ids = uuids(result.getStdout());
-        return ids.isEmpty() ? null : ids.get(0);
-    }
-
     @NonNull
     public UUID createBranch(
             @NonNull final UUID projectId,
@@ -356,15 +345,6 @@ public class AictlClient {
                 .map(String::trim)
                 .filter(line -> !line.isEmpty())
                 .collect(Collectors.toList());
-    }
-
-    @NonNull
-    public String getScanStatisticJson(
-            @NonNull final UUID projectId,
-            @NonNull final UUID scanResultId) throws GenericException {
-        return checked(
-                "PT AI project scan statistics read failed",
-                command("get", "scan", "statistic", scanResultId.toString(), "-p", projectId.toString(), "--json")).getStdout();
     }
 
     @NonNull

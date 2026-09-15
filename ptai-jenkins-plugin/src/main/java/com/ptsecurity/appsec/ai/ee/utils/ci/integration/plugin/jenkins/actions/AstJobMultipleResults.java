@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.BaseJsonChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -16,7 +15,6 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ptsecurity.appsec.ai.ee.scan.ScanDataPacked.Type.SCAN_BRIEF_DETAILED;
 
 /**
  * Class implements project-scope basic chart generation that is shown at project page
