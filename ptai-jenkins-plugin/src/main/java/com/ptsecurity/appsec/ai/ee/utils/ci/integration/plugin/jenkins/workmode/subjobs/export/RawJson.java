@@ -20,10 +20,14 @@ public class RawJson extends Export {
     @Getter
     private final String filter;
 
+    @Getter
+    private final String locale;
+
     @DataBoundConstructor
-    public RawJson(final String fileName, final String filter) {
+    public RawJson(final String fileName, final String filter, final String locale) {
         this.fileName = fileName;
         this.filter = filter;
+        this.locale = locale;
     }
 
     @Override
@@ -32,6 +36,7 @@ public class RawJson extends Export {
         String filter = job.replaceMacro(this.filter);
         Reports.RawData rawData = Reports.RawData.builder()
                 .fileName(fileName)
+                .locale(Reports.Locale.of(locale))
                 .filters(StringUtils.isNotEmpty(filter) ? ReportUtils.validateJsonFilter(filter) : null)
                 .build();
         new com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson(rawData).attach(job);

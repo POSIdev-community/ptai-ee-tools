@@ -20,10 +20,14 @@ public class Sarif extends Export {
     @Getter
     private final String filter;
 
+    @Getter
+    private final String locale;
+
     @DataBoundConstructor
-    public Sarif(final String fileName, final String filter) {
+    public Sarif(final String fileName, final String filter, final String locale) {
         this.fileName = fileName;
         this.filter = filter;
+        this.locale = locale;
     }
 
     @Override
@@ -32,6 +36,7 @@ public class Sarif extends Export {
         String filter = job.replaceMacro(this.filter);
         Reports.Sarif sarif = Reports.Sarif.builder()
                 .fileName(fileName)
+                .locale(Reports.Locale.of(locale))
                 .filters(StringUtils.isNotEmpty(filter) ? ReportUtils.validateJsonFilter(filter) : null)
                 .build();
         new com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sarif(sarif).attach(job);

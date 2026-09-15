@@ -4,6 +4,7 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.*;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlErrors;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlReport;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
@@ -52,12 +53,16 @@ public class ReportsTask extends AbstractTaskImpl {
                     "reports itself and aictl passes no filters to it", report.getTemplate());
         }
 
-        Reports.Locale locale = report.getLocale() == null ? Reports.Locale.EN : report.getLocale();
+        Reports.Locale locale = locale(report.getLocale());
         String path = scratchPath("report-" + scanBrief.getId() + "-" + UUID.randomUUID());
         try {
-            client.getScanReport(
-                    scanBrief.getProjectId(), scanBrief.getId(), report.getTemplate(), locale,
-                    report.isIncludeDfd(), report.isIncludeGlossary(), path);
+            try {
+                client.getScanReport(
+                        scanBrief.getProjectId(), scanBrief.getId(), report.getTemplate(), locale,
+                        report.isIncludeDfd(), report.isIncludeGlossary(), path);
+            } catch (GenericException e) {
+                throw templateMissing(report.getTemplate(), e);
+            }
 
             fileOps.saveArtifactFromScanHost(report.getFileName(), path);
         } finally {
@@ -76,7 +81,7 @@ public class ReportsTask extends AbstractTaskImpl {
                 scanBrief.getProjectId(), scanBrief.getId());
 
         warnAboutIgnoredFilters(rawData.getFilters(), "raw JSON");
-        downloadAsArtifact(scanBrief, AictlReport.JSON, rawData.getFileName(), fileOps);
+        downloadAsArtifact(scanBrief, AictlReport.JSON, locale(rawData.getLocale()), rawData.getFileName(), fileOps);
 
         fine("Finished: raw JSON data export for project id: %s, scan result id: %s",
                 scanBrief.getProjectId(), scanBrief.getId());
@@ -90,7 +95,7 @@ public class ReportsTask extends AbstractTaskImpl {
                 scanBrief.getProjectId(), scanBrief.getId());
 
         warnAboutIgnoredFilters(sarif.getFilters(), "SARIF");
-        downloadAsArtifact(scanBrief, AictlReport.SARIF, sarif.getFileName(), fileOps);
+        downloadAsArtifact(scanBrief, AictlReport.SARIF, locale(sarif.getLocale()), sarif.getFileName(), fileOps);
 
         fine("Finished: SARIF report export for project id: %s, scan result id: %s",
                 scanBrief.getProjectId(), scanBrief.getId());
@@ -99,6 +104,7 @@ public class ReportsTask extends AbstractTaskImpl {
     protected void downloadAsArtifact(
             @NonNull final ScanBrief scanBrief,
             @NonNull final AictlReport report,
+            @NonNull final Reports.Locale locale,
             @NonNull final String fileName,
             @NonNull final FileOperations fileOps) throws GenericException {
         String path = scratchPath(report.getValue() + "-" + scanBrief.getId() + "-" + UUID.randomUUID());
@@ -106,12 +112,31 @@ public class ReportsTask extends AbstractTaskImpl {
         try {
             client.getScanReport(
                     scanBrief.getProjectId(), scanBrief.getId(), report.getValue(),
-                    Reports.Locale.EN, false, false, path);
+                    locale, false, false, path);
 
             fileOps.saveArtifactFromScanHost(fileName, path);
         } finally {
             client.getEnvironment().delete(path);
         }
+    }
+
+    @NonNull
+    protected static GenericException templateMissing(
+            @NonNull final String template,
+            @NonNull final GenericException failure) {
+        if (!AictlErrors.noReportTemplate(failure)) {
+            return failure;
+        }
+
+        log.debug("PT AI report generation failed", failure);
+        return GenericException.raise(
+                "Report template '" + template + "' not found on PT AI server",
+                new IllegalStateException());
+    }
+
+    @NonNull
+    protected static Reports.Locale locale(final Reports.Locale locale) {
+        return locale == null ? Reports.Locale.EN : locale;
     }
 
     protected void warnAboutIgnoredFilters(final Reports.IssuesFilter filters, @NonNull final String what) {

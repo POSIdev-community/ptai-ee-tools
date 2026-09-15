@@ -6,7 +6,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Locale;
 import java.util.Map;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.FALSE;
@@ -28,6 +27,7 @@ public class ReportsHelper {
             }
             if (StringUtils.isNotEmpty(data.get(REPORTING_REPORT_FILTER)))
                 report.setFilters(ReportUtils.validateJsonFilter(data.get(REPORTING_REPORT_FILTER)));
+            report.setLocale(Reports.Locale.of(data.get(REPORTING_REPORT_LOCALE)));
             res.getReport().add(report);
         }
         if (TRUE.equals(data.getOrDefault(REPORTING_RAWDATA, Defaults.REPORTING_RAWDATA))) {
@@ -35,6 +35,7 @@ public class ReportsHelper {
             report.setFileName(data.get(REPORTING_RAWDATA_FILE));
             if (StringUtils.isNotEmpty(data.get(REPORTING_RAWDATA_FILTER)))
                 report.setFilters(ReportUtils.validateJsonFilter(data.get(REPORTING_RAWDATA_FILTER)));
+            report.setLocale(Reports.Locale.of(data.get(REPORTING_RAWDATA_LOCALE)));
             res.getRaw().add(report);
         }
         if (TRUE.equals(data.getOrDefault(REPORTING_SARIF, Defaults.REPORTING_SARIF))) {
@@ -42,6 +43,7 @@ public class ReportsHelper {
             report.setFileName(data.get(REPORTING_SARIF_FILE));
             if (StringUtils.isNotEmpty(data.get(REPORTING_SARIF_FILTER)))
                 report.setFilters(ReportUtils.validateJsonFilter(data.get(REPORTING_SARIF_FILTER)));
+            report.setLocale(Reports.Locale.of(data.get(REPORTING_SARIF_LOCALE)));
             res.getSarif().add(report);
         }
         if (TRUE.equals(data.getOrDefault(REPORTING_JSON, Defaults.REPORTING_JSON)))
@@ -51,18 +53,11 @@ public class ReportsHelper {
     }
 
     public static String getDefaultTemplate() {
-        return Reports.Locale.RU == getDefaultLocale()
-                ? "Отчет по результатам сканирования"
-                : "Scan results report";
+        return getDefaultTemplate(Reports.Locale.DEFAULT.getValue());
     }
 
-    private static Reports.Locale getDefaultLocale() {
-        String country = System.getProperty("user.country");
-        String language = System.getProperty("user.language");
-        Locale locale = new Locale(language, country);
-        if (locale.getLanguage().equalsIgnoreCase(Reports.Locale.RU.name()))
-            return Reports.Locale.RU;
-        else
-            return Reports.Locale.EN;
+    public static String getDefaultTemplate(final String locale) {
+        return Reports.Report.DEFAULT_TEMPLATE_NAME.get(Reports.Locale.of(locale));
     }
+
 }

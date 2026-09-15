@@ -108,6 +108,21 @@ public class Labels {
     public static final String REPORTING_REPORT_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_label();
 
     /**
+     * See {@link Params#REPORTING_REPORT_LOCALE}
+     */
+    public static final String REPORTING_REPORT_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label();
+
+    /**
+     * See {@link Params#REPORTING_RAWDATA_LOCALE}
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label();
+
+    /**
+     * See {@link Params#REPORTING_SARIF_LOCALE}
+     */
+    public static final String REPORTING_SARIF_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label();
+
+    /**
      * See {@link Params#REPORTING_RAWDATA_FILE}
      */
     public static final String REPORTING_RAWDATA_FILE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_rawjson_file_label();

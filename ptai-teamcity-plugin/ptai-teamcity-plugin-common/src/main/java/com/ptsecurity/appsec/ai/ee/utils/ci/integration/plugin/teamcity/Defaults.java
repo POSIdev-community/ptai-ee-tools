@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity;
 
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import lombok.NonNull;
@@ -178,6 +179,11 @@ public class Defaults {
     public static final String REPORTING_REPORT_FILTER = EMPTY;
 
     /**
+     * See {@link Params#REPORTING_REPORT_LOCALE}
+     */
+    public static final String REPORTING_REPORT_LOCALE = Reports.Locale.DEFAULT.getValue();
+
+    /**
      * See {@link Params#REPORTING_RAWDATA_FILE}
      */
     public static final String REPORTING_RAWDATA_FILE = "report.json";
@@ -186,6 +192,11 @@ public class Defaults {
      * See {@link Params#REPORTING_RAWDATA_FILTER}
      */
     public static final String REPORTING_RAWDATA_FILTER = EMPTY;
+
+    /**
+     * See {@link Params#REPORTING_RAWDATA_LOCALE}
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = Reports.Locale.DEFAULT.getValue();
 
     /**
      * See {@link Params#REPORTING_SARIF_FILE}
@@ -197,6 +208,11 @@ public class Defaults {
      */
 
     public static final String REPORTING_SARIF_FILTER = EMPTY;
+
+    /**
+     * See {@link Params#REPORTING_SARIF_LOCALE}
+     */
+    public static final String REPORTING_SARIF_LOCALE = Reports.Locale.DEFAULT.getValue();
 
     /**
      * See {@link Params#REPORTING_JSON_SETTINGS}
