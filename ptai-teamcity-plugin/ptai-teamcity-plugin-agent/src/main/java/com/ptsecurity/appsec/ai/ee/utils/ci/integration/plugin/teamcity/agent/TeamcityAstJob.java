@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent;
 
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.LocalAictlEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.operations.TeamcityAstOperations;
@@ -35,10 +36,12 @@ public class TeamcityAstJob extends GenericAstJob implements TextOutput {
     @NonNull
     private ArtifactsWatcher artifactsWatcher;
 
-    protected String policy;
-
     @Override
     protected void init() throws GenericException {
+        environment = new LocalAictlEnvironment(
+                agent.getAgentConfiguration().getAgentToolsDirectory(),
+                agent.getBuildTempDirectory().toPath().resolve("ptai-aictl").toFile());
+
         astOps = TeamcityAstOperations.builder()
                 .owner(this)
                 .build();

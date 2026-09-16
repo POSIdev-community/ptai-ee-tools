@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 @Slf4j
 @SuperBuilder
@@ -31,6 +30,10 @@ public abstract class AbstractFileOperations implements FileOperations {
         log.trace("Started: save in-memory data as build artifact {}. Data is {} bytes long", name, safeData.length);
         saveInMemoryData(name, safeData);
         log.trace("Finished: save in-memory data as build artifact {}. Data is {} bytes long", name, safeData.length);
+    }
+
+    public void saveArtifactFromScanHost(@NonNull String name, @NonNull String path) {
+        saveArtifact(name, new File(path));
     }
 
     protected abstract void saveInMemoryData(@NonNull String name, byte[] data);

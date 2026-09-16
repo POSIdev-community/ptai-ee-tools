@@ -37,7 +37,7 @@ public class Sarif extends Export {
     public void execute(@NonNull ScanBrief scanBrief) throws GenericException {
         ReportsTask reportsTask = new ReportsTask(owner.getClient());
         try {
-            reportsTask.exportSarif(scanBrief.getProjectId(), scanBrief.getId(), sarif, owner.getFileOps());
+            reportsTask.exportSarif(scanBrief, sarif, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

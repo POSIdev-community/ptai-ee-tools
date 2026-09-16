@@ -135,12 +135,6 @@ public class Params {
     public static final String REPORTING_SARIF = PARAM("ReportingSarif");
 
     /**
-     * If this field value equals to {@link Constants#TRUE} then raw vulnerabilities data will be exported as
-     * SonarQube GIIF JSON file. User also need to provide output file name
-     */
-    public static final String REPORTING_SONARGIIF = PARAM("ReportingSonarGiif");
-
-    /**
      * If this field value equals to {@link Constants#TRUE} then JSON-defined
      * reports and data exports will be done
      */
@@ -165,6 +159,12 @@ public class Params {
     public static final String REPORTING_REPORT_FILTER = PARAM("ReportingReportFilter");
 
     /**
+     * If {@link Params#REPORTING_REPORT} is on then this field is to
+     * contain the language PT AI renders the report in
+     */
+    public static final String REPORTING_REPORT_LOCALE = PARAM("ReportingReportLocale");
+
+    /**
      * If {@link Params#REPORTING_RAWDATA} is on then this field is to
      * contain name of the file where raw AST data will be saved to
      */
@@ -175,6 +175,12 @@ public class Params {
      * contain JSON filter to define vulnerabilities to be included in the generated raw data export file
      */
     public static final String REPORTING_RAWDATA_FILTER = PARAM("ReportingRawDataFilter");
+
+    /**
+     * If {@link Params#REPORTING_RAWDATA} is on then this field is to
+     * contain the language PT AI renders the exported data in
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = PARAM("ReportingRawDataLocale");
 
     /**
      * If {@link Params#REPORTING_SARIF} is on then this field is to
@@ -189,16 +195,10 @@ public class Params {
     public static final String REPORTING_SARIF_FILTER = PARAM("ReportingSarifFilter");
 
     /**
-     * If {@link Params#REPORTING_SONARGIIF} is on then this field is to
-     * contain name of the file where SonarQube GIIF JSON data will be saved to
+     * If {@link Params#REPORTING_SARIF} is on then this field is to
+     * contain the language PT AI renders the exported data in
      */
-    public static final String REPORTING_SONARGIIF_FILE = PARAM("ReportingSonarGiifFile");
-
-    /**
-     * If {@link Params#REPORTING_SONARGIIF} is on then this field may
-     * contain JSON filter to define vulnerabilities to be included in the generated SonarQube GIIF export file
-     */
-    public static final String REPORTING_SONARGIIF_FILTER = PARAM("ReportingSonarGiifFilter");
+    public static final String REPORTING_SARIF_LOCALE = PARAM("ReportingSarifLocale");
 
     /**
      * If {@link Params#REPORTING_JSON} is on then this field is to

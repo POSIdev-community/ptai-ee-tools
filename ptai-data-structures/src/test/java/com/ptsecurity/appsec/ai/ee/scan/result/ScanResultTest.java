@@ -32,6 +32,9 @@ public class ScanResultTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
 
             // this checks not work since staticCodeAnalysis was added (v470)
             // if want to fix need change resources generator generateRestApiDataStructures based on this versions
@@ -65,6 +68,9 @@ public class ScanResultTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
 
             // this checks not work since staticCodeAnalysis was added (v470)
             // if want to fix need change resources generator generateRestApiDataStructures based on this versions
@@ -98,6 +104,10 @@ public class ScanResultTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
+
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_SMOKE);
             String json = getResource7ZipString("json/scan/result/" + version.name().toLowerCase() + "/" + projectTemplate.getName() + ".json.7z");
             assertFalse(StringUtils.isEmpty(json));

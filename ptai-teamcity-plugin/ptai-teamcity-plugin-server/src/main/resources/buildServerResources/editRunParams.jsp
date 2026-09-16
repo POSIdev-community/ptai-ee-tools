@@ -88,6 +88,7 @@
         var ptaiReportingReportFieldRows = [
             'row_${REPORTING_REPORT_FILE}',
             'row_${REPORTING_REPORT_TEMPLATE}',
+            'row_${REPORTING_REPORT_LOCALE}',
             'row_${REPORTING_REPORT_DATAFLOW}',
             'row_${REPORTING_REPORT_SUMMARY}',
             'row_${REPORTING_REPORT_FILTER}' ];
@@ -100,9 +101,25 @@
             BS.MultilineProperties.updateVisible();
         };
 
+        var ptaiDefaultReportTemplates = {
+            '${REPORTING_LOCALE_ENGLISH}': '${DEFAULT_REPORTING_REPORT_TEMPLATE_ENGLISH}',
+            '${REPORTING_LOCALE_RUSSIAN}': '${DEFAULT_REPORTING_REPORT_TEMPLATE_RUSSIAN}'
+        };
+
+        ptaiReportingReportLocaleChange = function () {
+            let template = $('${REPORTING_REPORT_TEMPLATE}');
+            let name = template.value.trim();
+            let isDefaultName = false;
+            for (let locale in ptaiDefaultReportTemplates)
+                isDefaultName = isDefaultName || ptaiDefaultReportTemplates[locale] === name;
+            if (name !== '' && !isDefaultName) return;
+            template.value = ptaiDefaultReportTemplates[$('${REPORTING_REPORT_LOCALE}').value] || name;
+        };
+
         // Array of table row identifiers that are to be shown if raw data export option is checked
         var ptaiReportingRawDataFieldRows = [
             'row_${REPORTING_RAWDATA_FILE}',
+            'row_${REPORTING_RAWDATA_LOCALE}',
             'row_${REPORTING_RAWDATA_FILTER}' ];
 
         ptaiReportingRawDataShowHide = function (show) {
@@ -116,6 +133,7 @@
         // Array of table row identifiers that are to be shown if SARIF report export option is checked
         var ptaiReportingSarifFieldRows = [
             'row_${REPORTING_SARIF_FILE}',
+            'row_${REPORTING_SARIF_LOCALE}',
             'row_${REPORTING_SARIF_FILTER}' ];
 
         ptaiReportingSarifShowHide = function (show) {
@@ -127,17 +145,6 @@
         };
 
         // Array of table row identifiers that are to be shown if SARIF report export option is checked
-        var ptaiReportingSonarGiifFieldRows = [
-            'row_${REPORTING_SONARGIIF_FILE}',
-            'row_${REPORTING_SONARGIIF_FILTER}' ];
-
-        ptaiReportingSonarGiifShowHide = function (show) {
-            if (true == show)
-                BS.Util.show(...ptaiReportingSonarGiifFieldRows);
-            else
-                BS.Util.hide(...ptaiReportingSonarGiifFieldRows);
-            BS.MultilineProperties.updateVisible();
-        };
 
         ptaiReportingJsonShowHide = function (show) {
             if (true == show)
@@ -159,9 +166,6 @@
             ptaiReportingSarifShowHide($('${REPORTING_SARIF}').checked)
         };
 
-        ptaiReportingSonarGiifClick = function () {
-            ptaiReportingSonarGiifShowHide($('${REPORTING_SONARGIIF}').checked)
-        };
 
         ptaiReportingJsonClick = function () {
             ptaiReportingJsonShowHide($('${REPORTING_JSON}').checked)
@@ -173,7 +177,6 @@
             'row_${REPORTING_REPORT}',
             'row_${REPORTING_RAWDATA}',
             'row_${REPORTING_SARIF}',
-            'row_${REPORTING_SONARGIIF}',
             'row_${REPORTING_JSON}' ];
 
         ptaiAstWorkModeChange = function () {
@@ -183,7 +186,6 @@
                 ptaiReportingReportShowHide(false);
                 ptaiReportingRawDataShowHide(false);
                 ptaiReportingSarifShowHide(false);
-                ptaiReportingSonarGiifShowHide(false);
                 ptaiReportingJsonShowHide(false);
             }
             if (mode === '${AST_MODE_SYNC}') {
@@ -191,7 +193,6 @@
                 ptaiReportingReportClick();
                 ptaiReportingRawDataClick();
                 ptaiReportingSarifClick();
-                ptaiReportingSonarGiifClick();
                 ptaiReportingJsonClick();
             }
             BS.MultilineProperties.updateVisible();
@@ -461,6 +462,29 @@
             <span class="error" id="error_${REPORTING_REPORT_TEMPLATE}"></span>
         </td>
     </tr>
+    <tr id="row_${REPORTING_REPORT_LOCALE}">
+        <th class="noBorder dense">
+            <label for="${REPORTING_REPORT_LOCALE}">${LABEL_REPORTING_REPORT_LOCALE}</label>
+        </th>
+        <td class="noBorder dense">
+            <c:set var="CURRENT_REPORTING_REPORT_LOCALE" value="${
+                empty propertiesBean.properties[REPORTING_REPORT_LOCALE]
+                ? DEFAULT_REPORTING_REPORT_LOCALE
+                : propertiesBean.properties[REPORTING_REPORT_LOCALE]
+            }"/>
+            <props:selectProperty
+                    name="${REPORTING_REPORT_LOCALE}" enableFilter="true"
+                    className="longField" onchange="ptaiReportingReportLocaleChange()">
+                <props:option value="${REPORTING_LOCALE_ENGLISH}"
+                              currValue="${CURRENT_REPORTING_REPORT_LOCALE}">${LABEL_REPORTING_LOCALE_ENGLISH}</props:option>
+                <props:option value="${REPORTING_LOCALE_RUSSIAN}"
+                              currValue="${CURRENT_REPORTING_REPORT_LOCALE}">${LABEL_REPORTING_LOCALE_RUSSIAN}</props:option>
+            </props:selectProperty>
+            <span class="smallNote">${HINT_REPORTING_REPORT_LOCALE}</span>
+            <span class="error" id="error_${REPORTING_REPORT_LOCALE}"></span>
+        </td>
+    </tr>
+
     <tr id="row_${REPORTING_REPORT_DATAFLOW}">
         <th class="noBorder dense">
             <label for="${REPORTING_REPORT_DATAFLOW}">${LABEL_REPORTING_REPORT_DATAFLOW}</label>
@@ -522,6 +546,29 @@
             <span class="error" id="error_${REPORTING_RAWDATA_FILE}"></span>
         </td>
     </tr>
+    <tr id="row_${REPORTING_RAWDATA_LOCALE}">
+        <th class="noBorder dense">
+            <label for="${REPORTING_RAWDATA_LOCALE}">${LABEL_REPORTING_RAWDATA_LOCALE}</label>
+        </th>
+        <td class="noBorder dense">
+            <c:set var="CURRENT_REPORTING_RAWDATA_LOCALE" value="${
+                empty propertiesBean.properties[REPORTING_RAWDATA_LOCALE]
+                ? DEFAULT_REPORTING_RAWDATA_LOCALE
+                : propertiesBean.properties[REPORTING_RAWDATA_LOCALE]
+            }"/>
+            <props:selectProperty
+                    name="${REPORTING_RAWDATA_LOCALE}" enableFilter="true"
+                    className="longField">
+                <props:option value="${REPORTING_LOCALE_ENGLISH}"
+                              currValue="${CURRENT_REPORTING_RAWDATA_LOCALE}">${LABEL_REPORTING_LOCALE_ENGLISH}</props:option>
+                <props:option value="${REPORTING_LOCALE_RUSSIAN}"
+                              currValue="${CURRENT_REPORTING_RAWDATA_LOCALE}">${LABEL_REPORTING_LOCALE_RUSSIAN}</props:option>
+            </props:selectProperty>
+            <span class="smallNote">${HINT_REPORTING_RAWDATA_LOCALE}</span>
+            <span class="error" id="error_${REPORTING_RAWDATA_LOCALE}"></span>
+        </td>
+    </tr>
+
     <tr id="row_${REPORTING_RAWDATA_FILTER}">
         <th class="noBorder dense">
             <label for="${REPORTING_RAWDATA_FILTER}">${LABEL_REPORTING_RAWDATA_FILTER}</label>
@@ -565,6 +612,29 @@
             <span class="error" id="error_${REPORTING_SARIF_FILE}"></span>
         </td>
     </tr>
+    <tr id="row_${REPORTING_SARIF_LOCALE}">
+        <th class="noBorder dense">
+            <label for="${REPORTING_SARIF_LOCALE}">${LABEL_REPORTING_SARIF_LOCALE}</label>
+        </th>
+        <td class="noBorder dense">
+            <c:set var="CURRENT_REPORTING_SARIF_LOCALE" value="${
+                empty propertiesBean.properties[REPORTING_SARIF_LOCALE]
+                ? DEFAULT_REPORTING_SARIF_LOCALE
+                : propertiesBean.properties[REPORTING_SARIF_LOCALE]
+            }"/>
+            <props:selectProperty
+                    name="${REPORTING_SARIF_LOCALE}" enableFilter="true"
+                    className="longField">
+                <props:option value="${REPORTING_LOCALE_ENGLISH}"
+                              currValue="${CURRENT_REPORTING_SARIF_LOCALE}">${LABEL_REPORTING_LOCALE_ENGLISH}</props:option>
+                <props:option value="${REPORTING_LOCALE_RUSSIAN}"
+                              currValue="${CURRENT_REPORTING_SARIF_LOCALE}">${LABEL_REPORTING_LOCALE_RUSSIAN}</props:option>
+            </props:selectProperty>
+            <span class="smallNote">${HINT_REPORTING_SARIF_LOCALE}</span>
+            <span class="error" id="error_${REPORTING_SARIF_LOCALE}"></span>
+        </td>
+    </tr>
+
     <tr id="row_${REPORTING_SARIF_FILTER}">
         <th class="noBorder dense">
             <label for="${REPORTING_SARIF_FILTER}">${LABEL_REPORTING_SARIF_FILTER}</label>
@@ -583,48 +653,6 @@
     </tr>
 
 
-    <tr id="row_${REPORTING_SONARGIIF}">
-        <th class="noBorder dense">
-            <label for="${REPORTING_SONARGIIF}">${LABEL_REPORTING_SONARGIIF}</label>
-        </th>
-        <td>
-            <props:checkboxProperty name="${REPORTING_SONARGIIF}" onclick="ptaiReportingSonarGiifClick()"/>
-            <span class="smallNote">${HINT_REPORTING_SONARGIIF}</span>
-        </td>
-    </tr>
-    <tr id="row_${REPORTING_SONARGIIF_FILE}">
-        <th class="noBorder dense">
-            <label for="${REPORTING_SONARGIIF_FILE}">${LABEL_REPORTING_SONARGIIF_FILE}<l:star/></label>
-        </th>
-        <td class="noBorder dense">
-            <props:textProperty
-                    name="${REPORTING_SONARGIIF_FILE}"
-                    value="${
-                        propertiesBean.properties[REPORTING_SONARGIIF] == FALSE
-                        ? DEFAULT_REPORTING_SONARGIIF_FILE
-                        : propertiesBean.properties[REPORTING_SONARGIIF_FILE]
-                    }"
-                    className="longField"/>
-            <span class="smallNote">${HINT_REPORTING_SONARGIIF_FILE}</span>
-            <span class="error" id="error_${REPORTING_SONARGIIF_FILE}"></span>
-        </td>
-    </tr>
-    <tr id="row_${REPORTING_SONARGIIF_FILTER}">
-        <th class="noBorder dense">
-            <label for="${REPORTING_SONARGIIF_FILTER}">${LABEL_REPORTING_SONARGIIF_FILTER}</label>
-        </th>
-        <td class="noBorder dense">
-            <props:multilineProperty
-                    name="${REPORTING_SONARGIIF_FILTER}"
-                    className="longField"
-                    linkTitle=""
-                    rows="3"
-                    cols="49"
-                    expanded="${true}"
-                    note="${HINT_REPORTING_SONARGIIF_FILTER}"/>
-            <span class="error" id="error_${REPORTING_SONARGIIF_FILTER}"></span>
-        </td>
-    </tr>
 
     <tr id="row_${REPORTING_JSON}">
         <th class="noBorder dense">

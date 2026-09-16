@@ -1,10 +1,12 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils;
 
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.VulnerabilityIssue;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import lombok.NonNull;
+import org.jvnet.localizer.LocaleProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +42,8 @@ public class I18nHelper {
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.PYGREP, Resources::i18n_misc_enums_vulnerability_clazz_pygrep);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.SCA, Resources::i18n_misc_enums_vulnerability_clazz_sca);
         TYPE_SUPPLIER_MAP.put(BaseIssue.Type.FINGERPRINT_SCA, Resources::i18n_misc_enums_vulnerability_clazz_fingerprint);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.SECRET, Resources::i18n_misc_enums_vulnerability_clazz_secret);
+        TYPE_SUPPLIER_MAP.put(BaseIssue.Type.MALICIOUSCODE, Resources::i18n_misc_enums_vulnerability_clazz_maliciouscode);
 
         APPROVAL_STATE_SUPPLIER_MAP.put(BaseIssue.ApprovalState.APPROVAL, Resources::i18n_misc_enums_vulnerability_approval_confirmed);
         APPROVAL_STATE_SUPPLIER_MAP.put(BaseIssue.ApprovalState.AUTO_APPROVAL, Resources::i18n_misc_enums_vulnerability_approval_auto);
@@ -79,7 +83,8 @@ public class I18nHelper {
     }
 
     public static String i18n(@NonNull final BaseIssue.Type type) {
-        return TYPE_SUPPLIER_MAP.get(type).get();
+        Supplier<String> caption = TYPE_SUPPLIER_MAP.get(type);
+        return caption == null ? type.name() : caption.get();
     }
 
     public static String i18n(@NonNull final BaseIssue.ApprovalState state) {
@@ -96,5 +101,12 @@ public class I18nHelper {
 
     public static String i18n(@NonNull final Stage stage) {
         return STAGE_SUPPLIER_MAP.get(stage).get();
+    }
+
+    @NonNull
+    public static Reports.Locale uiLocale() {
+        return LocaleProvider.getLocale().getLanguage().equalsIgnoreCase(Reports.Locale.RU.name())
+                ? Reports.Locale.RU
+                : Reports.Locale.EN;
     }
 }

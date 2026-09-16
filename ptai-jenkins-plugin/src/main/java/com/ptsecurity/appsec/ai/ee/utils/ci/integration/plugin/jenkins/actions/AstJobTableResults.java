@@ -9,7 +9,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.I18nHelper;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -24,7 +23,6 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
-import static com.ptsecurity.appsec.ai.ee.scan.ScanDataPacked.Type.SCAN_BRIEF_DETAILED;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.BaseJsonChartDataModel.*;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 
@@ -47,10 +45,7 @@ public class AstJobTableResults implements Action {
             do {
                 final AstJobSingleResult action = build.getAction(AstJobSingleResult.class);
                 if (null == action) break;
-                if (null == action.getScanDataPacked()) break;
-                ScanDataPacked scanDataPacked = action.getScanDataPacked();
-                if (!scanDataPacked.getType().equals(SCAN_BRIEF_DETAILED)) break;
-                scanBriefDetailed = ScanDataPacked.unpackData(scanDataPacked.getData(), ScanBriefDetailed.class);
+                scanBriefDetailed = AstJobSingleResult.unpack(action.getScanDataPacked());
             } while (false);
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -239,7 +234,7 @@ public class AstJobTableResults implements Action {
                     = ChartDataModel.Series.builder()
                     .name(I18nHelper.i18n(value))
                     .itemStyle(ChartDataModel.Series.DataItem.ItemStyle.builder()
-                            .color("#" + Integer.toHexString(TYPE_COLORS.get(value)))
+                            .color(typeColor(value))
                             .build())
                     .build();
             // Prepare series to fill with data

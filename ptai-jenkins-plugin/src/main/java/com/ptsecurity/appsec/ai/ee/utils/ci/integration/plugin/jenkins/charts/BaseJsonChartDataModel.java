@@ -43,6 +43,8 @@ public class BaseJsonChartDataModel {
         TYPE_COLORS.put(BaseIssue.Type.PYGREP, 0x810fc2);
         TYPE_COLORS.put(BaseIssue.Type.SCA, 0xa7ffd7);
         TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT_SCA, 0xffb8ff);
+        TYPE_COLORS.put(BaseIssue.Type.SECRET, 0x00a2a5);
+        TYPE_COLORS.put(BaseIssue.Type.MALICIOUSCODE, 0xb3001b);
 
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.AUTO_APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
@@ -61,18 +63,6 @@ public class BaseJsonChartDataModel {
         SCANMODE_COLORS.put(VulnerabilityIssue.ScanMode.NONE, LEVEL_COLORS.get(BaseIssue.Level.NONE));
         SCANMODE_COLORS.put(VulnerabilityIssue.ScanMode.UNKNOWN, LEVEL_COLORS.get(BaseIssue.Level.NONE));
 
-        /*
-        SCANSTAGE_COLORS.put(Stage.SETUP, LEVEL_COLORS.get(BaseIssue.Level.LOW));
-        SCANSTAGE_COLORS.put(Stage.ZIP, changeColorShade(LEVEL_COLORS.get(BaseIssue.Level.LOW), 0.8f, 0.8f));
-        SCANSTAGE_COLORS.put(Stage.UPLOAD, changeColorShade(LEVEL_COLORS.get(BaseIssue.Level.LOW), 0.8f, 0.9f));
-        SCANSTAGE_COLORS.put(Stage.ENQUEUED, LEVEL_COLORS.get(BaseIssue.Level.POTENTIAL));
-        SCANSTAGE_COLORS.put(Stage.INITIALIZE, changeColorShade(LEVEL_COLORS.get(BaseIssue.Level.HIGH), 0.8f, 0.8f));
-        SCANSTAGE_COLORS.put(Stage.VFSSETUP, changeColorShade(LEVEL_COLORS.get(BaseIssue.Level.HIGH), 0.8f, 0.9f));
-        SCANSTAGE_COLORS.put(Stage.PRECHECK, changeColorShade(LEVEL_COLORS.get(BaseIssue.Level.HIGH), 0.8f, 1.0f));
-        SCANSTAGE_COLORS.put(Stage.SCAN, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
-        SCANSTAGE_COLORS.put(Stage.FINALIZE, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
-        SCANSTAGE_COLORS.put(Stage.AUTOCHECK, changeColorShade(LEVEL_COLORS.get(BaseIssue.Level.MEDIUM), 0.8f, 0.9f));
-        */
         SCANSTAGE_COLORS.put(Stage.SETUP, createShade(0, 10));
         SCANSTAGE_COLORS.put(Stage.ZIP, createShade(4, 10));
         SCANSTAGE_COLORS.put(Stage.UPLOAD, createShade(7, 10));
@@ -90,22 +80,16 @@ public class BaseJsonChartDataModel {
         SCANSTAGE_COLORS.put(Stage.UNKNOWN, 0xffffff);
     }
 
+    public static String typeColor(final BaseIssue.Type type) {
+        Integer color = TYPE_COLORS.get(type);
+        return "#" + Integer.toHexString(color == null ? LEVEL_COLORS.get(BaseIssue.Level.NONE) : color);
+    }
+
     public static int createShade(final float index, final float total) {
         float[] hsb = new float[3];
         hsb[0] = index / total; // * 255f;
         hsb[1] = 0.55f;
         hsb[2] = 0.8f;
-        return Color.getHSBColor(hsb[0], hsb[1], hsb[2]).getRGB() & 0xFFFFFF;
-    }
-
-    public static int changeColorShade(final int c, final float s, final float b) {
-        Color color = Color.decode("#" + Integer.toHexString(c));
-        float[] hsb = new float[3];
-        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsb);
-        hsb[1] *= s;
-        if (1 < hsb[1]) hsb[1] = 1;
-        hsb[2] *= b;
-        if (1 < hsb[2]) hsb[2] = 1;
         return Color.getHSBColor(hsb[0], hsb[1], hsb[2]).getRGB() & 0xFFFFFF;
     }
 

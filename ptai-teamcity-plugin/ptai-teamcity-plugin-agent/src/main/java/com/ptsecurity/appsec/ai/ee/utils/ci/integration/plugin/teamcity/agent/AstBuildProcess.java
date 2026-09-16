@@ -10,7 +10,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Report;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sarif;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.SonarGiif;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params;
@@ -121,7 +120,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 .branchName(branchName)
                 .scanLabel(scanLabel)
                 .jsonSettings(selectedScanSettingsUi ? null : settings)
-                .policy(selectedScanSettingsUi ?  null : policy)
+                .jsonPolicy(selectedScanSettingsUi ? null : policy)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(activeConnectionParams.get(Params.URL))
                         .insecure(TRUE.equals(activeConnectionParams.get(Params.INSECURE)))
@@ -140,8 +139,6 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 RawJson.builder().owner(job).rawData(rawData).build().attach(job);
             for (Reports.Sarif sarif : reports.getSarif())
                 Sarif.builder().owner(job).sarif(sarif).build().attach(job);
-            for (Reports.SonarGiif sonarGiif : reports.getSonarGiif())
-                SonarGiif.builder().owner(job).sonar(sonarGiif).build().attach(job);
         }
         if (failIfFailed) new FailIfAstFailed().attach(job);
         if (failIfUnstable) new FailIfAstUnstable().attach(job);

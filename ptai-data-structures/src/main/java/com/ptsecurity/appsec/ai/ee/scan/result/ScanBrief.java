@@ -6,7 +6,9 @@ import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Class that stores top-level information about completed AST job. That
@@ -40,7 +42,10 @@ public class ScanBrief {
         V4110("4.11.0"),
         V500("5.0.0"),
         V520("5.2.0"),
-        V530("5.3.0");
+        V530("5.3.0"),
+        V600("6.0.0"),
+        V610("6.1.0"),
+        V620("6.2.0");
 
         private final String prefix;
 
@@ -142,26 +147,6 @@ public class ScanBrief {
         @JsonProperty
         protected String branchName;
 
-        public enum Engine {
-            AI, PM, TAINT, STATICCODEANALYSIS, DC, FINGERPRINT, CONFIGURATION, BLACKBOX
-        }
-
-        @Builder.Default
-        @JsonProperty
-        protected final Set<Engine> engines = new HashSet<>();
-
-        @JsonProperty
-        protected Boolean unpackUserPackages;
-
-        @JsonProperty
-        protected Boolean downloadDependencies;
-
-        @JsonProperty
-        protected Boolean usePublicAnalysisMethod;
-
-        @JsonProperty
-        protected Boolean useEntryAnalysisPoint;
-
         @RequiredArgsConstructor
         public enum Language {
             PHP("PHP"),
@@ -179,7 +164,9 @@ public class ScanBrief {
             KOTLIN("Kotlin"),
             RUBY("Ruby"),
             SOLIDITY("Solidity"),
-            SCALA("Scala"),;
+            SCALA("Scala"),
+            ONE_C("OneC"),
+            DART("Dart");
 
             public static Language fromString(@NonNull final String value) {
                 for (Language language : Language.values())
@@ -201,15 +188,6 @@ public class ScanBrief {
 
         @JsonProperty
         protected String url;
-
-        @JsonProperty
-        protected Boolean autocheckAfterScan;
-
-        @JsonProperty
-        protected String customParameters;
-
-        @JsonProperty
-        protected String javaParameters;
     }
 
     @NonNull

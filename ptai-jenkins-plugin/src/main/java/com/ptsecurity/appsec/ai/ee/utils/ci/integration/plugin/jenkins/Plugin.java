@@ -1,14 +1,15 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins;
 
 import com.ptsecurity.appsec.ai.ee.scan.errors.SettingsMustBeSetUpException;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
@@ -50,10 +51,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.*;
 
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.ERROR;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.WARNING;
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_type_manual_json_settings_message_empty;
-import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @Slf4j
 @ToString
@@ -163,31 +161,23 @@ public class Plugin extends Builder implements SimpleBuildStep {
             projectName = Util.replaceMacro(projectName, buildInfo.getEnvVars());
             log.trace("UI-defined project name after macro replacement is {}", projectName);
         } else {
-            // TODO: Parse settings after macro replacement
-            UnifiedAiProjScanSettings.ParseResult parseResult = UnifiedAiProjScanSettings.parse(jsonSettings);
-            for (UnifiedAiProjScanSettings.ParseResult.Message message : parseResult.getMessages()) {
-                if (message.getType().equals(ERROR))
-                    log.error(message.getText());
-                else if (message.getType().equals(WARNING))
-                    log.warn(message.getText());
+            if (StringUtils.isBlank(jsonSettings)) {
+                throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
             }
-            if (null != parseResult.getCause())
-                throw new AbortException(parseResult.getCause().getMessage());
+
+            AictlAiproj.Result aiproj = AictlAiproj.check(ControllerEnvironment.get(), jsonSettings);
+            if (!aiproj.isValid()) {
+                throw new AbortException(String.join("\n", aiproj.getErrors()));
+            }
 
             check = scanSettingsManualDescriptor.doCheckJsonPolicy(jsonPolicy);
             if (FormValidation.Kind.ERROR == check.kind)
                 throw new AbortException(check.getMessage());
-            UnifiedAiProjScanSettings settings = parseResult.getSettings();
 
-            if (settings == null) {
-                throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
-            }
-
-            log.trace("JSON-defined project settings before macro replacement is {}", settings.toJson());
+            log.trace("JSON-defined project settings before macro replacement is {}", jsonSettings);
             jsonSettings = BaseJsonHelper.replaceMacro(jsonSettings, (s -> Util.replaceMacro(s, buildInfo.getEnvVars())));
             log.trace("JSON-defined project settings after macro replacement is {}", jsonSettings);
-            settings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
-            projectName = settings.getProjectName();
+            projectName = AictlAiproj.projectName(jsonSettings);
         }
 
         ServerSettings serverSettings;
@@ -244,8 +234,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .projectName(selectedScanSettingsUi ? projectName : null)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
-                .settings(selectedScanSettingsUi ? null : jsonSettings)
-                .policy(selectedScanSettingsUi ?  null : jsonPolicy)
                 .console(listener.getLogger())
                 .verbose(verbose)
                 .prefix(CONSOLE_PREFIX)
@@ -264,7 +252,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .buildInfo(buildInfo)
                 .transfers(transfers)
                 .fullScanMode(fullScanMode)
-                .jsonSettings(jsonSettings)
+                .jsonSettings(selectedScanSettingsUi ? null : jsonSettings)
+                .jsonPolicy(selectedScanSettingsUi ? null : jsonPolicy)
                 .advancedSettings(advancedSettings)
                 .build();
         if (workMode instanceof WorkModeSync) {
@@ -298,27 +287,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
         return Jenkins.get().getDescriptorByType(PluginDescriptor.class);
     }
 
-    protected static String getCurrentItem(Run<?, ?> run, String currentItem){
-        String runItem = null;
-        String curItem = trimToNull(currentItem);
-        if(run != null && run.getParent() != null)
-            runItem = trimToNull(run.getParent().getFullName());
-
-        if(runItem != null && curItem != null) {
-            if(runItem.equals(curItem)) {
-                return runItem;
-            } else {
-                throw new IllegalArgumentException(String.format("Current Item ('%s') and Parent Item from Run ('%s') differ!", curItem, runItem));
-            }
-        } else if(runItem != null) {
-            return runItem;
-        } else if(curItem != null) {
-            return curItem;
-        } else {
-            throw new IllegalArgumentException("Both null, Run and Current Item!");
-        }
-    }
-
     protected List<Action> projectActions;
 
     @Override
@@ -326,8 +294,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
         if (null == projectActions) {
             projectActions = new ArrayList<>();
-            // projectActions.add(new AstJobMultipleResults(project));
-            // projectActions.add(new AstJobTableResults(project));
         }
         return projectActions;
     }
@@ -339,7 +305,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
             String branchName = ((CustomNameBranchSettings) branchSettings).getBranchName();
             log.trace("Custom branch name before macro replacement is {}", branchName);
             branchName = Util.replaceMacro(branchName, buildInfo.getEnvVars());
-            log.trace("Custom branch name after macro replacement is {}", projectName);
+            log.trace("Custom branch name after macro replacement is {}", branchName);
             return branchName;
         }
 

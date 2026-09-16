@@ -19,17 +19,13 @@ public class Report extends Export {
     protected final Reports.Report report;
 
     @Override
-    public void validate() throws GenericException {
-        ReportsTask reportsTask = new ReportsTask(owner.getClient());
-        reportsTask.check(report);
-    }
+    public void validate() throws GenericException {}
 
     @Override
-    public void execute(
-            @NonNull final ScanBrief scanBrief) throws GenericException {
+    public void execute(@NonNull final ScanBrief scanBrief) throws GenericException {
         ReportsTask reportsTask = new ReportsTask(owner.getClient());
         try {
-            reportsTask.exportReport(scanBrief.getProjectId(), scanBrief.getId(), report, owner.getFileOps());
+            reportsTask.exportReport(scanBrief, report, owner.getFileOps());
         } catch (GenericException e) {
             owner.warning(e);
         }

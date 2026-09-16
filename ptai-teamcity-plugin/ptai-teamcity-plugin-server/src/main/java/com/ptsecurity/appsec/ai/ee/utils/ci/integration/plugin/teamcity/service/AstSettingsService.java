@@ -1,18 +1,17 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service;
 
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
-import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ReportsTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
@@ -161,16 +160,16 @@ public class AstSettingsService {
                 .fill(REPORTING_REPORT_TEMPLATE, request)
                 .fill(REPORTING_REPORT_DATAFLOW, request)
                 .fill(REPORTING_REPORT_SUMMARY, request)
-                .fill(REPORTING_REPORT_FILTER, request);
+                .fill(REPORTING_REPORT_FILTER, request)
+                .fill(REPORTING_REPORT_LOCALE, request);
         res.fill(REPORTING_RAWDATA, request)
                 .fill(REPORTING_RAWDATA_FILE, request)
-                .fill(REPORTING_RAWDATA_FILTER, request);
+                .fill(REPORTING_RAWDATA_FILTER, request)
+                .fill(REPORTING_RAWDATA_LOCALE, request);
         res.fill(REPORTING_SARIF, request)
                 .fill(REPORTING_SARIF_FILE, request)
-                .fill(REPORTING_SARIF_FILTER, request);
-        res.fill(REPORTING_SONARGIIF, request)
-                .fill(REPORTING_SONARGIIF_FILE, request)
-                .fill(REPORTING_SONARGIIF_FILTER, request);
+                .fill(REPORTING_SARIF_FILTER, request)
+                .fill(REPORTING_SARIF_LOCALE, request);
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
 
@@ -241,7 +240,10 @@ public class AstSettingsService {
                 results.add(JSON_SETTINGS, MESSAGE_JSON_SETTINGS_EMPTY);
             else {
                 try {
-                    UnifiedAiProjScanSettings.parse(bean.get(JSON_SETTINGS));
+                    AictlAiproj.Result aiproj = AictlAiproj.check(ServerEnvironment.get(), bean.get(JSON_SETTINGS));
+                    if (!aiproj.isValid()) {
+                        results.add(JSON_SETTINGS, String.join("; ", aiproj.getErrors()));
+                    }
                 } catch (GenericException e) {
                     results.add(JSON_SETTINGS, e.getDetailedMessage());
                     log.warn(e.getDetailedMessage(), e);
@@ -303,16 +305,6 @@ public class AstSettingsService {
             }
         }
 
-        if (bean.isTrue(REPORTING_SONARGIIF)) {
-            if (bean.empty(REPORTING_SONARGIIF_FILE))
-                results.add(REPORTING_SONARGIIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_message_empty());
-            if (!bean.empty(REPORTING_SONARGIIF_FILTER)) {
-                Validator.Result result = Validator.validateJsonIssuesFilter(bean.get(REPORTING_SONARGIIF_FILTER));
-                if (result.fail())
-                    results.add(REPORTING_SONARGIIF_FILTER, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid_details(result.getDetails()));
-            }
-        }
-
         if (bean.isTrue(REPORTING_JSON)) {
             if (bean.empty(REPORTING_JSON_SETTINGS))
                 results.add(REPORTING_JSON_SETTINGS, Resources.i18n_ast_settings_mode_synchronous_subjob_export_advanced_settings_message_empty());
@@ -358,7 +350,7 @@ public class AstSettingsService {
     }
 
     private static AictlClient createApiClient(@NonNull PropertiesBean bean) {
-        return Factory.client(ConnectionSettings.builder()
+        return Factory.client(ServerEnvironment.get(), ConnectionSettings.builder()
                 .url(bean.get(URL))
                 .credentials(TokenCredentials.builder().token(bean.get(TOKEN)).build())
                 .caCertsPem(bean.get(CERTIFICATES))
@@ -366,11 +358,6 @@ public class AstSettingsService {
                 .build());
     }
 
-    /**
-     * @param bean PT AI server connection settings bean
-     * @param results Response that contains diagnostic messages
-     *            that are related to connection check results
-     */
     protected static void checkConnectionSettings(@NonNull PropertiesBean bean, @NonNull final VerificationResults results) {
         // Check connection
         try {
@@ -404,8 +391,9 @@ public class AstSettingsService {
                     results.failure();
                 }
             } else {
-                UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(bean.getProperties().get(JSON_SETTINGS));
-                results.add("JSON settings are verified, project name is " + settings.getProjectName());
+                results.add("JSON settings are verified, project name is "
+                        + AictlAiproj.projectName(bean.getProperties().get(JSON_SETTINGS)));
+
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
                 if (policyJson != null) {
                     results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
@@ -418,16 +406,13 @@ public class AstSettingsService {
             boolean isAnyReportSelected = bean.eq(REPORTING_REPORT, TRUE) ||
                     bean.eq(REPORTING_RAWDATA, TRUE) ||
                     bean.eq(REPORTING_SARIF, TRUE) ||
-                    bean.eq(REPORTING_SONARGIIF, TRUE) ||
                     bean.eq(REPORTING_JSON, TRUE);
 
             if (!isAnyReportSelected) {
                 return;
             }
 
-            Reports reports = bean.convert();
-            reports = ReportUtils.validate(reports);
-            new ReportsTask(client).check(reports);
+            ReportUtils.validate(bean.convert());
         } catch (GenericException e) {
             log.warn(e.getDetailedMessage(), e);
             results.add(e);

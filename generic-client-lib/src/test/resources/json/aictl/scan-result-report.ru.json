@@ -1,0 +1,365 @@
+{
+  "ScanInfo": {
+    "TotalFileCount": 591,
+    "ScannedFileCount": 591,
+    "TotalUrlCount": 0,
+    "ScannedUrlCount": 0,
+    "VulnerableFiles": 58,
+    "TotalVulnerabilityCount": 161,
+    "AcceptedVulnerabilities": 150,
+    "DiscardedVulnerabilities": 5,
+    "SuppressedVulnerabilities": 0,
+    "NewVulnerabilities": 0,
+    "PreviousVulnerabilities": 161,
+    "PolicyState": 0,
+    "NonFilteredVulnerabilitiesCount": 0,
+    "NonFilteredAcceptedVulnerabilitiesCount": 0,
+    "NonFilteredDiscardedVulnerabilitiesCount": 0,
+    "NonFilteredSuppressedVulnerabilitiesCount": 0,
+    "NonFilteredNewVulnerabilitiesCount": 0,
+    "NonFilteredPreviousVulnerabilitiesCount": 0,
+    "VulnerableLinks": 0,
+    "ScanDate": "17 марта 2026",
+    "Branch": "docker-vulnerable-dvwa",
+    "BranchId": "961280ac-2bb7-40b3-b3a5-0afb46f7daae",
+    "ScanLabel": "",
+    "Policies": ""
+  },
+  "Items": [
+    {
+      "MatchedCode": "",
+      "SourceFile": "./dvwa/vulnerabilities/upload/source/high.php : 20",
+      "VulnerableCode": "\t\tif( !move_uploaded_file( $uploaded_tmp, $target_path ) ) {",
+      "TypeKey": "Vulnerability",
+      "Language": "Php",
+      "ScanModule": "Статический анализ кода",
+      "IsSuspected": false,
+      "GroupType": "FromPreviousScan",
+      "IsSuppressed": false,
+      "IsNew": false,
+      "Id": "IseNcQsKuQ/zqcaGRjyjca/x9yQ=",
+      "Type": {
+        "Id": "Arbitrary File Creation",
+        "GroupId": "Создание произвольного файлаlevel-high",
+        "DisplayName": "Создание произвольного файла",
+        "Value": "Arbitrary File Creation"
+      },
+      "Counter": 85,
+      "ApprovalState": "Approval",
+      "IsFavorite": false,
+      "Level": {
+        "Severity": 40,
+        "DisplayName": "Высокая",
+        "Value": "level-high"
+      },
+      "Owasp": {
+        "DisplayName": "Небезопасное проектирование",
+        "Value": "A04"
+      },
+      "Owaspm": {
+        "DisplayName": "Небезопасное хранение данных",
+        "Value": "2"
+      },
+      "Sans": {
+        "DisplayName": "Категория не определена",
+        "Value": ""
+      },
+      "Pcidss": [
+        {
+          "DisplayName": "Инъекции",
+          "Value": "6.5.1"
+        }
+      ],
+      "Nist": [
+        {
+          "DisplayName": "Проверка входных данных",
+          "Value": "SI-10"
+        }
+      ],
+      "CweId": "73",
+      "ParentItem": "c:\\windows\\temp\ai\\961280ac-2bb7-40b3-b3a5-0afb46f7daae\\dvwa\vulnerabilities\\upload\\source\\high.php:20:1:20:61",
+      "IsApproved": true,
+      "IsDiscarded": false,
+      "IsApprovedAutomatically": false,
+      "IsPotential": false,
+      "IsSecondOrder": false,
+      "Function": "",
+      "Entry": "./dvwa/vulnerabilities/upload/source/high.php : 1",
+      "NumberLine": 20,
+      "Exploit": "POST /dvwa/vulnerabilities/upload/source/high.php HTTP/1.1\nHost: localhost\nContent-Length: 18\nContent-Type: application/x-www-form-urlencoded\n\nsize=0&amp;Upload=True",
+      "RawLine": "\t\tif( !move_uploaded_file( $uploaded_tmp, $target_path ) ) {",
+      "AdditionalConditions": "((basename(((string)_FILES[\"uploaded\"][\"name\"])) == \"\") &amp;&amp; (strtolower(substr(((string)_FILES[\"uploaded\"][\"name\"]), ((int)(strrpos(_FILES[\"uploaded\"][\"name\"], \".\") + 1)), strlen(((string)_FILES[\"uploaded\"][\"name\"])))) == \"png\") &amp;&amp; str_contains((((string)constant(\"DVWA_WEB_PAGE_TO_ROOT\")) . \"hackable/uploads/\"), \".php\"))",
+      "ScanMode": "FromRootFunction"
+    },
+    {
+      "MatchedCode": "",
+      "SourceFile": "./dvwa/vulnerabilities/upload/source/high.php : 20",
+      "VulnerableCode": "\t\tif( !move_uploaded_file( $uploaded_tmp, $target_path ) ) {",
+      "TypeKey": "Vulnerability",
+      "Language": "Php",
+      "ScanModule": "Статический анализ кода",
+      "IsSuspected": false,
+      "GroupType": "FromPreviousScan",
+      "IsSuppressed": false,
+      "IsNew": false,
+      "Id": "DaBYm1hM3Hpzq6LJ4rtGeuAz1/A=",
+      "Type": {
+        "Id": "Arbitrary File Creation",
+        "GroupId": "Создание произвольного файлаlevel-high",
+        "DisplayName": "Создание произвольного файла",
+        "Value": "Arbitrary File Creation"
+      },
+      "Counter": 109,
+      "ApprovalState": "Approval",
+      "IsFavorite": false,
+      "Level": {
+        "Severity": 40,
+        "DisplayName": "Высокая",
+        "Value": "level-high"
+      },
+      "Owasp": {
+        "DisplayName": "Небезопасное проектирование",
+        "Value": "A04"
+      },
+      "Owaspm": {
+        "DisplayName": "Небезопасное хранение данных",
+        "Value": "2"
+      },
+      "Sans": {
+        "DisplayName": "Категория не определена",
+        "Value": ""
+      },
+      "Pcidss": [
+        {
+          "DisplayName": "Инъекции",
+          "Value": "6.5.1"
+        }
+      ],
+      "Nist": [
+        {
+          "DisplayName": "Проверка входных данных",
+          "Value": "SI-10"
+        }
+      ],
+      "CweId": "73",
+      "ParentItem": "c:\\windows\\temp\ai\\961280ac-2bb7-40b3-b3a5-0afb46f7daae\\dvwa\vulnerabilities\\upload\\source\\high.php:20:1:20:61",
+      "IsApproved": true,
+      "IsDiscarded": false,
+      "IsApprovedAutomatically": false,
+      "IsPotential": false,
+      "IsSecondOrder": false,
+      "Function": "",
+      "Entry": "./dvwa/vulnerabilities/upload/index.php : 1",
+      "NumberLine": 20,
+      "Exploit": "POST /dvwa/vulnerabilities/upload/index.php HTTP/1.1\nHost: localhost\nContent-Length: 18\nContent-Type: application/x-www-form-urlencoded\nCookie: security=high\n\nsize=0&amp;Upload=True",
+      "RawLine": "\t\tif( !move_uploaded_file( $uploaded_tmp, $target_path ) ) {",
+      "AdditionalConditions": "((basename(((string)_FILES[\"uploaded\"][\"name\"])) == \".php\") &amp;&amp; (strtolower(substr(((string)_FILES[\"uploaded\"][\"name\"]), ((int)(strrpos(_FILES[\"uploaded\"][\"name\"], \".\") + 1)), strlen(((string)_FILES[\"uploaded\"][\"name\"])))) == \"png\"))",
+      "ScanMode": "FromRootFunction"
+    },
+    {
+      "MatchedCode": "",
+      "SourceFile": "./dvwa/external/phpids/0.6/lib/IDS/vendors/htmlpurifier/HTMLPurifier/Config.php : 131",
+      "VulnerableCode": "                E_USER_ERROR);",
+      "TypeKey": "Vulnerability",
+      "Language": "Php",
+      "ScanModule": "Статический анализ кода",
+      "IsSuspected": false,
+      "GroupType": "FromPreviousScan",
+      "IsSuppressed": false,
+      "IsNew": false,
+      "Id": "+Mw82dM2ytpPldJfAuTOR2fRiVQ=",
+      "Type": {
+        "Id": "Cross-site Scripting",
+        "GroupId": "Межсайтовое выполнение сценариевlevel-medium",
+        "DisplayName": "Межсайтовое выполнение сценариев",
+        "Value": "Cross-site Scripting"
+      },
+      "Counter": 7,
+      "ApprovalState": "Approval",
+      "IsFavorite": false,
+      "Level": {
+        "Severity": 30,
+        "DisplayName": "Средняя",
+        "Value": "level-medium"
+      },
+      "Owasp": {
+        "DisplayName": "Внедрение",
+        "Value": "A03"
+      },
+      "Owaspm": {
+        "DisplayName": "Контроль содержимого клиентских приложений",
+        "Value": "7"
+      },
+      "Sans": {
+        "DisplayName": "Межсайтовое выполнение сценариев",
+        "Value": "4"
+      },
+      "Pcidss": [
+        {
+          "DisplayName": "Межсайтовое выполнение сценариев (XSS)",
+          "Value": "6.5.7"
+        }
+      ],
+      "Nist": [
+        {
+          "DisplayName": "Проверка входных данных",
+          "Value": "SI-10"
+        }
+      ],
+      "CweId": "79",
+      "ParentItem": "c:\\windows\\temp\ai\\961280ac-2bb7-40b3-b3a5-0afb46f7daae\\dvwa\\external\\phpids\\0.6\\lib\\ids\vendors\\htmlpurifier\\htmlpurifier\\config.php:131:1:131:31",
+      "IsApproved": true,
+      "IsDiscarded": false,
+      "IsApprovedAutomatically": false,
+      "IsPotential": false,
+      "IsSecondOrder": false,
+      "Function": "",
+      "Entry": "./dvwa/external/phpids/0.6/lib/IDS/vendors/htmlpurifier/HTMLPurifier/ConfigSchema/schema/Filter.ExtractStyleBlocks.txt : 1",
+      "NumberLine": 131,
+      "Exploit": "GET /dvwa/external/phpids/0.6/lib/IDS/vendors/htmlpurifier/HTMLPurifier/ConfigSchema/schema/Filter.ExtractStyleBlocks.txt HTTP/1.1\nHost: localhost\n\n",
+      "RawLine": "                E_USER_ERROR);",
+      "AdditionalConditions": "(((((string)constant(\"HTMLPURIFIER_PREFIX\")) . \"/HTMLPurifier/ConfigSchema/schema.ser\") != \"php://input\") &amp;&amp; (((string)(JSA: sealed (111275))[\"Core\"][\"CollectErrors\"][\"name\"]) == \"\") &amp;&amp; (((string)(JSA: sealed (111275))[\"Core\"][\"CollectErrors\"][\"namespace\"]) == \"&lt;script&gt;alert(0)&lt;/script&gt;\") &amp;&amp; (unserialize(file_get_contents((((string)constant(\"HTMLPURIFIER_PREFIX\")) . \"/HTMLPurifier/ConfigSchema/schema.ser\")))[\"info\"][\"Core\"][\"CollectErrors\"] !== NULL) &amp;&amp; (unserialize(file_get_contents((((string)constant(\"HTMLPURIFIER_PREFIX\")) . \"/HTMLPurifier/ConfigSchema/schema.ser\")))[\"info\"][\"Core\"][\"CollectErrors\"][\"isAlias\"] !== NULL) &amp;&amp; (unserialize(file_get_contents((((string)constant(\"HTMLPURIFIER_PREFIX\")) . \"/HTMLPurifier/ConfigSchema/schema.ser\")))[\"info\"][\"Core\"][\"MaintainLineNumbers\"] !== NULL) &amp;&amp; (unserialize(file_get_contents((((string)constant(\"HTMLPURIFIER_PREFIX\")) . \"/HTMLPurifier/ConfigSchema/schema.ser\")))[\"info\"][\"Core\"][\"MaintainLineNumbers\"][\"isAlias\"] !== NULL))",
+      "ScanMode": "FromRootFunction"
+    },
+    {
+      "MatchedCode": "",
+      "SourceFile": "./dvwa/vulnerabilities/csp/source/impossible.js : 9",
+      "VulnerableCode": "document.getElementById(\"answer\").innerHTML",
+      "TypeKey": "Vulnerability",
+      "Language": "JavaScript/TypeScript",
+      "ScanModule": "Статический анализ кода",
+      "IsSuspected": true,
+      "GroupType": "FromPreviousScan",
+      "IsSuppressed": false,
+      "IsNew": false,
+      "Id": "yZEdAU+Twrf2ny+lyTu4O0fVUWA=",
+      "Type": {
+        "Id": "DOM Modification HTML Tag",
+        "GroupId": "DOM модификация HTML тегаlevel-pattern",
+        "DisplayName": "DOM модификация HTML тега",
+        "Value": "DOM Modification HTML Tag"
+      },
+      "Counter": 2,
+      "ApprovalState": "Discard",
+      "IsFavorite": false,
+      "Level": {
+        "Severity": 10,
+        "DisplayName": "Потенциальная",
+        "Value": "level-pattern"
+      },
+      "Owasp": {
+        "DisplayName": "Внедрение",
+        "Value": "A03"
+      },
+      "Owaspm": {
+        "DisplayName": "Контроль содержимого клиентских приложений",
+        "Value": "7"
+      },
+      "Sans": {
+        "DisplayName": "Межсайтовое выполнение сценариев",
+        "Value": "4"
+      },
+      "Pcidss": [
+        {
+          "DisplayName": "Контролировать разрабатываемый код на наличие потенциальных уязвимостей перед передачей\r\nготовых приложений заказчикам или переводом их в производственный режим",
+          "Value": "6.3.2"
+        }
+      ],
+      "Nist": [
+        {
+          "DisplayName": "Управление конфигурацией для разработчика",
+          "Value": "SA-10"
+        },
+        {
+          "DisplayName": "Тестирование и оценка безопасности разработки",
+          "Value": "SA-11"
+        }
+      ],
+      "CweId": "79",
+      "ParentItem": "Taint-DOM Modification HTML Tag-[9,3..46)",
+      "IsApproved": false,
+      "IsDiscarded": true,
+      "IsApprovedAutomatically": false,
+      "IsPotential": true,
+      "IsSecondOrder": false,
+      "Function": "",
+      "Entry": "./dvwa/vulnerabilities/csp/source/impossible.js : 7",
+      "NumberLine": 9,
+      "Exploit": "",
+      "RawLine": "document.getElementById(\"answer\").innerHTML",
+      "AdditionalConditions": "",
+      "ScanMode": "FromPublicProtected"
+    },
+    {
+      "MatchedCode": "",
+      "SourceFile": "./dvwa/vulnerabilities/csp/source/high.js : 9",
+      "VulnerableCode": "document.getElementById(\"answer\").innerHTML",
+      "TypeKey": "Vulnerability",
+      "Language": "JavaScript/TypeScript",
+      "ScanModule": "Статический анализ кода",
+      "IsSuspected": true,
+      "GroupType": "FromPreviousScan",
+      "IsSuppressed": false,
+      "IsNew": false,
+      "Id": "wf4fcqEcpCn9WAL1J03rqIjvNIc=",
+      "Type": {
+        "Id": "DOM Modification HTML Tag",
+        "GroupId": "DOM модификация HTML тегаlevel-pattern",
+        "DisplayName": "DOM модификация HTML тега",
+        "Value": "DOM Modification HTML Tag"
+      },
+      "Counter": 3,
+      "ApprovalState": "Discard",
+      "IsFavorite": false,
+      "Level": {
+        "Severity": 10,
+        "DisplayName": "Потенциальная",
+        "Value": "level-pattern"
+      },
+      "Owasp": {
+        "DisplayName": "Внедрение",
+        "Value": "A03"
+      },
+      "Owaspm": {
+        "DisplayName": "Контроль содержимого клиентских приложений",
+        "Value": "7"
+      },
+      "Sans": {
+        "DisplayName": "Межсайтовое выполнение сценариев",
+        "Value": "4"
+      },
+      "Pcidss": [
+        {
+          "DisplayName": "Контролировать разрабатываемый код на наличие потенциальных уязвимостей перед передачей\r\nготовых приложений заказчикам или переводом их в производственный режим",
+          "Value": "6.3.2"
+        }
+      ],
+      "Nist": [
+        {
+          "DisplayName": "Управление конфигурацией для разработчика",
+          "Value": "SA-10"
+        },
+        {
+          "DisplayName": "Тестирование и оценка безопасности разработки",
+          "Value": "SA-11"
+        }
+      ],
+      "CweId": "79",
+      "ParentItem": "Taint-DOM Modification HTML Tag-[9,3..46)",
+      "IsApproved": false,
+      "IsDiscarded": true,
+      "IsApprovedAutomatically": false,
+      "IsPotential": true,
+      "IsSecondOrder": false,
+      "Function": "",
+      "Entry": "./dvwa/vulnerabilities/csp/source/high.js : 7",
+      "NumberLine": 9,
+      "Exploit": "",
+      "RawLine": "document.getElementById(\"answer\").innerHTML",
+      "AdditionalConditions": "",
+      "ScanMode": "FromPublicProtected"
+    }
+  ],
+  "HaveGroups": false,
+  "ReportType": "Json"
+}

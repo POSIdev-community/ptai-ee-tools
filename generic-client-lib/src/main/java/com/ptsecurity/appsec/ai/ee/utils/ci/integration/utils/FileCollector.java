@@ -104,6 +104,88 @@ public class FileCollector {
         }, "File collect failed");
     }
 
+    public static File collectToFolder(
+            Transfers transfers,
+            @NonNull final File dir,
+            @NonNull final File target,
+            @NonNull final AbstractTool owner) throws GenericException {
+        return call(() -> {
+            owner.fine("Create file collector");
+            FileCollector collector = new FileCollector(transfers, owner);
+
+            checkSourceFolder(dir, owner);
+            owner.info("Sources will be staged to %s", target.getAbsolutePath());
+
+            List<Entry> fileEntries = collector.collectFiles(dir);
+            if (fileEntries.isEmpty()) {
+                throw new IllegalArgumentException("No files are match defined transfer settings");
+            }
+
+            long size = collector.copyCollectedFiles(target, fileEntries);
+            owner.info("Staged sources size is %s (%d bytes)", bytesToString(size), size);
+            return target;
+        }, "File collect failed");
+    }
+
+    private static void checkSourceFolder(@NonNull final File dir, @NonNull final AbstractTool owner) throws GenericException {
+        if (!dir.exists() || !dir.canRead()) {
+            String reason = "Unknown problem with source folder " + dir.getAbsolutePath();
+            if (!dir.exists()) {
+                reason = "Source folder " + dir.getAbsolutePath() + " does not exist";
+            } else if (!dir.canRead()) {
+                reason = "Source folder " + dir.getAbsolutePath() + " can not be read";
+            }
+
+            throw GenericException.raise("File collect failed", new IllegalArgumentException(reason));
+        }
+        owner.info("Folder to collect files from is %s", dir.getAbsolutePath());
+    }
+
+    private long copyCollectedFiles(@NonNull final File target, final List<Entry> files) throws IOException {
+        Path root = target.toPath().toAbsolutePath().normalize();
+        Files.createDirectories(root);
+        long total = 0;
+
+        for (Entry entry : files) {
+            if (entry.entryName.isEmpty()) {
+                continue;
+            }
+
+            Path destination = root.resolve(entry.entryName).toAbsolutePath().normalize();
+            if (!destination.startsWith(root)) {
+                verbose("Skip %s as its entry name %s escapes staging folder", entry.path, entry.entryName);
+                continue;
+            }
+
+            if (Files.isSymbolicLink(entry.path) && !Files.readSymbolicLink(entry.path).toFile().exists()) {
+                verbose("Skip %s as there's no target file exist", entry.path);
+                continue;
+            }
+
+            if (Files.isDirectory(entry.path)) {
+                Files.createDirectories(destination);
+                continue;
+            }
+
+            Files.createDirectories(destination.getParent());
+            if (Files.exists(destination)) {
+                verbose("Entry name %s is not unique, %s overwrites an already staged file", entry.entryName, entry.path);
+            }
+
+            try {
+                Files.deleteIfExists(destination);
+                Files.createLink(destination, entry.path);
+            } catch (IOException | UnsupportedOperationException e) {
+                Files.copy(entry.path, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            total += Files.size(destination);
+            verbose("File %s staged as %s", entry.path, entry.entryName);
+        }
+
+        return total;
+    }
+
     private static final int MAX_DETAILS = 20;
 
     private void verboseCollectionDetails(String[] items, String prefix) {

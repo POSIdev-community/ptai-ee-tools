@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity;
 
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import lombok.NonNull;
@@ -48,8 +49,6 @@ public class Defaults {
      * See {@link Params#BRANCH_SETTINGS} and {@link Constants#BRANCH_SETTINGS_CUSTOM}
      */
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "";
-
-    public static final String BRANCH_SETTINGS_EXISTING_BRANCH_NAME = "";
 
     /**
      * See {@link Params#SCAN_LABEL}
@@ -158,11 +157,6 @@ public class Defaults {
     public static final String REPORTING_SARIF = FALSE;
 
     /**
-     * See {@link Params#REPORTING_SONARGIIF}
-     */
-    public static final String REPORTING_SONARGIIF = FALSE;
-
-    /**
      * See {@link Params#REPORTING_JSON}
      */
     public static final String REPORTING_JSON = FALSE;
@@ -183,6 +177,11 @@ public class Defaults {
     public static final String REPORTING_REPORT_FILTER = EMPTY;
 
     /**
+     * See {@link Params#REPORTING_REPORT_LOCALE}
+     */
+    public static final String REPORTING_REPORT_LOCALE = Reports.Locale.DEFAULT.getValue();
+
+    /**
      * See {@link Params#REPORTING_RAWDATA_FILE}
      */
     public static final String REPORTING_RAWDATA_FILE = "report.json";
@@ -191,6 +190,11 @@ public class Defaults {
      * See {@link Params#REPORTING_RAWDATA_FILTER}
      */
     public static final String REPORTING_RAWDATA_FILTER = EMPTY;
+
+    /**
+     * See {@link Params#REPORTING_RAWDATA_LOCALE}
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = Reports.Locale.DEFAULT.getValue();
 
     /**
      * See {@link Params#REPORTING_SARIF_FILE}
@@ -202,15 +206,11 @@ public class Defaults {
      */
 
     public static final String REPORTING_SARIF_FILTER = EMPTY;
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILE}
-     */
-    public static final String REPORTING_SONARGIIF_FILE = "sonar_giif_report.json";
 
     /**
-     * See {@link Params#REPORTING_SONARGIIF_FILTER}
+     * See {@link Params#REPORTING_SARIF_LOCALE}
      */
-    public static final String REPORTING_SONARGIIF_FILTER = EMPTY;
+    public static final String REPORTING_SARIF_LOCALE = Reports.Locale.DEFAULT.getValue();
 
     /**
      * See {@link Params#REPORTING_JSON_SETTINGS}

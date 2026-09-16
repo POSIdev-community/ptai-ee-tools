@@ -18,6 +18,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"sonarGiif"})
 @ToString
 public class Reports {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -40,6 +41,35 @@ public class Reports {
          */
         public static Locale from(@NonNull final String value) {
             return VALUES.get(value);
+        }
+
+        public static final Locale DEFAULT = EN;
+
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static Locale parse(final String value) {
+            String text = value == null ? "" : value.trim();
+            for (Locale locale : values()) {
+                if (locale.name().equalsIgnoreCase(text)) {
+                    return locale;
+                }
+            }
+
+            Locale result = VALUES.get(text);
+            if (result == null) {
+                throw new IllegalArgumentException("Unknown report locale: " + value);
+            }
+
+            return result;
+        }
+
+        @NonNull
+        public static Locale of(final String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return DEFAULT;
+            }
+
+            Locale result = VALUES.get(value.trim());
+            return result == null ? DEFAULT : result;
         }
 
         /**
@@ -312,6 +342,12 @@ public class Reports {
         @JsonProperty
         @Builder.Default
         protected IssuesFilter filters = null;
+
+        /**
+         * Language the report is rendered in
+         */
+        @JsonProperty
+        protected Reports.Locale locale;
     }
 
     @Getter
@@ -334,29 +370,14 @@ public class Reports {
         @JsonProperty
         @Builder.Default
         protected IssuesFilter filters = null;
-    }
-
-    @Getter
-    @Setter
-    @ToString
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @SuperBuilder
-    public static class SonarGiif {
-        /**
-         * File name where report should be saved to
-         */
-        @NonNull
-        @JsonProperty
-        protected String fileName;
 
         /**
-         * Report property that contain report generation filters
+         * Language the report is rendered in
          */
         @JsonProperty
-        @Builder.Default
-        protected IssuesFilter filters = null;
+        protected Reports.Locale locale;
     }
+
 
     /**
      * List of human-readable reports to be generated. Such report type
@@ -378,8 +399,6 @@ public class Reports {
     @JsonProperty
     protected List<Sarif> sarif = new ArrayList<>();
 
-    @JsonProperty
-    protected List<SonarGiif> sonarGiif = new ArrayList<>();
 
     /**
      * Builder-like method that adds reports and returns "this" instance
@@ -390,7 +409,6 @@ public class Reports {
         getReport().addAll(reports.getReport());
         getRaw().addAll(reports.getRaw());
         getSarif().addAll(reports.getSarif());
-        getSonarGiif().addAll(reports.getSonarGiif());
         return this;
     }
 }

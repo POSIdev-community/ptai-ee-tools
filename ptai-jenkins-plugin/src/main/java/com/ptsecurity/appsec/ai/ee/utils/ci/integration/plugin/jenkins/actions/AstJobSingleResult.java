@@ -12,13 +12,13 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.PieChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.I18nHelper;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.export.Export;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import hudson.model.Action;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,6 +30,7 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.ch
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 
 @RequiredArgsConstructor
+@Slf4j
 public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuildAction {
     @NonNull
     @Getter
@@ -38,10 +39,6 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
     @Override
     public String getIconFileName() {
         return Plugin.getPluginUrl() + "/icons/logo.svg";
-    }
-
-    public String getLogo48() {
-        return Plugin.getPluginUrl() + "/icons/logo.48x48.svg";
     }
 
     @Override
@@ -62,12 +59,26 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
 
     public ScanBriefDetailed loadScanBriefDetailed() {
         if (null != scanBriefDetailed) return scanBriefDetailed;
-
-        if (null == scanDataPacked) return null;
-        if (SCAN_BRIEF_DETAILED != scanDataPacked.getType()) return null;
-        scanBriefDetailed = scanDataPacked.unpackData(ScanBriefDetailed.class);
-
+        scanBriefDetailed = unpack(scanDataPacked);
         return scanBriefDetailed;
+    }
+
+    public static ScanBriefDetailed unpack(final ScanDataPacked packed) {
+        if (packed == null) {
+            return null;
+        }
+
+        if (SCAN_BRIEF_DETAILED != packed.getType()) {
+            return null;
+        }
+
+        try {
+            return ScanDataPacked.unpackData(packed.getData(), ScanBriefDetailed.class);
+        } catch (Exception e) {
+            log.warn("PT AI scan results were saved by another plugin version and can't be shown");
+            log.debug("Scan results unpack failed", e);
+            return null;
+        }
     }
 
     @Override
@@ -144,7 +155,7 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
     public String getVulnerabilityTypeDistribution() {
         loadScanBriefDetailed();
         if (isEmpty()) return null;
-        Reports.Locale locale = Export.ExportDescriptor.getDefaultLocale();
+        Reports.Locale locale = I18nHelper.uiLocale();
         List<BaseIssueCount> baseIssues = scanBriefDetailed.getDetails().getChartData().getBaseIssueDistributionData();
         Map<Pair<BaseIssue.Level, String>, Long> levelTitleCountMap = baseIssues.stream()
                 .filter(issue -> BaseIssue.ApprovalState.DISCARD != issue.getApprovalState())
@@ -207,7 +218,7 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
             PieChartDataModel.Series.DataItem typeItem = PieChartDataModel.Series.DataItem.builder()
                     .name(I18nHelper.i18n(type))
                     .itemStyle(PieChartDataModel.Series.DataItem.ItemStyle.builder()
-                            .color("#" + Integer.toHexString(TYPE_COLORS.get(type)))
+                            .color(typeColor(type))
                             .build())
                     .value(count)
                     .build();

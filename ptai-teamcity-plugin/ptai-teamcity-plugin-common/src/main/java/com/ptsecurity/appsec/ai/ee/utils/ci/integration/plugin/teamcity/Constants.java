@@ -4,11 +4,6 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 
 public class Constants {
     /**
-     * Value of mode parameter when user clicks on "Save" button
-     */
-    public static final String MODE_SAVE = "save";
-
-    /**
      * Value of mode parameter when user clicks on "Test" button
      */
     public static final String MODE_TEST = "test";

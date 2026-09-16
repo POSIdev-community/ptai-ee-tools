@@ -5,7 +5,6 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 
-import java.io.File;
 import java.util.UUID;
 
 /**
@@ -16,14 +15,25 @@ import java.util.UUID;
  * inside AST job and are to be implemented differently
  */
 public interface AstOperations {
-    /** Create zipped sources archive. Method marked as abstract as different
-     * environments may require different approaches to this procedure.
-     * For example, Jenkins plugin may be executed on a remote build agent
-     * and it's recommended to work with files using MasterToSlaveCallable approach
-     * Method may return null if resulting archive file is empty
-     * @return Zip archive with sources ready to be uploaded to PT AI server
+    /**
+     * Collect files that match transfer settings into a staging folder. Folder is
+     * created on a host that runs aictl, which is a CI agent and not necessarily a
+     * host that executes this code: Jenkins runs build steps in a controller JVM
+     * while a workspace lives on an agent.
+     * Ant-style include / exclude patterns, "remove prefix" and "flatten" options
+     * are applied during collection because aictl itself understands gitignore-style
+     * exclusions only
+     * @return Absolute path of a staging folder on a host where aictl runs, or null
+     * if no files match transfer settings
      */
-    File createZip() throws GenericException;
+    String stageSources() throws GenericException;
+
+    /**
+     * Remove a staging folder created by {@link AstOperations#stageSources()}.
+     * Implementation is not to fail a build when cleanup is unsuccessful
+     * @param path Value previously returned by {@link AstOperations#stageSources()}
+     */
+    void cleanupSources(final String path);
 
     /**
      * Callback method is being called when AST job is started on PT AI server.
