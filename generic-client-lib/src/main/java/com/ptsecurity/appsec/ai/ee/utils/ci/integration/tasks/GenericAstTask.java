@@ -20,7 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,19 +34,6 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSe
 @Slf4j
 public class GenericAstTask extends AbstractTaskImpl {
     public static final String DEFAULT_BRANCH_NAME = "default";
-
-    private static final Map<String, ScanBrief.ScanSettings.Engine> ENGINES = new HashMap<>();
-
-    static {
-        ENGINES.put("patternmatching", ScanBrief.ScanSettings.Engine.PM);
-        ENGINES.put("staticcodeanalysis", ScanBrief.ScanSettings.Engine.STATICCODEANALYSIS);
-        ENGINES.put("blackbox", ScanBrief.ScanSettings.Engine.BLACKBOX);
-        ENGINES.put("configuration", ScanBrief.ScanSettings.Engine.CONFIGURATION);
-        ENGINES.put("components", ScanBrief.ScanSettings.Engine.DC);
-        ENGINES.put("softwarecompositionanalysis", ScanBrief.ScanSettings.Engine.DC);
-        ENGINES.put("dataflowanalysis", ScanBrief.ScanSettings.Engine.TAINT);
-        ENGINES.put("vulnerablesourcecode", ScanBrief.ScanSettings.Engine.AI);
-    }
 
     public GenericAstTask(@NonNull final AictlClient client) {
         super(client);
@@ -307,15 +296,6 @@ public class GenericAstTask extends AbstractTaskImpl {
             @NonNull final InputStream aiproj) throws Exception {
         JsonNode root = BaseJsonHelper.createObjectMapper().readTree(aiproj);
 
-        Set<ScanBrief.ScanSettings.Engine> engines = new HashSet<>();
-        for (JsonNode module : root.path("ScanModules")) {
-            ScanBrief.ScanSettings.Engine engine =
-                    ENGINES.get(module.asText("").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", ""));
-            if (engine != null) {
-                engines.add(engine);
-            }
-        }
-
         List<ScanBrief.ScanSettings.Language> languages = new ArrayList<>();
         for (JsonNode language : root.path("ProgrammingLanguages")) {
             try {
@@ -325,46 +305,8 @@ public class GenericAstTask extends AbstractTaskImpl {
             }
         }
 
-        builder.engines(engines)
-                .languages(languages)
-                .language(languages.isEmpty() ? null : languages.get(0))
-                .usePublicAnalysisMethod(anyFlag(root, "UsePublicAnalysisMethod"))
-                .downloadDependencies(anyFlag(root, "DownloadDependencies"))
-                .unpackUserPackages(anyFlag(root, "UnpackUserPackages"))
-                .customParameters(firstText(root, "CustomParameters"))
-                .autocheckAfterScan(root.path("BlackBoxSettings").path("RunAutocheckAfterScan").asBoolean(false));
-    }
-
-    private static boolean anyFlag(@NonNull final JsonNode root, @NonNull final String name) {
-        if (root.path(name).isBoolean()) {
-            return root.path(name).asBoolean(false);
-        }
-
-        for (JsonNode child : root) {
-            if (child.isObject() && child.path(name).asBoolean(false)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static String firstText(@NonNull final JsonNode root, @NonNull final String name) {
-        String value = root.path(name).asText("");
-        if (!value.isEmpty()) {
-            return value;
-        }
-
-        for (JsonNode child : root) {
-            if (!child.isObject()) {
-                continue;
-            }
-            value = child.path(name).asText("");
-            if (!value.isEmpty()) {
-                return value;
-            }
-        }
-        return "";
+        builder.languages(languages)
+                .language(languages.isEmpty() ? null : languages.get(0));
     }
 
     public void appendResults(@NonNull final ScanBrief scanBrief) throws GenericException {

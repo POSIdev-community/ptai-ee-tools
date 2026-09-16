@@ -2,14 +2,14 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service
 
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
@@ -240,7 +240,10 @@ public class AstSettingsService {
                 results.add(JSON_SETTINGS, MESSAGE_JSON_SETTINGS_EMPTY);
             else {
                 try {
-                    UnifiedAiProjScanSettings.parse(bean.get(JSON_SETTINGS));
+                    AictlAiproj.Result aiproj = AictlAiproj.check(ServerEnvironment.get(), bean.get(JSON_SETTINGS));
+                    if (!aiproj.isValid()) {
+                        results.add(JSON_SETTINGS, String.join("; ", aiproj.getErrors()));
+                    }
                 } catch (GenericException e) {
                     results.add(JSON_SETTINGS, e.getDetailedMessage());
                     log.warn(e.getDetailedMessage(), e);
@@ -388,8 +391,9 @@ public class AstSettingsService {
                     results.failure();
                 }
             } else {
-                UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(bean.getProperties().get(JSON_SETTINGS));
-                results.add("JSON settings are verified, project name is " + settings.getProjectName());
+                results.add("JSON settings are verified, project name is "
+                        + AictlAiproj.projectName(bean.getProperties().get(JSON_SETTINGS)));
+
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
                 if (policyJson != null) {
                     results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
