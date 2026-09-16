@@ -28,7 +28,10 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
         log.trace("Check JSON settings");
 
         UnifiedAiProjScanSettings scanSettings = UnifiedAiProjScanSettings.loadSettings(jsonSettings);
-        checkPolicyAccordance(scanSettings, jsonPolicy);
+        if (isPolicyConflict(scanSettings, jsonPolicy)) {
+            owner.warning(Resources.i18n_ast_settings_type_manual_json_policy_message_conflict());
+        }
+
         jsonSettings = scanSettings.toJson();
         ProjectTasks projectTasks = new Factory().projectTasks(owner.getClient());
 
@@ -46,23 +49,11 @@ public class JsonAstJobSetupOperationsImpl extends AbstractSetupOperations imple
         return brief.getProjectId();
     }
 
-    public static void checkPolicyAccordance(
+    public static boolean isPolicyConflict(
             @NonNull final UnifiedAiProjScanSettings scanSettings,
-            final String jsonPolicy) throws GenericException {
-        if (StringUtils.isEmpty(jsonPolicy)) {
-            return;
-        }
-
-        if (!scanSettings.isUseSecurityPoliciesDefined()) {
-            return;
-        }
-
-        if (Boolean.TRUE.equals(scanSettings.isUseSecurityPolicies())) {
-            return;
-        }
-
-        throw GenericException.raise(
-                Resources.i18n_ast_settings_type_manual_json_policy_message_conflict(),
-                new IllegalArgumentException());
+            final String jsonPolicy) {
+        return StringUtils.isNotEmpty(jsonPolicy)
+                && scanSettings.isUseSecurityPoliciesDefined()
+                && !scanSettings.isUseSecurityPolicies();
     }
 }

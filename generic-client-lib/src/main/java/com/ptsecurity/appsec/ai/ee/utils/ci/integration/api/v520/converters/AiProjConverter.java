@@ -610,7 +610,9 @@ public class AiProjConverter {
             final Policy[] policy,
             @NonNull final SecurityPoliciesModel model) {
         if (null == policy) {
-            model.setCheckSecurityPoliciesAccordance(settings.isUseSecurityPolicies());
+            if (settings.isUseSecurityPolicies()) {
+                model.setCheckSecurityPoliciesAccordance(true);
+            }
             return model;
         }
 
