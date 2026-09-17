@@ -156,7 +156,9 @@ l.layout(title: Resources.i18n_ast_result_label()) {
         def language = scanBriefDetailed.scanSettings.language;
         if (null == language) {
             def languages = scanBriefDetailed.scanSettings.languages;
-            if (languages != null && languages.size() == 1) {
+            if (!languages) {
+                scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = Resources.i18n_misc_strings_empty()
+            } else if (languages.size() == 1) {
                 scanSettings[Resources.i18n_ast_settings_base_programminglanguage_label()] = "${languages.get(0)}"
             } else {
                 scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = "${scanBriefDetailed.scanSettings.languages}"

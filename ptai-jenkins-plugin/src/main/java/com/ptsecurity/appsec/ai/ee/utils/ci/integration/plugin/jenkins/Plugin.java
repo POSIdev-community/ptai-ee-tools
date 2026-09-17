@@ -46,6 +46,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -90,6 +91,41 @@ public class Plugin extends Builder implements SimpleBuildStep {
             this.transfers = new ArrayList<>();
         else
             this.transfers = transfers;
+    }
+
+    public static final String SCAN_TYPE_STANDARD = "STANDARD";
+    public static final String SCAN_TYPE_SBOM = "SBOM";
+
+    private String scanType;
+
+    @Getter
+    private String sbomProjectName;
+
+    @Getter
+    private String sbomPath;
+
+    @NonNull
+    public String getScanType() {
+        return SCAN_TYPE_SBOM.equals(scanType) ? SCAN_TYPE_SBOM : SCAN_TYPE_STANDARD;
+    }
+
+    @DataBoundSetter
+    public void setScanType(final String scanType) {
+        this.scanType = scanType;
+    }
+
+    public boolean isSbomScan() {
+        return SCAN_TYPE_SBOM.equals(getScanType());
+    }
+
+    @DataBoundSetter
+    public void setSbomProjectName(final String sbomProjectName) {
+        this.sbomProjectName = sbomProjectName;
+    }
+
+    @DataBoundSetter
+    public void setSbomPath(final String sbomPath) {
+        this.sbomPath = sbomPath;
     }
 
     @DataBoundConstructor
@@ -150,17 +186,38 @@ public class Plugin extends Builder implements SimpleBuildStep {
         // "PT AI EE server connection settings are defined locally" descriptor
         ConfigCustom.Descriptor configCustomDescriptor = Jenkins.get().getDescriptorByType(ConfigCustom.Descriptor.class);
 
-        boolean selectedScanSettingsUi = scanSettings instanceof ScanSettingsUi;
-        String jsonSettings = selectedScanSettingsUi ? null : ((ScanSettingsManual) scanSettings).getJsonSettings();
-        String jsonPolicy = selectedScanSettingsUi ? null : ((ScanSettingsManual) scanSettings).getJsonPolicy();
+        boolean sbomScan = isSbomScan();
+        boolean selectedScanSettingsUi = !sbomScan && scanSettings instanceof ScanSettingsUi;
+        String jsonSettings = null;
+        String jsonPolicy = null;
+        String sbomPath = null;
 
         String projectName;
-        if (selectedScanSettingsUi) {
+        if (sbomScan) {
+            projectName = Util.replaceMacro(sbomProjectName, buildInfo.getEnvVars());
+            log.trace("SBOM project name after macro replacement is {}", projectName);
+            check = descriptor.doCheckSbomProjectName(projectName);
+            if (check.kind == FormValidation.Kind.ERROR) {
+                throw new AbortException(check.getMessage());
+            }
+
+            sbomPath = Util.replaceMacro(getSbomPath(), buildInfo.getEnvVars());
+            log.trace("SBOM file path after macro replacement is {}", sbomPath);
+            check = descriptor.doCheckSbomPath(sbomPath);
+            if (check.kind == FormValidation.Kind.ERROR) {
+                throw new AbortException(check.getMessage());
+            }
+        } else if (selectedScanSettingsUi) {
             projectName = ((ScanSettingsUi) scanSettings).getProjectName();
             log.trace("UI-defined project name before macro replacement is {}", projectName);
             projectName = Util.replaceMacro(projectName, buildInfo.getEnvVars());
             log.trace("UI-defined project name after macro replacement is {}", projectName);
         } else {
+            if (scanSettings instanceof ScanSettingsManual) {
+                jsonSettings = ((ScanSettingsManual) scanSettings).getJsonSettings();
+                jsonPolicy = ((ScanSettingsManual) scanSettings).getJsonPolicy();
+            }
+
             if (StringUtils.isBlank(jsonSettings)) {
                 throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
             }
@@ -208,15 +265,15 @@ public class Plugin extends Builder implements SimpleBuildStep {
         advancedSettings.apply(descriptor.getAdvancedSettings());
         advancedSettings.apply(this.advancedSettings);
 
-        String branchName = getBranchName(buildInfo, projectName);
+        String branchName = sbomScan ? null : getBranchName(buildInfo, projectName);
         String scanLabel = scanLabelSettings.getScanLabel();
 
         check = descriptor.doTestProjectFields(
-                scanSettings, config,
+                sbomScan ? null : scanSettings, config,
                 jsonSettings, jsonPolicy,
                 projectName,
                 serverUrl, credentialsId, configName,
-                branchSettings,
+                sbomScan ? null : branchSettings,
                 branchName,
                 scanLabel);
         if (FormValidation.Kind.ERROR == check.kind)
@@ -231,7 +288,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
 
         JenkinsAstJob job = JenkinsAstJob.builder()
-                .projectName(selectedScanSettingsUi ? projectName : null)
+                .projectName(sbomScan || selectedScanSettingsUi ? projectName : null)
+                .sbomScan(sbomScan)
+                .sbomPath(sbomPath)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
                 .console(listener.getLogger())
@@ -252,8 +311,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .buildInfo(buildInfo)
                 .transfers(transfers)
                 .fullScanMode(fullScanMode)
-                .jsonSettings(selectedScanSettingsUi ? null : jsonSettings)
-                .jsonPolicy(selectedScanSettingsUi ? null : jsonPolicy)
+                .jsonSettings(jsonSettings)
+                .jsonPolicy(jsonPolicy)
                 .advancedSettings(advancedSettings)
                 .build();
         if (workMode instanceof WorkModeSync) {

@@ -84,6 +84,51 @@
             BS.MultilineProperties.updateVisible();
         };
 
+        var ptaiSbomFieldRows = [ 'row_${SBOM_PROJECT_NAME}', 'row_${SBOM_PATH}' ];
+        var ptaiStandardScanFieldRows = [ 'row_${BRANCH_SETTINGS}', 'row_${AST_SETTINGS}', 'row_${FULL_SCAN_MODE}' ];
+
+        ptaiScanScopeShowHide = function (show) {
+            let scope = $('ptai-scan-scope');
+            if (!scope) {
+                return;
+            }
+
+            let title = scope.previous();
+            let hasTitle = title && (title.hasClassName('groupingTitle') || title.down('.groupingTitle'));
+            if (show) {
+                BS.Util.show(scope);
+                if (hasTitle) {
+                    BS.Util.show(title);
+                }
+            } else {
+                BS.Util.hide(scope);
+                if (hasTitle) {
+                    BS.Util.hide(title);
+                }
+            }
+        };
+
+        ptaiScanTypeChange = function () {
+            if ($('${SCAN_TYPE}').value === '${SCAN_TYPE_SBOM}') {
+                BS.Util.show(...ptaiSbomFieldRows);
+                BS.Util.hide(
+                    ...ptaiStandardScanFieldRows,
+                    ...ptaiCustomBranchFieldRows,
+                    ...ptaiAstSettingsUiFieldRows,
+                    ...ptaiAstSettingsJsonFieldRows
+                );
+
+                ptaiScanScopeShowHide(false);
+            } else {
+                BS.Util.hide(...ptaiSbomFieldRows);
+                BS.Util.show(...ptaiStandardScanFieldRows);
+                ptaiScanScopeShowHide(true);
+                ptaiBranchSettingsChange();
+                ptaiAstSettingsChange();
+            }
+            BS.MultilineProperties.updateVisible();
+        };
+
         // Array of table row identifiers that are to be shown if report generation option is checked
         var ptaiReportingReportFieldRows = [
             'row_${REPORTING_REPORT_FILE}',
@@ -202,6 +247,7 @@
         ptaiAstSettingsChange();
         ptaiAstWorkModeChange();
         ptaiBranchSettingsChange();
+        ptaiScanTypeChange();
     });
 </script>
 
@@ -278,6 +324,45 @@
 
 <l:settingsGroup title="General AST settings">
     <tbody class="ptai-group">
+
+    <tr id="row_${SCAN_TYPE}">
+        <th>
+            <label for="${SCAN_TYPE}">${LABEL_SCAN_TYPE}</label></th>
+        <td>
+            <props:selectProperty
+                    name="${SCAN_TYPE}" enableFilter="true"
+                    className="mediumField" onchange="ptaiScanTypeChange()">
+                <props:option value="${SCAN_TYPE_STANDARD}"
+                              currValue="${propertiesBean.properties[SCAN_TYPE]}">${LABEL_SCAN_TYPE_STANDARD}</props:option>
+                <props:option value="${SCAN_TYPE_SBOM}"
+                              currValue="${propertiesBean.properties[SCAN_TYPE]}">${LABEL_SCAN_TYPE_SBOM}</props:option>
+            </props:selectProperty>
+            <span class="smallNote">${HINT_SCAN_TYPE}</span>
+            <span class="error" id="error_${SCAN_TYPE}"></span>
+        </td>
+    </tr>
+
+    <tr id="row_${SBOM_PROJECT_NAME}">
+        <th>
+            <label for="${SBOM_PROJECT_NAME}">${LABEL_SBOM_PROJECT_NAME}<l:star/></label>
+        </th>
+        <td>
+            <props:textProperty name="${SBOM_PROJECT_NAME}" className="longField"/>
+            <span class="smallNote">${HINT_SBOM_PROJECT_NAME}</span>
+            <span class="error" id="error_${SBOM_PROJECT_NAME}"></span>
+        </td>
+    </tr>
+
+    <tr id="row_${SBOM_PATH}">
+        <th>
+            <label for="${SBOM_PATH}">${LABEL_SBOM_PATH}<l:star/></label>
+        </th>
+        <td>
+            <props:textProperty name="${SBOM_PATH}" className="longField"/>
+            <span class="smallNote">${HINT_SBOM_PATH}</span>
+            <span class="error" id="error_${SBOM_PATH}"></span>
+        </td>
+    </tr>
 
     <tr id="row_${BRANCH_SETTINGS}">
         <th>
@@ -680,7 +765,7 @@
         </td>
     </tr>
 
-    <tr class="advancedSetting">
+    <tr id="row_${FULL_SCAN_MODE}" class="advancedSetting">
         <th>
             <label for="${FULL_SCAN_MODE}">${LABEL_FULL_SCAN_MODE}</label>
         </th>
@@ -703,7 +788,7 @@
 </l:settingsGroup>
 
 <l:settingsGroup title="Scan scope">
-    <tbody class="ptai-group">
+    <tbody id="ptai-scan-scope" class="ptai-group">
     <tr>
         <th>
             <label for="${INCLUDES}">${LABEL_INCLUDES}<l:star/></label>

@@ -29,6 +29,12 @@ public class Labels {
 
     public static final String SCAN_LABEL = "Scan label";
 
+    public static final String SCAN_TYPE = "Scan type";
+    public static final String SCAN_TYPE_STANDARD = "Standard scan";
+    public static final String SCAN_TYPE_SBOM = "SBOM scan";
+    public static final String SBOM_PROJECT_NAME = "SBOM project name";
+    public static final String SBOM_PATH = "SBOM file path";
+
     public static final String AST_SETTINGS = "Scan settings type";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
     public static final String AST_SETTINGS_UI = Resources.i18n_ast_settings_type_ui_label();

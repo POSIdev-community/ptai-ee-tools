@@ -90,6 +90,20 @@ public class GenericAstTask extends AbstractTaskImpl {
         return client.startScan(projectId, branchId, fullScanMode, scanLabel);
     }
 
+    @NonNull
+    public UUID setupSbomProject(
+            @NonNull final String projectName,
+            @NonNull final String sbomPath) throws GenericException {
+        return client.createSbomProject(projectName, sbomPath);
+    }
+
+    @NonNull
+    public UUID startSbomScan(
+            @NonNull final UUID projectId,
+            final String scanLabel) throws GenericException {
+        return client.startSbomScan(projectId, scanLabel);
+    }
+
     public void waitForComplete(
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId,
@@ -227,6 +241,28 @@ public class GenericAstTask extends AbstractTaskImpl {
             final String branchName,
             final String scanLabel,
             final String projectName) throws GenericException {
+        return scanBrief(projectId, scanResultId, branchId.toString(), scanLabel, projectName,
+                loadScanSettings(projectId, scanResultId, branchName));
+    }
+
+    @NonNull
+    public ScanBrief createSbomScanBrief(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            final String scanLabel,
+            final String projectName) throws GenericException {
+        return scanBrief(projectId, scanResultId, null, scanLabel, projectName,
+                ScanBrief.ScanSettings.builder().id(scanResultId).build());
+    }
+
+    @NonNull
+    private ScanBrief scanBrief(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId,
+            final String branchId,
+            final String scanLabel,
+            final String projectName,
+            @NonNull final ScanBrief.ScanSettings scanSettings) throws GenericException {
         String serverVersion = client.getServerVersion();
         AgentInfo agent = soleAgent();
 
@@ -239,9 +275,9 @@ public class GenericAstTask extends AbstractTaskImpl {
                 .id(scanResultId)
                 .projectId(projectId)
                 .projectName(projectName == null ? "" : projectName)
-                .branchId(branchId.toString())
+                .branchId(branchId)
                 .scanLabel(scanLabel)
-                .scanSettings(loadScanSettings(projectId, scanResultId, branchName))
+                .scanSettings(scanSettings)
                 .build();
     }
 

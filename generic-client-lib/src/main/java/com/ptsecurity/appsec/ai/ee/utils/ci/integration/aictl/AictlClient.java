@@ -115,6 +115,29 @@ public class AictlClient {
         return ids.get(0);
     }
 
+    @NonNull
+    public UUID createSbomProject(
+            @NonNull final String name,
+            @NonNull final String sbomPath) throws GenericException {
+        AictlResult result = checked(
+                "PT AI SBOM project create failed",
+                command("create", "sbom-project", name, "--file", sbomPath, "--safe"));
+
+        List<UUID> ids = uuids(result.getStdout());
+        if (!ids.isEmpty()) {
+            return ids.get(0);
+        }
+
+        UUID id = searchProjectId(name);
+        if (id == null) {
+            throw GenericException.raise(
+                    "PT AI SBOM project create returned no identifier",
+                    new IllegalStateException(result.getStdout()));
+        }
+
+        return id;
+    }
+
     public void setProjectSettings(
             @NonNull final UUID projectId,
             @NonNull final String aiprojPath) throws GenericException {
@@ -251,6 +274,27 @@ public class AictlClient {
         if (ids.isEmpty()) {
             throw GenericException.raise(
                     "PT AI project scan start returned no scan result identifier",
+                    new IllegalStateException(result.getStdout()));
+        }
+
+        return ids.get(0);
+    }
+
+    @NonNull
+    public UUID startSbomScan(
+            @NonNull final UUID projectId,
+            final String scanLabel) throws GenericException {
+        Command.CommandBuilder builder = commandBuilder("scan", "sbom", projectId.toString());
+
+        if (StringUtils.isNotBlank(scanLabel)) {
+            builder.arg("--scan-label").arg(scanLabel.trim());
+        }
+
+        AictlResult result = checked("PT AI SBOM scan start failed", builder.build());
+        List<UUID> ids = uuids(result.getStdout());
+        if (ids.isEmpty()) {
+            throw GenericException.raise(
+                    "PT AI SBOM scan start returned no scan result identifier",
                     new IllegalStateException(result.getStdout()));
         }
 

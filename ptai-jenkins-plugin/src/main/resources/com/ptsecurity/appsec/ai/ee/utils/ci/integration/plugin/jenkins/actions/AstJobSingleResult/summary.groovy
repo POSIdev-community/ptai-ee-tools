@@ -16,7 +16,7 @@ t.summary(icon: my.getIconFileName()) {
     div() {
         b(Resources.i18n_ast_plugin_label() + " (")
         def branchId = scanBriefDetailed.getBranchId()
-        if (branchId.isEmpty()) {
+        if (!branchId) {
             a(href: scanBriefDetailed.ptaiServerUrl + "/ui/projects/" + scanBriefDetailed.projectId + "/scan/" + scanBriefDetailed.id) {
                 text(_("project.open.ui.label"))
             }

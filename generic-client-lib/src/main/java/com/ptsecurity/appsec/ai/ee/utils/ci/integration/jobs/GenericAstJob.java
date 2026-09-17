@@ -71,6 +71,16 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Setter
     protected String scanLabel;
 
+    @Getter
+    @Setter
+    @Builder.Default
+    protected boolean sbomScan = false;
+
+    @Getter
+    @Setter
+    @Builder.Default
+    protected String sbomPath = null;
+
     @Builder.Default
     protected UUID branchId = null;
 
@@ -139,43 +149,18 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         }
 
         GenericAstTask genericAstTask = new GenericAstTask(client);
-        setupProject(genericAstTask);
-
-        process(Stage.ZIP);
-        String sourcesPath = astOps.stageSources();
-        try {
-            branchId = genericAstTask.resolveBranch(projectId, branchName, null);
-            if (branchName == null || branchName.trim().isEmpty()) {
-                branchName = GenericAstTask.DEFAULT_BRANCH_NAME;
-            }
-
-            if (StringUtils.isNotEmpty(sourcesPath)) {
-                process(Stage.UPLOAD);
-                genericAstTask.upload(projectId, branchId, sourcesPath);
-            } else {
-                info("No files match transfer settings, scan will use previously uploaded sources");
-            }
-        } finally {
-            astOps.cleanupSources(sourcesPath);
+        if (isSbomScan()) {
+            startSbomScan(genericAstTask);
+        } else {
+            startSourcesScan(genericAstTask);
         }
 
-        // Start scan
-        process(Stage.ENQUEUED);
-        scanResultId = genericAstTask.startScan(projectId, branchId, fullScanMode, scanLabel);
-
-        boolean isScanLabelEmpty = scanLabel == null || scanLabel.trim().isEmpty();
-        String scanEnqueuedFormat = "Scan enqueued, project name: %s, project id: %s, branch name: %s, branch id: %s" +
-                (!isScanLabelEmpty ? ", scan label: %s" : "") +
-                ", result id: %s";
-
-        Object[] scanEnqueuedArgs = !isScanLabelEmpty
-                ? new Object[]{projectName, projectId, branchName, branchId, scanLabel, scanResultId}
-                : new Object[]{projectName, projectId, branchName, branchId, scanResultId};
-
-        info(scanEnqueuedFormat, scanEnqueuedArgs);
+        info("Scan enqueued, %s", scanDescription());
 
         // Now we know scan result ID, so create initial scan brief with ID's and scan settings
-        scanBrief = genericAstTask.createScanBrief(projectId, scanResultId, branchId, branchName, scanLabel, projectName);
+        scanBrief = isSbomScan()
+                ? genericAstTask.createSbomScanBrief(projectId, scanResultId, scanLabel, projectName)
+                : genericAstTask.createScanBrief(projectId, scanResultId, branchId, branchName, scanLabel, projectName);
         scanBrief.setUseAsyncScan(async);
 
         // Notify descendants about scan started event
@@ -218,15 +203,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                 ? null
                 : ScanDiagnostic.create(scanBrief, scanErrors, performance());
 
-        String scanFinishedFormat = "Scan finished, project name: %s, project id: %s, branch name: %s, branch id: %s" +
-                (!isScanLabelEmpty ? ", scan label: %s" : "") +
-                ", result id: %s";
-
-        Object[] scanFinishedArgs = !isScanLabelEmpty
-                ? new Object[]{projectName, projectId, branchName, branchId, scanLabel, scanResultId}
-                : new Object[]{projectName, projectId, branchName, branchId, scanResultId};
-
-        info(scanFinishedFormat, scanFinishedArgs);
+        info("Scan finished, %s", scanDescription());
 
         fine("Resulting state is " + scanBrief.getState());
         if (!EnumSet.of(DONE, ABORTED, FAILED, ABORTED_FROM_CI).contains(scanBrief.getState())) {
@@ -278,6 +255,77 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         info(Resources.i18n_ast_result_status_success_label());
     }
 
+    protected void startSourcesScan(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+        setupProject(genericAstTask);
+
+        process(Stage.ZIP);
+        String sourcesPath = astOps.stageSources();
+        try {
+            branchId = genericAstTask.resolveBranch(projectId, branchName, null);
+            if (branchName == null || branchName.trim().isEmpty()) {
+                branchName = GenericAstTask.DEFAULT_BRANCH_NAME;
+            }
+
+            if (StringUtils.isNotEmpty(sourcesPath)) {
+                process(Stage.UPLOAD);
+                genericAstTask.upload(projectId, branchId, sourcesPath);
+            } else {
+                info("No files match transfer settings, scan will use previously uploaded sources");
+            }
+        } finally {
+            astOps.cleanupSources(sourcesPath);
+        }
+
+        process(Stage.ENQUEUED);
+        scanResultId = genericAstTask.startScan(projectId, branchId, fullScanMode, scanLabel);
+    }
+
+    protected void startSbomScan(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+        if (StringUtils.isEmpty(projectName)) {
+            throw GenericException.raise(
+                    "PT AI project name is not defined",
+                    new IllegalArgumentException("projectName"));
+        }
+
+        if (StringUtils.isEmpty(sbomPath)) {
+            throw GenericException.raise(
+                    Resources.i18n_ast_settings_sbom_path_message_empty(),
+                    new IllegalArgumentException("sbomPath"));
+        }
+
+        if (fullScanMode) {
+            fine("Full scan mode does not apply to SBOM scan and is ignored");
+        }
+
+        process(Stage.UPLOAD);
+        String sbomFile = astOps.sbomFile(sbomPath);
+        projectId = genericAstTask.setupSbomProject(projectName, sbomFile);
+        fine("PT AI SBOM project %s id is %s, SBOM file %s uploaded", projectName, projectId, sbomFile);
+
+        process(Stage.ENQUEUED);
+        scanResultId = genericAstTask.startSbomScan(projectId, scanLabel);
+    }
+
+    @NonNull
+    protected String scanDescription() {
+        StringBuilder result = new StringBuilder()
+                .append("project name: ").append(projectName)
+                .append(", project id: ").append(projectId);
+
+        if (isSbomScan()) {
+            result.append(", SBOM file: ").append(sbomPath);
+        } else {
+            result.append(", branch name: ").append(branchName)
+                    .append(", branch id: ").append(branchId);
+        }
+
+        if (StringUtils.isNotBlank(scanLabel)) {
+            result.append(", scan label: ").append(scanLabel);
+        }
+
+        return result.append(", result id: ").append(scanResultId).toString();
+    }
+
     protected void setupProject(@NonNull final GenericAstTask genericAstTask) throws GenericException {
         ProjectTask projectTask = new ProjectTask(client);
 
@@ -323,6 +371,13 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     }
 
     protected void appendStatistics() throws GenericException {
+        if (isSbomScan() && StringUtils.isEmpty(scanBrief.getBranchId())) {
+            String branchId = scanReports().getEnglish().getScanInfo().path("branchId").asText("");
+            if (!branchId.isEmpty()) {
+                scanBrief.setBranchId(branchId);
+            }
+        }
+
         ScanBrief.Statistics reported = scanReports().convert(scanBrief).getStatistics();
         ScanBrief.Statistics current = scanBrief.getStatistics();
         if (reported == null) {
