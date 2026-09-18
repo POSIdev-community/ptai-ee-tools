@@ -62,6 +62,23 @@
 <c:set var="LABEL_SCAN_LABEL" value="<%=Labels.SCAN_LABEL%>"/>
 <c:set var="HINT_SCAN_LABEL" value="<%=Hints.SCAN_LABEL%>"/>
 
+<c:set var="SCAN_TYPE" value="<%=Params.SCAN_TYPE%>"/>
+<c:set var="LABEL_SCAN_TYPE" value="<%=Labels.SCAN_TYPE%>"/>
+<c:set var="HINT_SCAN_TYPE" value="<%=Hints.SCAN_TYPE%>"/>
+
+<c:set var="SCAN_TYPE_STANDARD" value="<%=Constants.SCAN_TYPE_STANDARD%>"/>
+<c:set var="LABEL_SCAN_TYPE_STANDARD" value="<%=Labels.SCAN_TYPE_STANDARD%>"/>
+<c:set var="SCAN_TYPE_SBOM" value="<%=Constants.SCAN_TYPE_SBOM%>"/>
+<c:set var="LABEL_SCAN_TYPE_SBOM" value="<%=Labels.SCAN_TYPE_SBOM%>"/>
+
+<c:set var="SBOM_PROJECT_NAME" value="<%=Params.SBOM_PROJECT_NAME%>"/>
+<c:set var="LABEL_SBOM_PROJECT_NAME" value="<%=Labels.SBOM_PROJECT_NAME%>"/>
+<c:set var="HINT_SBOM_PROJECT_NAME" value="<%=Hints.SBOM_PROJECT_NAME%>"/>
+
+<c:set var="SBOM_PATH" value="<%=Params.SBOM_PATH%>"/>
+<c:set var="LABEL_SBOM_PATH" value="<%=Labels.SBOM_PATH%>"/>
+<c:set var="HINT_SBOM_PATH" value="<%=Hints.SBOM_PATH%>"/>
+
 <c:set var="AST_SETTINGS" value="<%=Params.AST_SETTINGS%>"/>
 <c:set var="LABEL_AST_SETTINGS" value="<%=Labels.AST_SETTINGS%>"/>
 <c:set var="HINT_AST_SETTINGS" value="<%=Hints.AST_SETTINGS%>"/>

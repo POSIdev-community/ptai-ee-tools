@@ -145,9 +145,12 @@ public class AstSettingsService {
     public static BasePropertiesBean parseAstSettings(
             @NonNull final HttpServletRequest request, final PropertiesBean bean) {
         PropertiesBean res = (null == bean) ? new PropertiesBean() : bean;
+        res.fill(SCAN_TYPE, request);
         res.fill(AST_SETTINGS, request);
 
-        if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
+        if (SCAN_TYPE_SBOM.equals(res.get(SCAN_TYPE)))
+            res.fill(SBOM_PROJECT_NAME, request).fill(SBOM_PATH, request);
+        else if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
             res.fill(JSON_SETTINGS, request).fill(JSON_POLICY, request);
         else if (AST_SETTINGS_UI.equals(res.get(AST_SETTINGS)))
             res.fill(PROJECT_NAME, request);
@@ -232,7 +235,15 @@ public class AstSettingsService {
      */
     protected static void validateAstSettings(@NonNull final PropertiesBean bean, @NonNull final VerificationResults results) {
         // JavaScript handlers are named as on[Error ID]Error like "onEmptyUrlError"
-        if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI) && bean.empty(PROJECT_NAME))
+        boolean sbomScan = bean.eq(SCAN_TYPE, SCAN_TYPE_SBOM);
+        if (sbomScan) {
+            if (bean.empty(SBOM_PROJECT_NAME)) {
+                results.add(SBOM_PROJECT_NAME, Resources.i18n_ast_settings_sbom_projectname_message_empty());
+            }
+            if (bean.empty(SBOM_PATH)) {
+                results.add(SBOM_PATH, Resources.i18n_ast_settings_sbom_path_message_empty());
+            }
+        } else if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI) && bean.empty(PROJECT_NAME))
             results.add(PROJECT_NAME, MESSAGE_PROJECT_NAME_EMPTY);
         else if (bean.eq(AST_SETTINGS, AST_SETTINGS_JSON)) {
             // Settings and policy are defined with JSON, let's validate them
@@ -258,18 +269,23 @@ public class AstSettingsService {
             }
         }
 
-        validateBranchSettings(bean, results);
         validateScanLabel(bean, results);
 
-        if (bean.empty(INCLUDES))
-            results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
-        if (bean.empty(PATTERN_SEPARATOR))
-            results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_EMPTY);
-        else {
-            try {
-                Pattern.compile(bean.get(PATTERN_SEPARATOR));
-            } catch (PatternSyntaxException e) {
-                results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_INVALID);
+        if (!sbomScan) {
+            validateBranchSettings(bean, results);
+
+            if (bean.empty(INCLUDES)) {
+                results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
+            }
+            if (bean.empty(PATTERN_SEPARATOR)) {
+                results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_EMPTY);
+            }
+            else {
+                try {
+                    Pattern.compile(bean.get(PATTERN_SEPARATOR));
+                } catch (PatternSyntaxException e) {
+                    results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_INVALID);
+                }
             }
         }
 
@@ -382,7 +398,13 @@ public class AstSettingsService {
         try {
             AictlClient client = createApiClient(bean);
             // Check if project exists
-            if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI)) {
+            if (bean.eq(SCAN_TYPE, SCAN_TYPE_SBOM)) {
+                String name = bean.get(SBOM_PROJECT_NAME);
+                UUID projectId = new ProjectTask(client).searchProjectId(name);
+                results.add(projectId != null
+                        ? "SBOM project " + name + " found, ID = " + projectId + ", its SBOM file will be replaced on scan"
+                        : "SBOM project " + name + " not found, it will be created on scan");
+            } else if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI)) {
                 UUID projectId = new ProjectTask(client).searchProjectId(bean.get(PROJECT_NAME));
                 if (null != projectId)
                     results.add("Project " + bean.get(PROJECT_NAME) + " found, ID = " + projectId.toString());

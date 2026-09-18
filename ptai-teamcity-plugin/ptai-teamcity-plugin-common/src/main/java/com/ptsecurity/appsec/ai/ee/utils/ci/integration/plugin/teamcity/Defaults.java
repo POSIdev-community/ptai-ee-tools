@@ -56,6 +56,21 @@ public class Defaults {
     public static final String SCAN_LABEL = "";
 
     /**
+     * See {@link Params#SCAN_TYPE} and {@link Constants#SCAN_TYPE_STANDARD}
+     */
+    public static final String SCAN_TYPE = SCAN_TYPE_STANDARD;
+
+    /**
+     * See {@link Params#SBOM_PROJECT_NAME}
+     */
+    public static final String SBOM_PROJECT_NAME = "PROJECT";
+
+    /**
+     * See {@link Params#SBOM_PATH}
+     */
+    public static final String SBOM_PATH = "";
+
+    /**
      * See {@link Params#AST_SETTINGS} and {@link Constants#AST_SETTINGS_UI}
      */
     public static final String AST_SETTINGS = AST_SETTINGS_UI;

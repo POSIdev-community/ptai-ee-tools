@@ -47,6 +47,25 @@ public class Params {
     public static final String SCAN_LABEL = PARAM("ScanLabel");
 
     /**
+     * Defines what is scanned. If this field equals to {@link Constants#SCAN_TYPE_SBOM}
+     * then SBOM file is scanned, otherwise project sources are scanned. Build steps
+     * created before SBOM scan support have no value and scan sources
+     */
+    public static final String SCAN_TYPE = PARAM("ScanType");
+
+    /**
+     * PT AI SBOM project name. This value used if SCAN_TYPE equals to
+     * {@link Constants#SCAN_TYPE_SBOM}
+     */
+    public static final String SBOM_PROJECT_NAME = PARAM("SbomProjectName");
+
+    /**
+     * SBOM file path, absolute or relative to a checkout directory. This value used if
+     * SCAN_TYPE equals to {@link Constants#SCAN_TYPE_SBOM}
+     */
+    public static final String SBOM_PATH = PARAM("SbomPath");
+
+    /**
      * Defines how code AST settings are defined. If this field equals to
      * {@link Constants#AST_SETTINGS_JSON} then settings are defined via two JSONs, if
      * equals to {@link Constants#AST_SETTINGS_UI} then settings are defined via viewer

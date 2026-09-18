@@ -28,6 +28,10 @@ public class Hints {
 
     public static final String SCAN_LABEL = "Label";
 
+    public static final String SCAN_TYPE = "Choose whether project sources or an SBOM file are scanned";
+    public static final String SBOM_PROJECT_NAME = "PT AI SBOM project name";
+    public static final String SBOM_PATH = "SBOM file path relative to the checkout directory";
+
     public static final String AST_SETTINGS = "Choose how AST settings are defined";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
     public static final String AST_SETTINGS_UI = Resources.i18n_ast_settings_type_ui_label();

@@ -100,6 +100,24 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
         return true;
     }
 
+    public FormValidation doCheckSbomProjectName(@QueryParameter String value) {
+        return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_projectname_message_empty());
+    }
+
+    public FormValidation doCheckSbomPath(@QueryParameter String value) {
+        return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_path_message_empty());
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanTypeStandard() {
+        return Plugin.SCAN_TYPE_STANDARD;
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanTypeSbom() {
+        return Plugin.SCAN_TYPE_SBOM;
+    }
+
     /**
      * Method checks if AST job step settings are correct.
      * It doesn't checks PT AI server availability, project existence etc.

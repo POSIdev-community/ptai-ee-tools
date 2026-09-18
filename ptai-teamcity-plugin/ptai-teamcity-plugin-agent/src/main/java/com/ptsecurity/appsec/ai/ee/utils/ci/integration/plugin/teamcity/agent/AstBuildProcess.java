@@ -70,11 +70,16 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         Map<String, String> params = buildRunnerContext.getRunnerParameters();
         Map<String, String> globals = agentRunningBuild.getSharedConfigParameters();
 
-        boolean selectedScanSettingsUi = AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
+        boolean sbomScan = SCAN_TYPE_SBOM.equals(params.get(Params.SCAN_TYPE));
+        boolean selectedScanSettingsUi = !sbomScan && AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
         String projectName = null;
         String settings = null;
         String policy = null;
-        if (!selectedScanSettingsUi) {
+        String sbomPath = null;
+        if (sbomScan) {
+            projectName = params.get(Params.SBOM_PROJECT_NAME);
+            sbomPath = params.get(Params.SBOM_PATH);
+        } else if (!selectedScanSettingsUi) {
             settings = BaseJsonHelper.minimize(params.get(Params.JSON_SETTINGS));
             String policyParamValue = params.get(Params.JSON_POLICY);
             if (policyParamValue != null) {
@@ -110,17 +115,19 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 ? params
                 : globals;
 
-        String branchName = getBranchName(params);
+        String branchName = sbomScan ? null : getBranchName(params);
         String scanLabel =  params.get(Params.SCAN_LABEL);
 
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
                 .artifactsWatcher(artifactsWatcher)
-                .projectName(selectedScanSettingsUi ? projectName : null)
+                .projectName(sbomScan || selectedScanSettingsUi ? projectName : null)
+                .sbomScan(sbomScan)
+                .sbomPath(sbomPath)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
-                .jsonSettings(selectedScanSettingsUi ? null : settings)
-                .jsonPolicy(selectedScanSettingsUi ? null : policy)
+                .jsonSettings(sbomScan || selectedScanSettingsUi ? null : settings)
+                .jsonPolicy(sbomScan || selectedScanSettingsUi ? null : policy)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(activeConnectionParams.get(Params.URL))
                         .insecure(TRUE.equals(activeConnectionParams.get(Params.INSECURE)))
