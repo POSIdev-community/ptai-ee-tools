@@ -99,7 +99,8 @@ public class Validator {
             AictlAiproj.Result aiproj = AictlAiproj.check(ControllerEnvironment.get(), value);
             if (aiproj.isValid()) {
                 return FormValidation.ok(
-                        Resources.i18n_ast_settings_type_manual_json_settings_message_success(aiproj.getProjectName()));
+                        Resources.i18n_ast_settings_type_manual_json_settings_message_success(
+                                aiproj.getProjectName(), String.join(", ", aiproj.getLanguages())));
             }
 
             Collection<FormValidation> messages = new ArrayList<>();

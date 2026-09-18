@@ -49,6 +49,9 @@ public class Mappings {
         LANGUAGES.put(key("C++"), ScanBrief.ScanSettings.Language.CPP);
         LANGUAGES.put(key("Objective-C"), ScanBrief.ScanSettings.Language.OBJECTIVEC);
         LANGUAGES.put(key("Visual Basic"), ScanBrief.ScanSettings.Language.VB);
+        LANGUAGES.put(key("CSharp (Windows, Linux)"), ScanBrief.ScanSettings.Language.CSHARP);
+        LANGUAGES.put(key("CSharp (Windows)"), ScanBrief.ScanSettings.Language.CSHARPWINONLY);
+        LANGUAGES.put(key("CAndCPlusPlus"), ScanBrief.ScanSettings.Language.CPP);
     }
 
     @NonNull

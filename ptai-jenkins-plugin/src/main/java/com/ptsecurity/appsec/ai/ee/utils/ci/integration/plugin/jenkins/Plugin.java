@@ -222,11 +222,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
             }
 
-            AictlAiproj.Result aiproj = AictlAiproj.check(ControllerEnvironment.get(), jsonSettings);
-            if (!aiproj.isValid()) {
-                throw new AbortException(String.join("\n", aiproj.getErrors()));
-            }
-
             check = scanSettingsManualDescriptor.doCheckJsonPolicy(jsonPolicy);
             if (FormValidation.Kind.ERROR == check.kind)
                 throw new AbortException(check.getMessage());
@@ -234,7 +229,12 @@ public class Plugin extends Builder implements SimpleBuildStep {
             log.trace("JSON-defined project settings before macro replacement is {}", jsonSettings);
             jsonSettings = BaseJsonHelper.replaceMacro(jsonSettings, (s -> Util.replaceMacro(s, buildInfo.getEnvVars())));
             log.trace("JSON-defined project settings after macro replacement is {}", jsonSettings);
-            projectName = AictlAiproj.projectName(jsonSettings);
+
+            AictlAiproj.Result aiproj = AictlAiproj.check(ControllerEnvironment.get(), jsonSettings);
+            if (!aiproj.isValid()) {
+                throw new AbortException(String.join("\n", aiproj.getErrors()));
+            }
+            projectName = aiproj.getProjectName();
         }
 
         ServerSettings serverSettings;
