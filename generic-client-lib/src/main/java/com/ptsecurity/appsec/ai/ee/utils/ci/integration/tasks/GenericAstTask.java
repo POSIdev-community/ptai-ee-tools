@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
@@ -9,10 +8,10 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.AieJsonReport;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.Mappings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.UnsupportedReportSchemaException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -312,9 +311,7 @@ public class GenericAstTask extends AbstractTaskImpl {
                     client.getEnvironment().scratchDir(), "scan-settings-" + scanResultId + ".aiproj");
 
             client.getScanAiproj(projectId, scanResultId, path);
-            try (InputStream aiproj = client.getEnvironment().read(path)) {
-                appendAiproj(builder, aiproj);
-            }
+            appendLanguages(builder, AictlAiproj.checkFile(client.getEnvironment(), path).getLanguages());
         } catch (Exception e) {
             log.warn("PT AI scan settings load failed, scan results will carry no settings details");
             log.debug("Exception details", e);
@@ -327,17 +324,14 @@ public class GenericAstTask extends AbstractTaskImpl {
         return builder.build();
     }
 
-    private void appendAiproj(
+    private static void appendLanguages(
             @NonNull final ScanBrief.ScanSettings.ScanSettingsBuilder builder,
-            @NonNull final InputStream aiproj) throws Exception {
-        JsonNode root = BaseJsonHelper.createObjectMapper().readTree(aiproj);
-
+            @NonNull final List<String> names) {
         List<ScanBrief.ScanSettings.Language> languages = new ArrayList<>();
-        for (JsonNode language : root.path("ProgrammingLanguages")) {
-            try {
-                languages.add(ScanBrief.ScanSettings.Language.fromString(language.asText("")));
-            } catch (IllegalArgumentException e) {
-                log.debug("Skipping unknown programming language {}", language.asText(""));
+        for (String name : names) {
+            ScanBrief.ScanSettings.Language language = Mappings.language(name);
+            if (language != null && !languages.contains(language)) {
+                languages.add(language);
             }
         }
 

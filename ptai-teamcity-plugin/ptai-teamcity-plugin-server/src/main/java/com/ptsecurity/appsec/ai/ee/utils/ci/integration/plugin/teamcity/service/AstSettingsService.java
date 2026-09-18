@@ -413,8 +413,10 @@ public class AstSettingsService {
                     results.failure();
                 }
             } else {
-                results.add("JSON settings are verified, project name is "
-                        + AictlAiproj.projectName(bean.getProperties().get(JSON_SETTINGS)));
+                AictlAiproj.Result aiproj = AictlAiproj.check(
+                        ServerEnvironment.get(), bean.getProperties().get(JSON_SETTINGS));
+
+                results.add("JSON settings are verified, project name is " + aiproj.getProjectName());
 
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
                 if (policyJson != null) {
