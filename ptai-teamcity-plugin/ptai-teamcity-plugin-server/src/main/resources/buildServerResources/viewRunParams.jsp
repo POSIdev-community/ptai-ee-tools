@@ -3,9 +3,24 @@
 
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 
+<c:set var="SBOM_SCAN" value="${propertiesBean.properties[SCAN_TYPE] == SCAN_TYPE_SBOM}"/>
+
 <div class="parameter">General AST settings:</div>
 
 <c:choose>
+    <c:when test="${SBOM_SCAN}">
+        <div class="nestedParameter">
+            ${LABEL_SCAN_TYPE}: <strong>${LABEL_SCAN_TYPE_SBOM}</strong>
+        </div>
+        <div class="nestedParameter">
+            ${LABEL_SBOM_PROJECT_NAME}:
+            <props:displayValue name="${SBOM_PROJECT_NAME}" emptyValue=""/>
+        </div>
+        <div class="nestedParameter">
+            ${LABEL_SBOM_PATH}:
+            <props:displayValue name="${SBOM_PATH}" emptyValue=""/>
+        </div>
+    </c:when>
     <c:when test="${propertiesBean.properties[AST_SETTINGS] == AST_SETTINGS_UI}">
         <div class="nestedParameter">
             ${LABEL_AST_SETTINGS}: <strong>${HINT_AST_SETTINGS_UI}</strong>
@@ -32,34 +47,36 @@
     <props:displayValue name="${FAIL_IF_UNSTABLE}" emptyValue="false"/>
 </div>
 
-<div class="parameter">Scan scope:</div>
+<c:if test="${not SBOM_SCAN}">
+    <div class="parameter">Scan scope:</div>
 
-<div class="nestedParameter">
-    ${LABEL_INCLUDES}:
-    <props:displayValue name="${INCLUDES}" emptyValue=""/>
-</div>
+    <div class="nestedParameter">
+        ${LABEL_INCLUDES}:
+        <props:displayValue name="${INCLUDES}" emptyValue=""/>
+    </div>
 
-<div class="nestedParameter">
-    ${LABEL_EXCLUDES}:
-    <props:displayValue name="${EXCLUDES}" emptyValue=""/>
-</div>
+    <div class="nestedParameter">
+        ${LABEL_EXCLUDES}:
+        <props:displayValue name="${EXCLUDES}" emptyValue=""/>
+    </div>
 
-<div class="nestedParameter">
-    ${LABEL_REMOVE_PREFIX}:
-    <props:displayValue name="${REMOVE_PREFIX}" emptyValue="false"/>
-</div>
+    <div class="nestedParameter">
+        ${LABEL_REMOVE_PREFIX}:
+        <props:displayValue name="${REMOVE_PREFIX}" emptyValue="false"/>
+    </div>
 
-<div class="nestedParameter">
-    ${LABEL_PATTERN_SEPARATOR}:
-    <props:displayValue name="${PATTERN_SEPARATOR}" emptyValue=""/>
-</div>
+    <div class="nestedParameter">
+        ${LABEL_PATTERN_SEPARATOR}:
+        <props:displayValue name="${PATTERN_SEPARATOR}" emptyValue=""/>
+    </div>
 
-<div class="nestedParameter">
-    ${LABEL_USE_DEFAULT_EXCLUDES}:
-    <props:displayValue name="${USE_DEFAULT_EXCLUDES}" emptyValue="false"/>
-</div>
+    <div class="nestedParameter">
+        ${LABEL_USE_DEFAULT_EXCLUDES}:
+        <props:displayValue name="${USE_DEFAULT_EXCLUDES}" emptyValue="false"/>
+    </div>
 
-<div class="nestedParameter">
-    ${LABEL_FLATTEN}:
-    <props:displayValue name="${FLATTEN}" emptyValue="false"/>
-</div>
+    <div class="nestedParameter">
+        ${LABEL_FLATTEN}:
+        <props:displayValue name="${FLATTEN}" emptyValue="false"/>
+    </div>
+</c:if>

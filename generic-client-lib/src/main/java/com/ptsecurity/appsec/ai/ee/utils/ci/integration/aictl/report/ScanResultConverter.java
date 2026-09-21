@@ -5,20 +5,19 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.jvnet.localizer.Localizable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class ScanResultConverter {
+    private static final String COMPONENT_VULNERABILITY = "scafingerprintvulnerability";
+
     @NonNull
     public static ScanResult convert(
             @NonNull final ScanBrief scanBrief,
@@ -39,8 +38,16 @@ public class ScanResultConverter {
                 continue;
             }
 
-            String englishTitle = text(Nodes.get(item, "type", "displayName"));
-            String russianTitle = russianTitles.getOrDefault(issue.getTypeId(), englishTitle);
+            String englishTitle;
+            String russianTitle;
+            if (componentVulnerability(item)) {
+                Localizable title = Resources._i18n_misc_enums_vulnerability_clazz_fingerprint();
+                englishTitle = title.toString(Locale.ENGLISH);
+                russianTitle = title.toString(new Locale("ru"));
+            } else {
+                englishTitle = text(Nodes.get(item, "type", "displayName"));
+                russianTitle = russianTitles.getOrDefault(issue.getTypeId(), englishTitle);
+            }
             Map<Reports.Locale, ScanResult.Strings> strings = new HashMap<>();
 
             strings.put(Reports.Locale.EN, new ScanResult.Strings(englishTitle, englishTitle));
@@ -63,7 +70,7 @@ public class ScanResultConverter {
         }
 
         for (JsonNode item : report.getItems()) {
-            String typeId = text(Nodes.get(item, "type", "value"));
+            String typeId = typeId(item);
             String title = text(Nodes.get(item, "type", "displayName"));
             if (!typeId.isEmpty() && !title.isEmpty()) {
                 result.putIfAbsent(typeId, title);
@@ -171,6 +178,15 @@ public class ScanResultConverter {
                 issue = new FingerprintScaIssue();
                 break;
             }
+            case COMPONENT_VULNERABILITY: {
+                FingerprintScaIssue value = new FingerprintScaIssue();
+                String component = text(Nodes.get(item, "type", "displayName"));
+                int version = component.lastIndexOf(' ');
+                value.setComponent(version < 0 ? component : component.substring(0, version));
+                value.setVersion(version < 0 ? null : component.substring(version + 1));
+                issue = value;
+                break;
+            }
             case "sca": {
                 ScaIssue value = new ScaIssue();
                 value.setFile(Places.file(text(Nodes.get(item, "sourceFile"))));
@@ -198,7 +214,7 @@ public class ScanResultConverter {
 
         issue.setId(text(Nodes.get(item, "id")));
         issue.setGroupId(null);
-        issue.setTypeId(text(Nodes.get(item, "type", "value")));
+        issue.setTypeId(typeId(item));
         issue.setLevel(Mappings.level(text(Nodes.get(item, "level", "value"))));
         issue.setFavorite(Nodes.get(item, "isFavorite").asBoolean(false));
         issue.setSuspected(Nodes.get(item, "isSuspected").asBoolean(false));
@@ -282,6 +298,20 @@ public class ScanResultConverter {
         }
 
         return StringEscapeUtils.unescapeHtml4(node.asText(""));
+    }
+
+    private static boolean componentVulnerability(@NonNull final JsonNode item) {
+        return COMPONENT_VULNERABILITY.equals(normalize(text(Nodes.get(item, "typeKey"))));
+    }
+
+    @NonNull
+    private static String typeId(@NonNull final JsonNode item) {
+        if (componentVulnerability(item)) {
+            return text(Nodes.get(item, "typeKey"));
+        }
+
+        String value = text(Nodes.get(item, "type", "value"));
+        return value.isEmpty() ? text(Nodes.get(item, "type", "displayName")) : value;
     }
 
     @NonNull

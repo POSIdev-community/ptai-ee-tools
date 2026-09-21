@@ -92,6 +92,10 @@ public class AstRunType extends RunType {
     @NonNull
     @Override
     public String describeParameters(@NonNull Map<String, String> parameters) {
+        if (Constants.SCAN_TYPE_SBOM.equals(parameters.get(Params.SCAN_TYPE))) {
+            return "SBOM file to scan: " + parameters.getOrDefault(Params.SBOM_PATH, "");
+        }
+
         StringBuilder result = new StringBuilder();
         String includes = parameters.getOrDefault(Params.INCLUDES, "");
         if (StringUtils.isNotEmpty(includes))

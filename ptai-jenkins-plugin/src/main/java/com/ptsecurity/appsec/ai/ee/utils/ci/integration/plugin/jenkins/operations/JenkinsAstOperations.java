@@ -3,18 +3,26 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.operatio
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.JenkinsAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions.AstJobSingleResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.RemoteFileUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.SbomPath;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import hudson.FilePath;
+import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import static com.ptsecurity.appsec.ai.ee.scan.ScanDataPacked.Type.SCAN_BRIEF_DETAILED;
@@ -53,6 +61,37 @@ public class JenkinsAstOperations implements AstOperations {
     }
 
     @Override
+    @NonNull
+    public String sbomFile(@NonNull final String path) throws GenericException {
+        return sbomFile(owner.getWorkspace(), path);
+    }
+
+    @NonNull
+    static String sbomFile(@NonNull final FilePath workspace, @NonNull final String path) throws GenericException {
+        SbomPath.check(path);
+
+        FilePath file = workspace.child(path);
+        try {
+            if (!file.exists() || file.isDirectory()) {
+                throw GenericException.raise(
+                        Resources.i18n_ast_settings_sbom_path_message_notfound(file.getName()),
+                        new FileNotFoundException());
+            }
+
+            if (!workspace.act(new InsideWorkspace(path))) {
+                throw SbomPath.outside(path);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw GenericException.raise("SBOM file check interrupted", e);
+        } catch (IOException e) {
+            throw GenericException.raise("SBOM file check failed", e);
+        }
+
+        return file.getRemote();
+    }
+
+    @Override
     public void scanStartedCallback(@NonNull UUID projectId, @NonNull UUID scanResultId) throws GenericException {
 
     }
@@ -80,5 +119,21 @@ public class JenkinsAstOperations implements AstOperations {
         AstJobSingleResult action = new AstJobSingleResult(owner.getRun());
         action.setScanDataPacked(scanDataPacked);
         owner.getRun().addAction(action);
+    }
+
+    private static final class InsideWorkspace extends MasterToSlaveFileCallable<Boolean> {
+        private static final long serialVersionUID = 1L;
+
+        private final String path;
+
+        private InsideWorkspace(@NonNull final String path) {
+            this.path = path;
+        }
+
+        @Override
+        public Boolean invoke(final File workspace, final VirtualChannel channel) throws IOException {
+            Path root = workspace.toPath().toRealPath();
+            return new File(workspace, path).toPath().toRealPath().startsWith(root);
+        }
     }
 }

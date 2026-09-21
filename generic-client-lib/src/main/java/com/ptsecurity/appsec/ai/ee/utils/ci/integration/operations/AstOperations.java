@@ -36,6 +36,16 @@ public interface AstOperations {
     void cleanupSources(final String path);
 
     /**
+     * Resolve an SBOM file path against a CI workspace and check that the file exists.
+     * File is looked for on a host that runs aictl, which is a CI agent
+     * @param path SBOM file path, absolute or relative to a workspace
+     * @return Absolute SBOM file path on a host where aictl runs
+     * @throws GenericException If there's no such file
+     */
+    @NonNull
+    String sbomFile(@NonNull final String path) throws GenericException;
+
+    /**
      * Callback method is being called when AST job is started on PT AI server.
      * AstJob descendants may use this callback to prepare for safe build
      * termination. For example, CLI plugin may create
