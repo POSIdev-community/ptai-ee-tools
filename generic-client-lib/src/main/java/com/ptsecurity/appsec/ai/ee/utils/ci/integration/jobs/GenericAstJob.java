@@ -81,6 +81,26 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     @Builder.Default
     protected String sbomPath = null;
 
+    /**
+     * Minimal retry time and retry step for scan start when branch scan is already running
+     */
+    public static final int RETRY_INTERVAL_SECONDS = 5;
+
+    public static final int DEFAULT_RETRY_TIME_SECONDS = 3600;
+
+    /**
+     * Scan start retry settings. Retry itself is not implemented with aictl yet
+     */
+    @Getter
+    @Setter
+    @Builder.Default
+    protected boolean retry = false;
+
+    @Getter
+    @Setter
+    @Builder.Default
+    protected int retryTime = DEFAULT_RETRY_TIME_SECONDS;
+
     @Builder.Default
     protected UUID branchId = null;
 

@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSetting
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
@@ -82,6 +83,22 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
     @Getter
     private final boolean fullScanMode;
+
+    @Getter
+    private boolean retry;
+
+    @Getter
+    private int retryTime = GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+
+    @DataBoundSetter
+    public void setRetry(final boolean retry) {
+        this.retry = retry;
+    }
+
+    @DataBoundSetter
+    public void setRetryTime(final int retryTime) {
+        this.retryTime = retryTime;
+    }
 
     @Getter
     private ArrayList<Transfer> transfers;
@@ -311,6 +328,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 .buildInfo(buildInfo)
                 .transfers(transfers)
                 .fullScanMode(fullScanMode)
+                .retry(retry)
+                .retryTime(retryTime)
                 .jsonSettings(jsonSettings)
                 .jsonPolicy(jsonPolicy)
                 .advancedSettings(advancedSettings)

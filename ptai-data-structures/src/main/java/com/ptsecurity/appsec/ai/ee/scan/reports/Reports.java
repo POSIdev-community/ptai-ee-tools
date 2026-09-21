@@ -160,6 +160,7 @@ public class Reports {
             RUBY,
             SOLIDITY,
             SCALA,
+            ONEC,
             ALL
         }
 

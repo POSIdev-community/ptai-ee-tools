@@ -123,6 +123,23 @@ f.advanced() {
         f.checkbox()
     }
 
+    f.optionalBlock(
+            title: _('retry'),
+            field: 'retry',
+            checked: pluginInstance != null ? pluginInstance.retry : false,
+            inline: true) {
+        f.entry(
+                title: _('retryTime'),
+                field: 'retryTime') {
+            f.textbox(
+                    clazz: 'required positive-number',
+                    value: pluginInstance != null && pluginInstance.retryTime >= pluginDescriptor.minRetryTime
+                            ? pluginInstance.retryTime
+                            : pluginDescriptor.defaultRetryTime,
+                    checkMethod: 'post')
+        }
+    }
+
     f.entry(
             title: _('verbose'),
             field: 'verbose',

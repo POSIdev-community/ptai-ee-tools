@@ -42,6 +42,10 @@ public class JenkinsFileOperations extends AbstractFileOperations implements Fil
     @SneakyThrows
     public void saveArtifactFromScanHost(@NonNull String name, @NonNull String path) {
         log.trace("Started: move {} into build artifacts as {}", path, name);
+        if (!RemoteFileUtils.validateArtifactPath(owner, name)) {
+            return;
+        }
+
         FilePath source = new FilePath(owner.getWorkspace().getChannel(), path);
         FilePath destination = owner.getWorkspace().child(AbstractJob.DEFAULT_OUTPUT_FOLDER).child(name);
         destination.getParent().mkdirs();
