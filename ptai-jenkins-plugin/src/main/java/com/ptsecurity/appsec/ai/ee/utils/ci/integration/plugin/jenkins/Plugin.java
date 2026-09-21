@@ -295,8 +295,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
                 scanLabel);
         if (FormValidation.Kind.ERROR == check.kind)
             throw new AbortException(check.getMessage());
-        // TODO: Implement scan node support when PT AI will be able to
-        // String node = StringUtils.isEmpty(nodeName) ? Base.DEFAULT_PTAI_NODE_NAME : nodeName;
 
         String ptAiToken = Optional.ofNullable(credentials.getToken())
                 .orElseThrow(() -> new PTAIClientTokenIsEmptyException(

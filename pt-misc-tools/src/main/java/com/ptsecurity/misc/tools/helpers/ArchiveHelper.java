@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -59,18 +57,6 @@ public class ArchiveHelper {
     /**
      * Method extracts 7z-packed resource file contents to temp folder
      * @param name Absolute name of resource
-     * @return Path to extracted resources. If packed resource contains exactly one file then path
-     * to extracted file will be returned. If resource contains more than one file all these files
-     * will be extracted to destination folder and its path will be returned
-     */
-    @SneakyThrows
-    public static Path extract7ZipResourceFile(@NonNull final String name) {
-        return extract7ZipResourceFile(name, TempFile.createFolder().toPath());
-    }
-
-    /**
-     * Method extracts 7z-packed resource file contents to temp folder
-     * @param name Absolute name of resource
      * @param destinationFolder Folder where resources are to be unpacked.
      *                   If null value is passed, temporal directory will be automatically created
      * @return Path to extracted resources. If packed resource contains exactly one file then path
@@ -113,18 +99,6 @@ public class ArchiveHelper {
             packedFile.close();
         }
         return res;
-    }
-
-    /**
-     * Method extracts zip-packed resource file contents to temp folder
-     * @param name Absolute name of resource like "code/php-smoke.zip"
-     * @return Path to extracted resources. If packed resource contains exactly one file then path
-     * to extracted file will be returned. If resource contains more than one file all these files
-     * will be extracted to destination folder and its path will be returned
-     */
-    @SneakyThrows
-    public Path extractZipResourceFile(@NonNull final String name) {
-        return extractZipResourceFile(name, TempFile.createFolder().toPath());
     }
 
     /**
@@ -237,50 +211,5 @@ public class ArchiveHelper {
             return result.toString();
         }
         return null;
-    }
-
-    private static void packDataZip(ZipArchiveOutputStream out, File file, String name) throws IOException {
-        log.trace("Zip {} file as {}", file.getName(), name);
-        ZipArchiveEntry zipArchiveEntry = new ZipArchiveEntry(file, name);
-        out.putArchiveEntry(zipArchiveEntry);
-        if (file.isFile()) {
-            log.trace("Pack data from file");
-            try (FileInputStream fis = new FileInputStream(file)) {
-                IOUtils.copy(fis, out);
-                out.closeArchiveEntry();
-            }
-        } else {
-            out.closeArchiveEntry();
-            log.trace("Pack children files / folders");
-            File[] files = file.listFiles();
-            if (null == files) return;
-            for (File child : files)
-                packDataZip(out, child, name + "/" + child.getName());
-        }
-    }
-
-    /**
-     * Pack file or folder contents to temporary file
-     * @param source File or folder path that is to be zipped
-     * @return Temporary file location
-     */
-    @SneakyThrows
-    public static Path packDataZip(@NonNull final Path source) {
-        Path zip = TempFile.createFile().toPath();
-        log.trace("File(s) from {} will be zipped to {}", source.getFileName(), zip.getFileName());
-        try (
-                OutputStream os = Files.newOutputStream(zip);
-                BufferedOutputStream bos = new BufferedOutputStream(os);
-                ZipArchiveOutputStream zos = new ZipArchiveOutputStream(bos)) {
-            if (source.toFile().isDirectory()) {
-                File[] files = source.toFile().listFiles();
-                if (null == files) return zip;
-                for (File file : files)
-                    packDataZip(zos, file, file.getName());
-            } else {
-                packDataZip(zos, source.toFile(), source.getFileName().toString());
-            }
-        }
-        return zip;
     }
 }

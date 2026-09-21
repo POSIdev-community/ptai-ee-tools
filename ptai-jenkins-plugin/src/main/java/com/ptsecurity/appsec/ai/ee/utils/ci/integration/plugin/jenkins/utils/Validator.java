@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils;
 
+import com.ptsecurity.appsec.ai.ee.helpers.json.JsonPolicyHelper;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
@@ -8,7 +9,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.UrlHelper;
 import hudson.util.FormValidation;
@@ -149,7 +149,6 @@ public class Validator {
     }
 
     public static FormValidation error(Exception e) {
-        // log.log(Level.FINEST, "FormValidation error", e);
         String caption = e.getMessage();
         if (StringUtils.isEmpty(caption))
             return FormValidation.error(e, Resources.i18n_ast_settings_test_message_failed());
@@ -161,7 +160,6 @@ public class Validator {
     }
 
     public static FormValidation error(@NonNull final String message, Exception e) {
-        // log.log(Level.FINEST, "FormValidation error", e);
         Throwable cause = e;
         if (e instanceof GenericException) cause = e.getCause();
         return FormValidation.error(cause, Resources.i18n_ast_settings_test_message_failed_details(message));

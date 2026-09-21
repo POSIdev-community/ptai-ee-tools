@@ -11,12 +11,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
     implementation 'org.apache.commons:commons-compress:1.28.0'
-    // Need this to work with 7zip compression
-    // https://mvnrepository.com/artifact/org.tukaani/xz
-    implementation 'org.tukaani:xz:1.9'
 
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
     // https://mvnrepository.com/artifact/commons-io/commons-io
     implementation 'commons-io:commons-io:2.20.0'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
@@ -25,44 +20,18 @@ dependencies {
     implementation 'org.apache.ant:ant:1.10.13'
     // https://mvnrepository.com/artifact/org.jooq/joor-java-8
     implementation 'org.jooq:joor-java-8:0.9.13'
-    // https://mvnrepository.com/artifact/com.microsoft.signalr/signalr
-    // implementation 'com.microsoft.signalr:signalr:1.0.0'
-    // implementation 'com.microsoft.signalr:signalr:5.0.9'
-    implementation 'com.microsoft.signalr:signalr:6.0.0'
-    // https://mvnrepository.com/artifact/io.reactivex.rxjava3/rxjava
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.2'
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-text
     implementation 'org.apache.commons:commons-text:1.10.0'
-    // Need this to search for VersionRange-annotated classes
-    // https://mvnrepository.com/artifact/io.github.classgraph/classgraph
-    // implementation 'io.github.classgraph:classgraph:4.8.138'
-    // https://mvnrepository.com/artifact/org.reflections/reflections
-    implementation 'org.reflections:reflections:0.10.2'
-
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-
-    // https://mvnrepository.com/artifact/com.contrastsecurity/java-sarif
-    implementation 'com.contrastsecurity:java-sarif:2.0'
 
     // Use JUnit 5 for test fixtures
     testFixturesImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testFixturesImplementation('org.junit.jupiter:junit-jupiter')
 
-    // https://mvnrepository.com/artifact/com.contrastsecurity/java-sarif
-    testFixturesApi 'com.contrastsecurity:java-sarif:2.0'
-
     // Need this to write tests that use data stored in 7zip-packed resource files
     // like issues model, scan settings etc.
     testImplementation(testFixtures(project(":pt-misc-tools")))
     testImplementation(testFixtures(project(":ptai-data-structures")))
-
-    testImplementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    testRuntimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    testRuntimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     testFixturesImplementation(testFixtures(project(":pt-misc-tools")))
     testFixturesImplementation(testFixtures(project(":ptai-data-structures")))

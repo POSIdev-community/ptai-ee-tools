@@ -107,7 +107,6 @@ def compareVersion(a, b) {
 
 dependencies {
     api project(':generic-client-lib')
-    api project(':ptai-report-tools')
 
     String versionString = findProperty('jenkinsVersion')
     // For Jenkins versions [2.413 - 2.427] need to explicitly define some dependencies
@@ -116,8 +115,6 @@ dependencies {
         implementation 'org.checkerframework:checker-qual:3.38.0'
         annotationProcessor 'org.checkerframework:checker-qual:3.38.0'
     }
-    // https://mvnrepository.com/artifact/org.jenkins-ci.plugins/token-macro
-    implementation "org.jenkins-ci.plugins:token-macro:${jenkinsTokenMacroPluginVersion}"
     // https://mvnrepository.com/artifact/org.jenkins-ci.plugins/credentials
     implementation "org.jenkins-ci.plugins:credentials:${jenkinsCredentialsPluginVersion}"
     // https://mvnrepository.com/artifact/org.jenkins-ci.plugins/structs
@@ -129,9 +126,6 @@ dependencies {
     implementation 'org.jooq:joor-java-8:0.9.13'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
     implementation 'org.apache.commons:commons-compress:1.28.0'
-    // Need this to work with 7zip compression
-    // https://mvnrepository.com/artifact/org.tukaani/xz
-    implementation 'org.tukaani:xz:1.9'
 
     // https://mvnrepository.com/artifact/org.webjars/echarts
     webjars 'org.webjars:echarts:5.0.2'

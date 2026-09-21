@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service;
 
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
+import com.ptsecurity.appsec.ai.ee.helpers.json.JsonPolicyHelper;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
@@ -15,7 +16,6 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
 import com.ptsecurity.misc.tools.helpers.CertificateHelper;
@@ -69,10 +69,6 @@ public class AstSettingsService {
         public void add(@NonNull final String id, @NonNull final String error) {
             add(Pair.of(id, error));
             failure();
-        }
-
-        public void success() {
-            result = SUCCESS;
         }
 
         public void failure() {

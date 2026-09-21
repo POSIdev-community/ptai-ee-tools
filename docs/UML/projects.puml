@@ -7,7 +7,6 @@ class ptai-rest-api
 class ptai-data-structures
 class generic-client-lib
 class ptai-jenkins-plugin
-class ptai-report-tools
 
 package ptai-teamcity-plugin {
     class ptai-teamcity-plugin-common

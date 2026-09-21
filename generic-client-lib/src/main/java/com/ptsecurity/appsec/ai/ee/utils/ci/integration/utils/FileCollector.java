@@ -11,9 +11,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +20,10 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,7 +31,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
-import static org.apache.commons.compress.archivers.ArchiveStreamFactory.ZIP;
 import static org.joor.Reflect.on;
 
 @Slf4j
@@ -311,8 +312,8 @@ public class FileCollector {
             verbose("Destination folder %s doesn't exist, creating", destDir.getAbsolutePath());
             destDir.mkdirs();
         }
-        OutputStream zfs = new FileOutputStream(zip);
-        ArchiveOutputStream as = new ArchiveStreamFactory().createArchiveOutputStream(ZIP, zfs);
+        OutputStream zfs = Files.newOutputStream(zip.toPath());
+        ZipArchiveOutputStream as = new ZipArchiveOutputStream(zfs);
         verbose("Zip stream created");
 
         for (Entry entry : files) {
@@ -328,7 +329,7 @@ public class FileCollector {
 
             as.putArchiveEntry(new ZipArchiveEntry(entry.entryName));
             if (!Files.isDirectory(entry.path)) {
-                BufferedInputStream is = new BufferedInputStream(new FileInputStream(entry.path.toFile()));
+                BufferedInputStream is = new BufferedInputStream(Files.newInputStream(entry.path.toFile().toPath()));
                 int size = IOUtils.copy(is, as);
                 verbose("%s zipped", bytesToString(size));
                 is.close();

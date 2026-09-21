@@ -1,6 +1,5 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl;
 
-import com.ptsecurity.appsec.ai.ee.ProjectInfo;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
@@ -65,22 +64,6 @@ public class AictlClient {
     @NonNull
     public String getServerVersion() throws GenericException {
         return checked("PT AI server version read failed", command("get", "version")).getStdout();
-    }
-
-
-    @NonNull
-    public List<ProjectInfo> getProjects() throws GenericException {
-        AictlResult result = checked("PT AI projects list read failed", command("get", "projects"));
-        List<ProjectInfo> projects = new ArrayList<>();
-        for (String[] row : TableParser.rows(result.getStdout())) {
-            String id = TableParser.cell(row, 0);
-            if (!isUuid(id)) {
-                continue;
-            }
-
-            projects.add(new ProjectInfo(UUID.fromString(id), TableParser.cell(row, 1)));
-        }
-        return projects;
     }
 
     public UUID searchProjectId(@NonNull final String name) throws GenericException {
@@ -174,24 +157,6 @@ public class AictlClient {
                     TableParser.cell(row, 4)));
         }
         return agents;
-    }
-
-    @NonNull
-    public List<BranchInfo> getBranches(@NonNull final UUID projectId) throws GenericException {
-        AictlResult result = checked(
-                "PT AI project branches read failed",
-                command("get", "branches", "-p", projectId.toString()));
-
-        List<BranchInfo> branches = new ArrayList<>();
-        for (String[] row : TableParser.rows(result.getStdout())) {
-            String id = TableParser.cell(row, 0);
-            if (!isUuid(id)) {
-                continue;
-            }
-
-            branches.add(new BranchInfo(UUID.fromString(id), TableParser.cell(row, 1)));
-        }
-        return branches;
     }
 
     @NonNull
