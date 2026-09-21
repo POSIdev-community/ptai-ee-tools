@@ -290,7 +290,7 @@ public class AictlClient {
         AictlResult result = execute(builder.build());
 
         if (AictlResult.ExitCode.API == result.kind() || AictlResult.ExitCode.UNKNOWN == result.kind()) {
-            throw failure("PT AI project scan await failed", result.errorMessage());
+            throw failure("PT AI project scan await failed", result);
         }
     }
 
@@ -527,12 +527,13 @@ public class AictlClient {
             return result;
         }
 
-        throw failure(message, result.errorMessage());
+        throw failure(message, result);
     }
 
     @NonNull
-    protected static GenericException failure(@NonNull final String message, final String raw) {
-        return GenericException.raise(message, new IllegalStateException(AictlErrors.message(raw)));
+    protected static AictlException failure(@NonNull final String message, @NonNull final AictlResult result) {
+        return new AictlException(message, result.kind(),
+                new IllegalStateException(AictlErrors.message(result.errorMessage())));
     }
 
     @NonNull
