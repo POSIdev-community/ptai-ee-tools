@@ -1,7 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.Getter;
@@ -29,6 +28,9 @@ public class AictlAiproj {
         private final List<String> errors;
 
         private final String projectName;
+
+        @NonNull
+        private final List<String> languages;
     }
 
     @NonNull
@@ -41,29 +43,41 @@ public class AictlAiproj {
                 .write("aiproj-check-" + UUID.randomUUID() + ".json", json.getBytes(StandardCharsets.UTF_8));
 
         try {
-            AictlResult result = environment.execute(Command.builder()
-                    .arg("check").arg("aiproj").arg("-f").arg(path).arg("--json")
-                    .build());
-
-            return interpret(result, json);
+            return checkFile(environment, path);
         } finally {
             environment.delete(path);
         }
     }
 
-    public static String projectName(final String json) {
-        return text(read(json), "ProjectName");
+    @NonNull
+    public static Result checkFile(@NonNull final AictlEnvironment environment, @NonNull final String path) throws GenericException {
+        AictlResult result = environment.execute(Command.builder()
+                .arg("check").arg("aiproj").arg("-f").arg(path).arg("--json")
+                .build());
+
+        return interpret(result);
     }
 
     @NonNull
-    static Result interpret(@NonNull final AictlResult result, @NonNull final String json) {
+    static Result interpret(@NonNull final AictlResult result) {
         JsonNode answer = answer(result.getStdout());
         if (answer == null) {
-            return result.isSuccess() ? valid(json) : invalid(error(reason(result)));
+            return result.isSuccess()
+                    ? new Result(true, Collections.emptyList(), null, Collections.emptyList())
+                    : invalid(error(reason(result)));
+        }
+
+        String projectName = text(answer.path("projectName"));
+        List<String> languages = new ArrayList<>();
+        for (JsonNode language : answer.path("languages")) {
+            String value = text(language);
+            if (value != null) {
+                languages.add(value);
+            }
         }
 
         if (answer.path("ok").asBoolean(false)) {
-            return valid(json);
+            return new Result(true, Collections.emptyList(), projectName, languages);
         }
 
         List<String> errors = new ArrayList<>();
@@ -78,7 +92,7 @@ public class AictlAiproj {
             errors.add(error(reason(result)));
         }
 
-        return new Result(false, errors, null);
+        return new Result(false, errors, projectName, languages);
     }
 
     private static JsonNode answer(final String stdout) {
@@ -114,32 +128,11 @@ public class AictlAiproj {
     }
 
     @NonNull
-    private static Result valid(@NonNull final String json) {
-        return new Result(true, Collections.emptyList(), projectName(json));
-    }
-
-    @NonNull
     private static Result invalid(@NonNull final String error) {
-        return new Result(false, Collections.singletonList(error), null);
+        return new Result(false, Collections.singletonList(error), null, Collections.emptyList());
     }
 
-    @NonNull
-    private static JsonNode read(final String json) {
-        if (StringUtils.isBlank(json)) {
-            return MissingNode.getInstance();
-        }
-
-        try {
-            JsonNode root = createObjectMapper().readTree(json);
-            return root == null ? MissingNode.getInstance() : root;
-        } catch (Exception e) {
-            log.debug("aiproj is not a JSON document", e);
-            return MissingNode.getInstance();
-        }
-    }
-
-    private static String text(@NonNull final JsonNode root, @NonNull final String field) {
-        JsonNode node = root.path(field);
+    private static String text(@NonNull final JsonNode node) {
         return node.isTextual() && StringUtils.isNotBlank(node.asText()) ? node.asText() : null;
     }
 }
