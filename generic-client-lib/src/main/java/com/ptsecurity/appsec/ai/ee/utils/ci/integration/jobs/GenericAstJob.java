@@ -89,7 +89,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
     public static final int DEFAULT_RETRY_TIME_SECONDS = 3600;
 
     /**
-     * Scan start retry settings. Retry itself is not implemented with aictl yet
+     * Scan start retry settings, see {@link ScanStartRetry}
      */
     @Getter
     @Setter
@@ -286,18 +286,29 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
                 branchName = GenericAstTask.DEFAULT_BRANCH_NAME;
             }
 
-            if (StringUtils.isNotEmpty(sourcesPath)) {
-                process(Stage.UPLOAD);
-                genericAstTask.upload(projectId, branchId, sourcesPath);
-            } else {
+            if (StringUtils.isEmpty(sourcesPath)) {
                 info("No files match transfer settings, scan will use previously uploaded sources");
             }
+
+            scanResultId = scanStartRetry().run(() -> {
+                setupProjectSettings(genericAstTask);
+
+                if (StringUtils.isNotEmpty(sourcesPath)) {
+                    process(Stage.UPLOAD);
+                    genericAstTask.upload(projectId, branchId, sourcesPath);
+                }
+
+                process(Stage.ENQUEUED);
+                return genericAstTask.startScan(projectId, branchId, fullScanMode, scanLabel);
+            });
         } finally {
             astOps.cleanupSources(sourcesPath);
         }
+    }
 
-        process(Stage.ENQUEUED);
-        scanResultId = genericAstTask.startScan(projectId, branchId, fullScanMode, scanLabel);
+    @NonNull
+    protected ScanStartRetry scanStartRetry() {
+        return new ScanStartRetry(retry, retryTime, this::info);
     }
 
     protected void startSbomScan(@NonNull final GenericAstTask genericAstTask) throws GenericException {
@@ -317,13 +328,15 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             fine("Full scan mode does not apply to SBOM scan and is ignored");
         }
 
-        process(Stage.UPLOAD);
         String sbomFile = astOps.sbomFile(sbomPath);
-        projectId = genericAstTask.setupSbomProject(projectName, sbomFile);
-        fine("PT AI SBOM project %s id is %s, SBOM file %s uploaded", projectName, projectId, sbomFile);
+        scanResultId = scanStartRetry().run(() -> {
+            process(Stage.UPLOAD);
+            projectId = genericAstTask.setupSbomProject(projectName, sbomFile);
+            fine("PT AI SBOM project %s id is %s, SBOM file %s uploaded", projectName, projectId, sbomFile);
 
-        process(Stage.ENQUEUED);
-        scanResultId = genericAstTask.startSbomScan(projectId, scanLabel);
+            process(Stage.ENQUEUED);
+            return genericAstTask.startSbomScan(projectId, scanLabel);
+        });
     }
 
     @NonNull
@@ -383,6 +396,12 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
         projectId = client.createProject(projectName);
         fine("PT AI project %s id is %s", projectName, projectId);
+    }
+
+    protected void setupProjectSettings(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+        if (StringUtils.isEmpty(jsonSettings)) {
+            return;
+        }
 
         genericAstTask.setProjectSettings(projectId, jsonSettings);
         if (StringUtils.isNotEmpty(jsonPolicy)) {
