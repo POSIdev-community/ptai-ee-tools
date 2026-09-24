@@ -235,6 +235,10 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiScanLabel", elem)
             },
 
+            onPtaiRetryTimeError: function (elem) {
+                this.handle("ptaiRetryTime", elem)
+            },
+
             onPtaiProjectNameError: function (elem) {
                 this.handle("ptaiProjectName", elem);
             },

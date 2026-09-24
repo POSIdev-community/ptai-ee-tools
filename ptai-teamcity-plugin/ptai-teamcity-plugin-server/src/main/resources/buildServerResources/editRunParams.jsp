@@ -795,6 +795,7 @@
                             ? DEFAULT_RETRY_TIME
                             : propertiesBean.properties[RETRY_TIME]
                         }"
+                        maxlength="${MAX_RETRY_TIME_LENGTH}"
                         className="mediumField"/>
                 <span class="smallNote">${HINT_RETRY_TIME}</span>
                 <span class="error" id="error_${RETRY_TIME}"></span>

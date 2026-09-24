@@ -8,6 +8,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSetting
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Report;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sarif;
@@ -210,10 +211,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
             return GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
         }
 
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            return GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
-        }
+        Integer retryTime = ScanStartRetry.parseRetryTime(value);
+        return retryTime == null ? -1 : retryTime;
     }
 }

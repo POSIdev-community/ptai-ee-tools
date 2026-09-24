@@ -219,6 +219,7 @@
 <c:set var="LABEL_RETRY_TIME" value="<%=Labels.RETRY_TIME%>"/>
 <c:set var="HINT_RETRY_TIME" value="<%=Hints.RETRY_TIME%>"/>
 <c:set var="DEFAULT_RETRY_TIME" value="<%=Defaults.RETRY_TIME%>"/>
+<c:set var="MAX_RETRY_TIME_LENGTH" value="<%=com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry.MAX_RETRY_TIME_LENGTH%>"/>
 
 <c:set var="VERBOSE" value="<%=Params.VERBOSE%>"/>
 <c:set var="LABEL_VERBOSE" value="<%=Labels.VERBOSE%>"/>
