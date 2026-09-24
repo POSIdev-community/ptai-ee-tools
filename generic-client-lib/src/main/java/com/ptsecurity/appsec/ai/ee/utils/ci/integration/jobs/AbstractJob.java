@@ -9,12 +9,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.AstPolicyViolationException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.MinorAstErrorsException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,12 +72,20 @@ public abstract class AbstractJob extends AbstractTool {
                 return JobExecutionResult.INTERRUPTED;
             } else if (e.getCause() instanceof AstPolicyViolationException || e.getCause() instanceof MinorAstErrorsException) {
                 log.debug(e.getDetailedMessage(), e.getCause());
+                failed(e.getDetailedMessage(), true);
                 return JobExecutionResult.FAILED;
             }
         }
-        severe(e.getDetailedMessage());
+
         log.error(e.getDetailedMessage(), e.getCause());
+        failed(e.getDetailedMessage(), false);
         return JobExecutionResult.FAILED;
+    }
+
+    protected void failed(@NonNull final String reason, final boolean logged) {
+        if (!logged) {
+            severe(reason);
+        }
     }
 
     protected abstract void init() throws GenericException;

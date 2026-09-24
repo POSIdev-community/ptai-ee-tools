@@ -7,12 +7,14 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.operations.TeamcityAstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.operations.TeamcityFileOperations;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
+import jetbrains.buildServer.BuildProblemData;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -35,6 +37,8 @@ public class TeamcityAstJob extends GenericAstJob implements TextOutput {
 
     @NonNull
     private ArtifactsWatcher artifactsWatcher;
+
+    protected static final String BUILD_PROBLEM_TYPE = "PT_AI_AST";
 
     @Override
     protected void init() throws GenericException {
@@ -60,5 +64,17 @@ public class TeamcityAstJob extends GenericAstJob implements TextOutput {
     protected void out(final Throwable t) {
         if (null == t) return;
         agent.getBuildLogger().exception(t);
+    }
+
+    @Override
+    protected void failed(@NonNull final String reason, final boolean logged) {
+        String description = StringUtils.abbreviate(
+                StringUtils.defaultIfBlank(reason, "PT AI AST failed"),
+                BuildProblemData.MAX_DESCRIPTION_LENGTH);
+
+        agent.getBuildLogger().logBuildProblem(BuildProblemData.createBuildProblem(
+                BUILD_PROBLEM_TYPE + "_" + Integer.toHexString(description.hashCode()),
+                BUILD_PROBLEM_TYPE,
+                description));
     }
 }
