@@ -133,6 +133,7 @@ f.advanced() {
                 field: 'retryTime') {
             f.textbox(
                     clazz: 'required positive-number',
+                    maxlength: pluginDescriptor.maxRetryTimeLength,
                     value: pluginInstance != null && pluginInstance.retryTime >= pluginDescriptor.minRetryTime
                             ? pluginInstance.retryTime
                             : pluginDescriptor.defaultRetryTime,

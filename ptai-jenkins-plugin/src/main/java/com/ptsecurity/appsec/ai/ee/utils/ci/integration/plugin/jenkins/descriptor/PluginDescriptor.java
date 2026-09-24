@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
@@ -290,20 +291,15 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     }
 
     @SuppressWarnings("unused")
+    public int getMaxRetryTimeLength() {
+        return ScanStartRetry.MAX_RETRY_TIME_LENGTH;
+    }
+
+    @SuppressWarnings("unused")
     public FormValidation doCheckRetryTime(@QueryParameter String value) {
-        int minRetryTime = getMinRetryTime();
-        int retryTime;
-        try {
-            retryTime = Integer.parseInt(StringUtils.trimToEmpty(value));
-        } catch (NumberFormatException e) {
-            return FormValidation.error(Resources.i18n_ast_settings_retryTime_message_invalid(minRetryTime));
-        }
-
-        if (retryTime < minRetryTime) {
-            return FormValidation.error(Resources.i18n_ast_settings_retryTime_message_invalid(minRetryTime));
-        }
-
-        return FormValidation.ok();
+        return ScanStartRetry.parseRetryTime(value) == null
+                ? FormValidation.error(ScanStartRetry.invalidRetryTimeMessage())
+                : FormValidation.ok();
     }
 
     private static boolean isApplicableManifest(Manifest manifest) {

@@ -9,6 +9,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
@@ -177,6 +178,8 @@ public class AstSettingsService {
 
         res.fill(SCAN_LABEL, request);
 
+        res.fill(RETRY, request).fill(RETRY_TIME, request);
+
         return res;
     }
 
@@ -266,6 +269,10 @@ public class AstSettingsService {
         }
 
         validateScanLabel(bean, results);
+
+        if (bean.isTrue(RETRY) && ScanStartRetry.parseRetryTime(bean.get(RETRY_TIME)) == null) {
+            results.add(RETRY_TIME, ScanStartRetry.invalidRetryTimeMessage());
+        }
 
         if (!sbomScan) {
             validateBranchSettings(bean, results);
