@@ -1,7 +1,9 @@
 # PT Application Inspector CI/CD plugins bundle
 Set of CI/CD plugins that allow to implement application security testing (AST) in build pipelines using Positive Technologies Application Inspector tool ([link](https://www.ptsecurity.com/ww-en/products/ai/)).
 ## Build plugins
-Starting with plugins version 3.6.2 Gradle build script use com.palantir.git-version plugin to inject SCM commit hash into manifests. That means you need use ```git clone``` command to download sources.  
+Starting with plugins version 3.6.2 Gradle build script use com.palantir.git-version plugin to inject SCM commit hash into manifests. That means you need use ```git clone``` command to download sources.
+
+Build requires JDK 11.
 ### Build plugins using Gradle
 To build plugins bundle using Gradle you need to execute ```build``` Gradle task:
 ```
@@ -12,10 +14,10 @@ Jenkins and Teamcity plugins will be built for CI versions defined in ```gradle.
 $ ./gradlew build -P teamcityVersion=2020.1
 ```
 Jenkins plugin will be built for the minimum supported version `2.300`. The plugin for Jenkins will work for
-jenkins `2.300` and any newer version. Additionally, you can override the versions of the `token-macro`, `credentials` 
+jenkins `2.300` and any newer version. Additionally, you can override the versions of the `credentials` 
 and `structs` jenkins plugins, in case your installation uses non-standard ones. Often, this is not required:
 ```
-./gradlew build -P jenkinsTokenMacroPluginVersion=321.vd7cc1f2a_52c8 -P jenkinsCredentialsPluginVersion=2.6.1.1 -P jenkinsStructsPluginVersion=324.va_f5d6774f3a_d
+./gradlew build -P jenkinsCredentialsPluginVersion=2.6.1.1 -P jenkinsStructsPluginVersion=324.va_f5d6774f3a_d
 ```
 
 You can override maven repositories used during the build:
@@ -26,7 +28,13 @@ $ ./gradlew build -PmavenCentralRepoUrl=https://maven.example.com/ -PgradlePlugi
 The full list of used repositories is available [here](./gradle.properties).
 
 Also, you can use [HTTP proxy settings](https://docs.gradle.org/current/userguide/networking.html#sec:accessing_the_web_via_a_proxy). 
+### Bundled aictl
+The build downloads the latest aictl [release](https://github.com/POSIdev-community/aictl/releases) from GitHub.
 
+aictl is bundled for platforms listed in ```aictlPlatforms``` property of ```gradle.properties```. Supported platforms are `linux-amd64`, `linux-arm64`, `darwin-amd64`, `darwin-arm64` and `windows-amd64`. The list can be redefined using the ```-P``` option:
+```
+$ ./gradlew build -PaictlPlatforms=linux-amd64,windows-amd64
+```
 ### Build plugins using Docker Gradle image
 Execute ```docker run``` command in project root:
 ```
@@ -57,55 +65,3 @@ $ ./gradlew downloadTeamcity
 $ ./gradlew installTeamcity
 ```
 See additional info on gradle-teamcity-plugin [page](https://github.com/rodm/gradle-teamcity-plugin).
-## Launch integration tests
-All integration tests are marked as "integration" (including additional tags "slow", "scan" and "jenkins") and "development". These tests interact with PT AI instance that is to be available via HTTPS REST API. 
-
-As PT AI server connection settings and credentials aren't stored in repository, those are to be defined in ptai-rest-api/src/testFixtures/resources/configuration.yml file as follows:
-```yaml
-connections:
-  ptai420:
-    version: V420
-    url: https://ptai420-server.domain.org:443
-    # CI only API token
-    token: TOKEN_GOES_HERE
-    # CI and agent API token
-    failSafeToken: ANOTHER_TOKEN_GOES_HERE
-    user: root
-    password: GUESS_WHAT
-    ca: keys/domain.org.pem
-    insecure: false
-  ptai421: &current
-    version: V430
-    url: https://ptai-server.domain.org:443
-    # CI only API token
-    token: TOKEN_GOES_HERE
-    # CI and agent API token
-    failSafeToken: ANOTHER_TOKEN_GOES_HERE
-    user: root
-    password: GUESS_WHAT
-    ca: keys/domain.org.pem
-    insecure: false
-current: *current
-```
-### "Pure" (i.e. without any additional tag) integration tests
-Tests that are marked with "integration" tag only are fast as those aren't start any scans. These tests are used to check PT AI REST API interactions and may be launched using following command:
-```
-$ ./gradlew integrationFastTest
-```
-### Slow tests
-Long-running tests include these containing JWT token refresh check etc. These tests last very long time and to be launched separately:
-```
-$ ./gradlew clean build integrationSlowTest
-```
-### Generic integration tests
-Generic integration tests use predefined vulnerable source packs from generic-client-lib/src/testFixtures/resources/code folder. Use following command to run these tests:
-```
-$ ./gradlew clean build integrationScanTest
-```
-### Development integration tests
-Development integration tests aren't supposed to be started during build. Their main purpose is to launch scans and store PT AI server responses to use them as JUnit tests resources. There's no dedicated Gradle task to run these tests, those are to be executed from IDE.
-### Jenkins integration tests
-Jenkins' integration tests use embedded Jenkins server to create AST jos and launch them. Use following command to run these tests:
-```
-$ ./gradlew clean build integrationJenkinsTest
-```
