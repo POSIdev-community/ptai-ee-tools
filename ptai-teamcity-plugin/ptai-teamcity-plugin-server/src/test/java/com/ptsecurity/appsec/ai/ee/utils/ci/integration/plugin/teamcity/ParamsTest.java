@@ -16,7 +16,6 @@ class ParamsTest {
                 .filter(f -> Modifier.isStatic(f.getModifiers()))
                 .filter(f -> Modifier.isFinal(f.getModifiers()))
                 .map(Field::getName).forEach(n -> System.out.println(Defaults.value(n)));
-                // .collect(Collectors.toList());
 
         List<String> defaults = Arrays.stream(Defaults.class.getDeclaredFields())
                 .filter(f -> Modifier.isPublic(f.getModifiers()))

@@ -26,15 +26,14 @@ public class Labels {
     public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "From pipeline environment";
     public static final String BRANCH_SETTINGS_CUSTOM = "Custom branch";
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "Branch name";
-    public static final String BRANCH_SETTINGS_FROM_JSON = "From JSON settings";
 
     public static final String SCAN_LABEL = "Scan label";
 
-    public static final String PROJECT_PRIORITY = "Project priority";
-    public static final String PROJECT_PRIORITY_LOW = "Low";
-    public static final String PROJECT_PRIORITY_MEDIUM = "Medium";
-    public static final String PROJECT_PRIORITY_HIGH = "High";
-    public static final String PROJECT_PRIORITY_CRITICAL = "Critical";
+    public static final String SCAN_TYPE = "Scan type";
+    public static final String SCAN_TYPE_STANDARD = "Standard scan";
+    public static final String SCAN_TYPE_SBOM = "SBOM scan";
+    public static final String SBOM_PROJECT_NAME = "SBOM project name";
+    public static final String SBOM_PATH = "SBOM file path";
 
     public static final String AST_SETTINGS = "Scan settings type";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
@@ -63,6 +62,8 @@ public class Labels {
     public static final String FAIL_IF_UNSTABLE = "Fail step if SAST unstable";
 
     public static final String FULL_SCAN_MODE = Resources.i18n_ast_settings_fullScanMode_label();
+    public static final String RETRY = Resources.i18n_ast_settings_retry_label();
+    public static final String RETRY_TIME = Resources.i18n_ast_settings_retryTime_label();
     public static final String VERBOSE = Resources.i18n_ast_settings_verbose_label();
     public static final String INCLUDES = "Files to analyse";
     public static final String REMOVE_PREFIX = "Remove prefix";
@@ -84,10 +85,6 @@ public class Labels {
      * See {@link Params#REPORTING_SARIF}
      */
     public static final String REPORTING_SARIF = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_label();
-    /**
-     * See {@link Params#REPORTING_SONARGIIF}
-     */
-    public static final String REPORTING_SONARGIIF = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_label();
     /**
      * See {@link Params#REPORTING_JSON}
      */
@@ -119,6 +116,21 @@ public class Labels {
     public static final String REPORTING_REPORT_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_label();
 
     /**
+     * See {@link Params#REPORTING_REPORT_LOCALE}
+     */
+    public static final String REPORTING_REPORT_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label();
+
+    /**
+     * See {@link Params#REPORTING_RAWDATA_LOCALE}
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label();
+
+    /**
+     * See {@link Params#REPORTING_SARIF_LOCALE}
+     */
+    public static final String REPORTING_SARIF_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label();
+
+    /**
      * See {@link Params#REPORTING_RAWDATA_FILE}
      */
     public static final String REPORTING_RAWDATA_FILE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_rawjson_file_label();
@@ -137,16 +149,6 @@ public class Labels {
      * See {@link Params#REPORTING_SARIF_FILTER}
      */
     public static final String REPORTING_SARIF_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_filter_label();
-
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILE}
-     */
-    public static final String REPORTING_SONARGIIF_FILE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_label();
-
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILTER}
-     */
-    public static final String REPORTING_SONARGIIF_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_filter_label();
 
     /**
      * See {@link Params#REPORTING_JSON_SETTINGS}

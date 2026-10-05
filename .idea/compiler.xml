@@ -26,18 +26,14 @@
         <module name="ptai-ee-tools.generic-client-lib.main" />
         <module name="ptai-ee-tools.ptai-jenkins-plugin.test" />
         <module name="ptai-ee-tools.pt-misc-tools.testFixtures" />
-        <module name="ptai-ee-tools.ptai-cli-plugin.test" />
         <module name="ptai-ee-tools.ptai-rest-api.main" />
         <module name="ptai-ee-tools.ptai-teamcity-plugin.ptai-teamcity-plugin-server.test" />
         <module name="ptai-ee-tools.ptai-data-structures.testFixtures" />
         <module name="ptai-ee-tools.ptai-teamcity-plugin.ptai-teamcity-plugin-common.main" />
         <module name="ptai-ee-tools.ptai-i18n.test" />
-        <module name="ptai-ee-tools.ptai-rest-api.testFixtures" />
         <module name="ptai-ee-tools.ptai-teamcity-plugin.ptai-teamcity-plugin-server.main" />
         <module name="ptai-ee-tools.ptai-teamcity-plugin.test" />
-        <module name="ptai-ee-tools.ptai-rest-api.test" />
         <module name="ptai-ee-tools.generic-client-lib.test" />
-        <module name="ptai-ee-tools.ptai-cli-plugin.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />

@@ -1,16 +1,15 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.FromJsonBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.PipelineEnvironmentBranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalconfig.Config;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.priority.ProjectPrioritySettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
@@ -24,7 +23,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.CopyOnWriteList;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import lombok.Getter;
 import lombok.NonNull;
@@ -45,6 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.RETRY_INTERVAL_SECONDS;
 
 @Slf4j
 @Extension
@@ -101,6 +102,24 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
 
         save();
         return true;
+    }
+
+    public FormValidation doCheckSbomProjectName(@QueryParameter String value) {
+        return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_projectname_message_empty());
+    }
+
+    public FormValidation doCheckSbomPath(@QueryParameter String value) {
+        return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_path_message_empty());
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanTypeStandard() {
+        return Plugin.SCAN_TYPE_STANDARD;
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanTypeSbom() {
+        return Plugin.SCAN_TYPE_SBOM;
     }
 
     /**
@@ -162,13 +181,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                 );
                 res = customNameBranchDescriptor.doCheckBranchName(branchName);
                 if (FormValidation.Kind.ERROR == res.kind) break;
-            } else if (branchSettings instanceof FromJsonBranchSettings && scanSettings instanceof ScanSettingsManual) {
-                FromJsonBranchSettings.Descriptor fromJsonBranchSettingsDescriptor = Jenkins.get()
-                        .getDescriptorByType(FromJsonBranchSettings.Descriptor.class);
-                res = fromJsonBranchSettingsDescriptor.doCheckBranchNameJsonSettings(jsonSettings);
-                if (FormValidation.Kind.ERROR == res.kind) {
-                    break;
-                }
             }
 
             ScanLabelSettings.ScanLabelSettingsDescriptor scanLabelSettingsDescriptor = Jenkins.get().getDescriptorByType(
@@ -216,11 +228,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
         return BranchSettings.getAll();
     }
 
-    @SuppressWarnings("unused")
-    public static ScanLabelSettings.ScanLabelSettingsDescriptor getDefaulScanLabelSettingsDescriptor() {
-        return Jenkins.get().getDescriptorByType(ScanLabelSettings.ScanLabelSettingsDescriptor.class);
-    }
-
     public static List<WorkMode.WorkModeDescriptor> getWorkModeDescriptors() {
         return WorkMode.getAll();
     }
@@ -228,20 +235,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public static WorkMode.WorkModeDescriptor getDefaultWorkModeDescriptor() {
         return Jenkins.get().getDescriptorByType(WorkModeSync.Descriptor.class);
-    }
-
-    @SuppressWarnings("unused")
-    public ListBoxModel doFillProjectPrioritySettingsItems() {
-        ListBoxModel items = new ListBoxModel();
-        for (ProjectPrioritySettings setting : ProjectPrioritySettings.values()) {
-            items.add(setting.getDisplayName(), setting.name());
-        }
-        return items;
-    }
-
-    @SuppressWarnings("unused")
-    public String getDefaultProjectPrioritySettings() {
-        return ProjectPrioritySettings.MEDIUM.name();
     }
 
     protected static Map<String, String> versionInfo = null;
@@ -285,6 +278,28 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public FormValidation doCheckAdvancedSettings(@QueryParameter String value) {
         return Validator.doCheckFieldAdvancedSettings(value, Resources.i18n_ast_settings_advanced_message_invalid());
+    }
+
+    @SuppressWarnings("unused")
+    public int getDefaultRetryTime() {
+        return DEFAULT_RETRY_TIME_SECONDS;
+    }
+
+    @SuppressWarnings("unused")
+    public int getMinRetryTime() {
+        return RETRY_INTERVAL_SECONDS;
+    }
+
+    @SuppressWarnings("unused")
+    public int getMaxRetryTimeLength() {
+        return ScanStartRetry.MAX_RETRY_TIME_LENGTH;
+    }
+
+    @SuppressWarnings("unused")
+    public FormValidation doCheckRetryTime(@QueryParameter String value) {
+        return ScanStartRetry.parseRetryTime(value) == null
+                ? FormValidation.error(ScanStartRetry.invalidRetryTimeMessage())
+                : FormValidation.ok();
     }
 
     private static boolean isApplicableManifest(Manifest manifest) {

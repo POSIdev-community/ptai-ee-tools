@@ -4,11 +4,6 @@ import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 
 public class Constants {
     /**
-     * Value of mode parameter when user clicks on "Save" button
-     */
-    public static final String MODE_SAVE = "save";
-
-    /**
      * Value of mode parameter when user clicks on "Test" button
      */
     public static final String MODE_TEST = "test";
@@ -36,12 +31,9 @@ public class Constants {
 
     public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "BranchSettingsFromEnvironment";
     public static final String BRANCH_SETTINGS_CUSTOM = "BranchSettingsCustom";
-    public static final String BRANCH_SETTINGS_FROM_JSON = "BranchSettingsFromJson";
 
-    public static final String PROJECT_PRIORITY_LOW = "ProjectPriorityLow";
-    public static final String PROJECT_PRIORITY_MEDIUM = "ProjectPriorityMedium";
-    public static final String PROJECT_PRIORITY_HIGH = "ProjectPriorityHigh";
-    public static final String PROJECT_PRIORITY_CRITICAL = "ProjectPriorityCritical";
+    public static final String SCAN_TYPE_STANDARD = "ScanTypeStandard";
+    public static final String SCAN_TYPE_SBOM = "ScanTypeSbom";
 
     public static final String AST_SETTINGS_JSON = "SettingsJson";
     public static final String AST_SETTINGS_UI = "SettingsUI";

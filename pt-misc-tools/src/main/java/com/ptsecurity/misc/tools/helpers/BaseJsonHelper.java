@@ -41,6 +41,11 @@ public class BaseJsonHelper {
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
+    public static ObjectMapper createCompatibleObjectMapper() {
+        return createObjectMapper()
+                .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
+    }
+
     public static String serialize(Object data) throws GenericException {
         return call(
                 () -> createObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data),

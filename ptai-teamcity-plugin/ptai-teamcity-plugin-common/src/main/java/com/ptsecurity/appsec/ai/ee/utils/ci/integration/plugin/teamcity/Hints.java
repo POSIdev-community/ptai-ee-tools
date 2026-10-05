@@ -21,15 +21,16 @@ public class Hints {
     public static final String SERVER_SETTINGS_GLOBAL = "Global scope defined PT AI server config";
     public static final String SERVER_SETTINIGS_LOCAL = "Task scope defined PT AI server config";
 
-    public static final String BRANCH_SETTINGS = "Choose how PT AI branch name are defined. Branch name from JSON-defined settings is only used when the corresponding setting is selected";
+    public static final String BRANCH_SETTINGS = "Choose how PT AI branch name are defined";
     public static final String BRANCH_SETTINGS_FROM_ENVIRONMENT = "PT AI branch name from pipeline environment";
     public static final String BRANCH_SETTINGS_CUSTOM = "Custom PT AI branch name";
     public static final String BRANCH_SETTINGS_CUSTOM_BRANCH_NAME = "Branch name";
-    public static final String BRANCH_SETTINGS_FROM_JSON = "Branch name from JSON-defined settings is only used when the corresponding setting is selected";
 
     public static final String SCAN_LABEL = "Label";
 
-    public static final String PROJECT_PRIORITY = "An agent will first handle the project that has the highest priority";
+    public static final String SCAN_TYPE = "Choose whether project sources or an SBOM file are scanned";
+    public static final String SBOM_PROJECT_NAME = "PT AI SBOM project name";
+    public static final String SBOM_PATH = "SBOM file path relative to the checkout directory";
 
     public static final String AST_SETTINGS = "Choose how AST settings are defined";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
@@ -51,6 +52,8 @@ public class Hints {
     public static final String FAIL_IF_FAILED = "Mark build step as failed if AST policy assessment failed";
     public static final String FAIL_IF_UNSTABLE = "Mark build step as failed if AST policy assessment success but there were some minor warnings reported";
     public static final String FULL_SCAN_MODE = Resources.i18n_ast_settings_fullScanMode_hint();
+    public static final String RETRY = Resources.i18n_ast_settings_retry_hint();
+    public static final String RETRY_TIME = Resources.i18n_ast_settings_retryTime_hint();
     public static final String VERBOSE = Resources.i18n_ast_settings_verbose_hint();
 
     public static final String INCLUDES =
@@ -85,10 +88,6 @@ public class Hints {
      */
     public static final String REPORTING_SARIF = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_hint();
     /**
-     * See {@link Params#REPORTING_SONARGIIF}
-     */
-    public static final String REPORTING_SONARGIIF = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_hint();
-    /**
      * See {@link Params#REPORTING_JSON}
      */
     public static final String REPORTING_JSON = Resources.i18n_ast_settings_mode_synchronous_subjob_export_advanced_hint();
@@ -102,6 +101,21 @@ public class Hints {
      * See {@link Params#REPORTING_REPORT_TEMPLATE}
      */
     public static final String REPORTING_REPORT_TEMPLATE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_template_hint();
+
+    /**
+     * See {@link Params#REPORTING_REPORT_LOCALE}
+     */
+    public static final String REPORTING_REPORT_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_hint();
+
+    /**
+     * See {@link Params#REPORTING_RAWDATA_LOCALE}
+     */
+    public static final String REPORTING_RAWDATA_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_hint();
+
+    /**
+     * See {@link Params#REPORTING_SARIF_LOCALE}
+     */
+    public static final String REPORTING_SARIF_LOCALE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_hint();
 
     /**
      * See {@link Params#REPORTING_REPORT_DATAFLOW}
@@ -137,16 +151,6 @@ public class Hints {
      * See {@link Params#REPORTING_SARIF_FILTER}
      */
     public static final String REPORTING_SARIF_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sarif_filter_hint();
-
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILE}
-     */
-    public static final String REPORTING_SONARGIIF_FILE = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_hint();
-
-    /**
-     * See {@link Params#REPORTING_SONARGIIF_FILTER}
-     */
-    public static final String REPORTING_SONARGIIF_FILTER = Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_filter_hint();
 
     /**
      * See {@link Params#REPORTING_JSON_SETTINGS}

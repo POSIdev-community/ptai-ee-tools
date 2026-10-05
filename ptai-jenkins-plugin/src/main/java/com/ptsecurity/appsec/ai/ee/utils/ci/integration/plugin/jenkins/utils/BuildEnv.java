@@ -12,7 +12,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Map;
 import java.util.TreeMap;
 
 @Slf4j
@@ -70,13 +69,5 @@ public class BuildEnv implements Serializable {
 
     public String toString() {
         return addToToString(new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)).toString();
-    }
-
-    public TreeMap<String, String> getEnvVarsWithPrefix(final String prefix) {
-        final TreeMap<String, String> prefixed = new TreeMap<>();
-        for (Map.Entry<String, String> entry : envVars.entrySet()) {
-            prefixed.put(prefix + entry.getKey(), entry.getValue());
-        }
-        return prefixed;
     }
 }

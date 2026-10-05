@@ -23,7 +23,7 @@ pipeline {
     }
     stage('Archive') {
       steps {
-        archiveArtifacts artifacts: 'ptai-cli-plugin/build/libs/ptai-cli-plugin.jar, ptai-jenkins-plugin/build/libs/ptai-jenkins-plugin.hpi, ptai-teamcity-plugin/ptai-teamcity-plugin-server/build/distributions/ptai-teamcity-plugin.zip', followSymlinks: false
+        archiveArtifacts artifacts: 'ptai-jenkins-plugin/build/libs/ptai-jenkins-plugin.hpi, ptai-teamcity-plugin/ptai-teamcity-plugin-server/build/distributions/ptai-teamcity-plugin.zip', followSymlinks: false
       }
     }
   }

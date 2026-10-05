@@ -1,13 +1,14 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils;
 
+import com.ptsecurity.appsec.ai.ee.helpers.json.JsonPolicyHelper;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.UrlHelper;
 import hudson.util.FormValidation;
@@ -18,10 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
-
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.ERROR;
-import static com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings.ParseResult.Message.Type.WARNING;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources.i18n_ast_settings_branch_from_json_message_empty;
 
 @Slf4j
 public class Validator {
@@ -82,20 +79,6 @@ public class Validator {
         return doCheckFieldRegEx(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
     }
 
-    public static FormValidation doCheckLocale(String value) {
-        if (value.isEmpty() || value.trim().isEmpty()) {
-            return FormValidation.ok();
-        }
-
-        if (Reports.Locale.from(value) == null) {
-            return FormValidation.error(
-                    Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_message_error()
-            );
-        }
-
-        return FormValidation.ok();
-    }
-
     public static FormValidation doCheckFieldJsonPolicy(String value) {
         try {
             if (!Validator.doCheckFieldNotEmpty(value))
@@ -112,22 +95,23 @@ public class Validator {
     }
 
     public static FormValidation doCheckFieldJsonSettings(String value) {
-        Collection<FormValidation> messages = new ArrayList<>();
-        UnifiedAiProjScanSettings.ParseResult parseResult = UnifiedAiProjScanSettings.parse(value);
-        if (!parseResult.getMessages().isEmpty()) {
-            log.trace("There are messages generated during parse");
-            for (UnifiedAiProjScanSettings.ParseResult.Message message : parseResult.getMessages())
-                messages.add(message.getType().equals(ERROR)
-                        ? FormValidation.error(message.getText())
-                        : message.getType().equals(WARNING)
-                        ? FormValidation.warning(message.getText())
-                        : FormValidation.ok(message.getText()));
+        try {
+            AictlAiproj.Result aiproj = AictlAiproj.check(ControllerEnvironment.get(), value);
+            if (aiproj.isValid()) {
+                return FormValidation.ok(
+                        Resources.i18n_ast_settings_type_manual_json_settings_message_success(
+                                aiproj.getProjectName(), String.join(", ", aiproj.getLanguages())));
+            }
+
+            Collection<FormValidation> messages = new ArrayList<>();
+            for (String error : aiproj.getErrors()) {
+                messages.add(FormValidation.error(error));
+            }
+
+            return FormValidation.aggregate(messages);
+        } catch (Exception e) {
+            return Validator.error(e);
         }
-        if (null != parseResult.getCause())
-            messages.add(FormValidation.error(
-                    parseResult.getCause(),
-                    Resources.i18n_ast_settings_type_manual_json_settings_message_invalid()));
-        return FormValidation.aggregate(messages);
     }
 
     public static FormValidation doCheckFieldJsonIssuesFilter(String value, String errorMessage) {
@@ -138,13 +122,21 @@ public class Validator {
         return doCheckFieldJsonReports(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
     }
 
-    public static FormValidation doCheckBranchNameJsonSettings(String value) {
-        return checkViaException(() -> UnifiedAiProjScanSettings.validateBranchNameFromJson(value))
-                ? FormValidation.ok() : FormValidation.error(i18n_ast_settings_branch_from_json_message_empty());
-    }
-
     public static FormValidation doCheckFieldAdvancedSettings(String value, String errorMessage) {
         return doCheckFieldAdvancedSettings(value) ? FormValidation.ok() : FormValidation.error(errorMessage);
+    }
+
+    public static FormValidation doCheckLocale(String value) {
+        if (StringUtils.isBlank(value)) {
+            return FormValidation.ok();
+        }
+
+        if (Reports.Locale.from(value.trim()) == null) {
+            return FormValidation.error(
+                    Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_message_error());
+        }
+
+        return FormValidation.ok();
     }
 
     public static FormValidation doCheckScanLabelMaxLength(String value, String errorMessage) {
@@ -157,7 +149,6 @@ public class Validator {
     }
 
     public static FormValidation error(Exception e) {
-        // log.log(Level.FINEST, "FormValidation error", e);
         String caption = e.getMessage();
         if (StringUtils.isEmpty(caption))
             return FormValidation.error(e, Resources.i18n_ast_settings_test_message_failed());
@@ -169,7 +160,6 @@ public class Validator {
     }
 
     public static FormValidation error(@NonNull final String message, Exception e) {
-        // log.log(Level.FINEST, "FormValidation error", e);
         Throwable cause = e;
         if (e instanceof GenericException) cause = e.getCause();
         return FormValidation.error(cause, Resources.i18n_ast_settings_test_message_failed_details(message));

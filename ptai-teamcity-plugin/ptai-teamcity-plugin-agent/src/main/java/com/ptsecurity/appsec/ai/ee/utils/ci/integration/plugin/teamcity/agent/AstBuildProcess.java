@@ -2,21 +2,20 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports.RawData;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Report;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sarif;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.SonarGiif;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.ReportsHelper;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import jetbrains.buildServer.RunBuildException;
 import jetbrains.buildServer.agent.AgentRunningBuild;
@@ -29,12 +28,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants.*;
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Messages.MESSAGE_BRANCH_NAME_MISSING_JSON;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -60,13 +57,6 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
 
     private TeamcityAstJob job = null;
 
-    private static final Map<String, String> PRIORITY_MAPPING = new HashMap<String, String>() {{
-        put(PROJECT_PRIORITY_LOW, "Low");
-        put(PROJECT_PRIORITY_MEDIUM, "Medium");
-        put(PROJECT_PRIORITY_HIGH, "High");
-        put(PROJECT_PRIORITY_CRITICAL, "Critical");
-    }};
-
     @Override
     public BuildFinishedStatus call() {
         AbstractJob.JobExecutionResult status = ast();
@@ -82,11 +72,16 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         Map<String, String> params = buildRunnerContext.getRunnerParameters();
         Map<String, String> globals = agentRunningBuild.getSharedConfigParameters();
 
-        boolean selectedScanSettingsUi = AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
+        boolean sbomScan = SCAN_TYPE_SBOM.equals(params.get(Params.SCAN_TYPE));
+        boolean selectedScanSettingsUi = !sbomScan && AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
         String projectName = null;
         String settings = null;
         String policy = null;
-        if (!selectedScanSettingsUi) {
+        String sbomPath = null;
+        if (sbomScan) {
+            projectName = params.get(Params.SBOM_PROJECT_NAME);
+            sbomPath = params.get(Params.SBOM_PATH);
+        } else if (!selectedScanSettingsUi) {
             settings = BaseJsonHelper.minimize(params.get(Params.JSON_SETTINGS));
             String policyParamValue = params.get(Params.JSON_POLICY);
             if (policyParamValue != null) {
@@ -122,19 +117,19 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 ? params
                 : globals;
 
-        String branchName = getBranchName(params);
+        String branchName = sbomScan ? null : getBranchName(params);
         String scanLabel =  params.get(Params.SCAN_LABEL);
-        String projectPriority = getProjectPriority(params);
 
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
                 .artifactsWatcher(artifactsWatcher)
-                .projectName(selectedScanSettingsUi ? projectName : null)
+                .projectName(sbomScan || selectedScanSettingsUi ? projectName : null)
+                .sbomScan(sbomScan)
+                .sbomPath(sbomPath)
                 .branchName(branchName)
                 .scanLabel(scanLabel)
-                .projectPriority(projectPriority)
-                .settings(selectedScanSettingsUi ? null : settings)
-                .policy(selectedScanSettingsUi ?  null : policy)
+                .jsonSettings(sbomScan || selectedScanSettingsUi ? null : settings)
+                .jsonPolicy(sbomScan || selectedScanSettingsUi ? null : policy)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(activeConnectionParams.get(Params.URL))
                         .insecure(TRUE.equals(activeConnectionParams.get(Params.INSECURE)))
@@ -142,6 +137,8 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                         .caCertsPem(activeConnectionParams.get(Params.CERTIFICATES))
                         .build())
                 .fullScanMode(TRUE.equals(params.get(Params.FULL_SCAN_MODE)))
+                .retry(TRUE.equals(params.get(Params.RETRY)))
+                .retryTime(getRetryTime(params))
                 .verbose(TRUE.equals(params.get(Params.VERBOSE)))
                 .transfers(transfers)
                 .async(async)
@@ -153,8 +150,6 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 RawJson.builder().owner(job).rawData(rawData).build().attach(job);
             for (Reports.Sarif sarif : reports.getSarif())
                 Sarif.builder().owner(job).sarif(sarif).build().attach(job);
-            for (Reports.SonarGiif sonarGiif : reports.getSonarGiif())
-                SonarGiif.builder().owner(job).sonar(sonarGiif).build().attach(job);
         }
         if (failIfFailed) new FailIfAstFailed().attach(job);
         if (failIfUnstable) new FailIfAstUnstable().attach(job);
@@ -200,32 +195,23 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         }
     }
 
-    private String getBranchName(Map<String, String> params) {
+    private String getBranchName(Map<String, String> params ) {
         boolean selectedCustomBranchSettings = BRANCH_SETTINGS_CUSTOM.equals(params.get(Params.BRANCH_SETTINGS));
 
         if (selectedCustomBranchSettings) {
             return params.get(Params.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
         }
 
-        if (BRANCH_SETTINGS_FROM_ENVIRONMENT.equals(params.get(Params.BRANCH_SETTINGS))) {
-            return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
-        }
-
-        if (!AST_SETTINGS_JSON.equals(params.get(Params.AST_SETTINGS))) {
-            throw GenericException.raise(MESSAGE_BRANCH_NAME_MISSING_JSON, new IllegalArgumentException());
-        }
-
-        UnifiedAiProjScanSettings jsonSettings = UnifiedAiProjScanSettings.loadSettings(params.get(Params.JSON_SETTINGS));
-
-        String branchName = jsonSettings.getBranchName();
-        if (branchName == null) {
-            throw GenericException.raise(MESSAGE_BRANCH_NAME_MISSING_JSON, new IllegalArgumentException());
-        }
-
-        return branchName;
+        return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
     }
 
-    private String getProjectPriority(Map<String, String> params) {
-        return PRIORITY_MAPPING.getOrDefault(params.get(Params.PROJECT_PRIORITY), "Medium");
+    private int getRetryTime(Map<String, String> params) {
+        String value = params.get(Params.RETRY_TIME);
+        if (StringUtils.isBlank(value)) {
+            return GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+        }
+
+        Integer retryTime = ScanStartRetry.parseRetryTime(value);
+        return retryTime == null ? -1 : retryTime;
     }
 }

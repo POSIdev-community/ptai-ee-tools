@@ -4,6 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
        default-autowire="constructor">
 
+    <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment"/>
     <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings" init-method="init"/>
     <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminPage"/>
     <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminPageController"/>

@@ -74,7 +74,7 @@ public class ScanDataPacked extends com.ptsecurity.appsec.ai.ee.scan.ScanDataPac
                 byte[] jsonData = new byte[(int) entry.getSize()];
                 log.debug("Reading packed data");
                 call(() -> IOUtils.read(inputStream, jsonData), "Packed data read failed");
-                ObjectMapper mapper = BaseJsonHelper.createObjectMapper();
+                ObjectMapper mapper = BaseJsonHelper.createCompatibleObjectMapper();
                 return call(() -> (T) mapper.readValue(jsonData, clazz), "Packed object deserialization failed");
             } while (true);
             throw GenericException.raise("No packed data found", new IllegalArgumentException(data));

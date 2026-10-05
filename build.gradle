@@ -43,8 +43,8 @@ subprojects {
     }
 
     dependencies {
-        // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml
-        implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
+        // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
         // Enable Slf4J log facade
         implementation "org.slf4j:slf4j-api:$slf4jVersion"
 

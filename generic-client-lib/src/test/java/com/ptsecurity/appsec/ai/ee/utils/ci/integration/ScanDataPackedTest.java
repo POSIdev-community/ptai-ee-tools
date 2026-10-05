@@ -25,9 +25,11 @@ public class ScanDataPackedTest extends BaseTest {
     public void packOwaspBenchmarksScanBriefDetailed() {
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/brief/detailed", version)) continue;
+            String folder = "json/scan/brief/detailed/" + version.name().toLowerCase() + "/";
             for (ProjectTemplate.ID templateId : ProjectTemplate.ID.values()) {
                 ProjectTemplate projectTemplate = ProjectTemplate.getTemplate(templateId);
-                File scanBriefDetailedFile = ArchiveHelper.extractResourceFile("json/scan/brief/detailed/" + version.name().toLowerCase() + "/" + projectTemplate.getName() + ".json.7z").toFile();
+                File scanBriefDetailedFile = ArchiveHelper.extractResourceFile(folder + projectTemplate.getName() + ".json.7z").toFile();
                 ObjectMapper mapper = createObjectMapper();
                 ScanBriefDetailed scanBriefDetailed = mapper.readValue(scanBriefDetailedFile, ScanBriefDetailed.class);
                 String unpackedData = mapper.writeValueAsString(scanBriefDetailed);

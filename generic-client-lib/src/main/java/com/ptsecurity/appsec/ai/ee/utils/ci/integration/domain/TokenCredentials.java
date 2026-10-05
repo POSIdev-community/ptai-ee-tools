@@ -9,14 +9,13 @@ import org.apache.commons.lang3.StringUtils;
 @Getter
 @Builder
 @RequiredArgsConstructor
-public class TokenCredentials extends BaseCredentials {
+public class TokenCredentials {
     /**
      * PT AI server API token
      */
     @NonNull
     protected String token;
 
-    @Override
     public void validate() {
         if (StringUtils.isEmpty(token))
             throw GenericException.raise(Resources.i18n_ast_settings_server_token_message_empty(), new IllegalArgumentException(token));

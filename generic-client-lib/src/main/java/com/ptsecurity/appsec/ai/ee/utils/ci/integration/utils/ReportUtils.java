@@ -3,13 +3,11 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
-import com.ptsecurity.appsec.ai.ee.scan.settings.ReportSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.StringHelper;
 import lombok.NonNull;
 import lombok.ToString;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -57,15 +55,6 @@ public class ReportUtils {
                 "JSON filter settings parse failed");
     }
 
-    public static void validateJsonReportSettings(String json) throws GenericException {
-        ObjectMapper objectMapper = createObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-
-        call(
-                () -> objectMapper.readValue(json, ReportSettings.class),
-                "JSON report settings parse failed");
-    }
-
     /**
      * Method loads and validates reporting settings from JSON string
      * @param json String that contains JSON-defined reporting settings
@@ -84,14 +73,10 @@ public class ReportUtils {
      * @throws GenericException Exception that contains error info if JSON load / parse was failed
      */
     public static Reports load(String json) throws GenericException {
+        ObjectMapper mapper = createObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         return call(
-                () -> createObjectMapper().readValue(json, Reports.class),
+                () -> mapper.readValue(json, Reports.class),
                 Resources.i18n_ast_settings_mode_synchronous_subjob_export_advanced_settings_message_invalid());
-    }
-
-    public static String setFilenameExtension(@NonNull final String name, @NonNull final String extension) {
-        int idx = FilenameUtils.indexOfExtension(name);
-        String result = (-1 == idx) ? name : StringUtils.left(name, idx);
-        return result + FilenameUtils.EXTENSION_SEPARATOR + extension;
     }
 }

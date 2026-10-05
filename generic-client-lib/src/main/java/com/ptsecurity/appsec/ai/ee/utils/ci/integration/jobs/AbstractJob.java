@@ -1,17 +1,15 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.AbstractTool;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlEnvironment;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.AstPolicyViolationException;
-import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.MinorAstErrorsException;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.ptsecurity.misc.tools.exceptions.GenericException;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,12 +39,23 @@ public abstract class AbstractJob extends AbstractTool {
 
     @Getter
     @Builder.Default
-    protected AbstractApiClient client = null;
+    protected AictlClient client = null;
+
+    @Getter
+    @Setter
+    @Builder.Default
+    @ToString.Exclude
+    protected AictlEnvironment environment = null;
 
     public JobExecutionResult execute() {
         try {
             init();
-            validate();
+            if (environment == null) {
+                throw GenericException.raise(
+                        "aictl execution environment is not initialized",
+                        new IllegalStateException(getClass().getName() + ".init()"));
+            }
+
             client = Factory.client(this);
 
             unsafeExecute();
@@ -63,19 +72,23 @@ public abstract class AbstractJob extends AbstractTool {
                 return JobExecutionResult.INTERRUPTED;
             } else if (e.getCause() instanceof AstPolicyViolationException || e.getCause() instanceof MinorAstErrorsException) {
                 log.debug(e.getDetailedMessage(), e.getCause());
+                failed(e.getDetailedMessage(), true);
                 return JobExecutionResult.FAILED;
             }
         }
-        severe(e.getDetailedMessage());
+
         log.error(e.getDetailedMessage(), e.getCause());
+        failed(e.getDetailedMessage(), false);
         return JobExecutionResult.FAILED;
     }
 
-    protected abstract void init() throws GenericException;
-
-    protected void validate() throws GenericException {
-        connectionSettings.validate();
+    protected void failed(@NonNull final String reason, final boolean logged) {
+        if (!logged) {
+            severe(reason);
+        }
     }
+
+    protected abstract void init() throws GenericException;
 
     protected abstract void unsafeExecute() throws GenericException;
     /**

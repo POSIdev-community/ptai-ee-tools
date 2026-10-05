@@ -1,19 +1,22 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.service;
 
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
-import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
+import com.ptsecurity.appsec.ai.ee.helpers.json.JsonPolicyHelper;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
-import com.ptsecurity.appsec.ai.ee.scan.settings.UnifiedAiProjScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.AstAdminSettings;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.json.JsonPolicyHelper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
 import com.ptsecurity.misc.tools.helpers.CertificateHelper;
@@ -67,10 +70,6 @@ public class AstSettingsService {
         public void add(@NonNull final String id, @NonNull final String error) {
             add(Pair.of(id, error));
             failure();
-        }
-
-        public void success() {
-            result = SUCCESS;
         }
 
         public void failure() {
@@ -143,9 +142,12 @@ public class AstSettingsService {
     public static BasePropertiesBean parseAstSettings(
             @NonNull final HttpServletRequest request, final PropertiesBean bean) {
         PropertiesBean res = (null == bean) ? new PropertiesBean() : bean;
+        res.fill(SCAN_TYPE, request);
         res.fill(AST_SETTINGS, request);
 
-        if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
+        if (SCAN_TYPE_SBOM.equals(res.get(SCAN_TYPE)))
+            res.fill(SBOM_PROJECT_NAME, request).fill(SBOM_PATH, request);
+        else if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
             res.fill(JSON_SETTINGS, request).fill(JSON_POLICY, request);
         else if (AST_SETTINGS_UI.equals(res.get(AST_SETTINGS)))
             res.fill(PROJECT_NAME, request);
@@ -158,16 +160,16 @@ public class AstSettingsService {
                 .fill(REPORTING_REPORT_TEMPLATE, request)
                 .fill(REPORTING_REPORT_DATAFLOW, request)
                 .fill(REPORTING_REPORT_SUMMARY, request)
-                .fill(REPORTING_REPORT_FILTER, request);
+                .fill(REPORTING_REPORT_FILTER, request)
+                .fill(REPORTING_REPORT_LOCALE, request);
         res.fill(REPORTING_RAWDATA, request)
                 .fill(REPORTING_RAWDATA_FILE, request)
-                .fill(REPORTING_RAWDATA_FILTER, request);
+                .fill(REPORTING_RAWDATA_FILTER, request)
+                .fill(REPORTING_RAWDATA_LOCALE, request);
         res.fill(REPORTING_SARIF, request)
                 .fill(REPORTING_SARIF_FILE, request)
-                .fill(REPORTING_SARIF_FILTER, request);
-        res.fill(REPORTING_SONARGIIF, request)
-                .fill(REPORTING_SONARGIIF_FILE, request)
-                .fill(REPORTING_SONARGIIF_FILTER, request);
+                .fill(REPORTING_SARIF_FILTER, request)
+                .fill(REPORTING_SARIF_LOCALE, request);
         res.fill(REPORTING_JSON, request)
                 .fill(REPORTING_JSON_SETTINGS, request);
 
@@ -175,7 +177,8 @@ public class AstSettingsService {
                 .fill(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, request);
 
         res.fill(SCAN_LABEL, request);
-        res.fill(PROJECT_PRIORITY, request);
+
+        res.fill(RETRY, request).fill(RETRY_TIME, request);
 
         return res;
     }
@@ -230,10 +233,16 @@ public class AstSettingsService {
      * @param results List of validation results
      */
     protected static void validateAstSettings(@NonNull final PropertiesBean bean, @NonNull final VerificationResults results) {
-        UnifiedAiProjScanSettings jsonSettings = null;
-
         // JavaScript handlers are named as on[Error ID]Error like "onEmptyUrlError"
-        if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI) && bean.empty(PROJECT_NAME))
+        boolean sbomScan = bean.eq(SCAN_TYPE, SCAN_TYPE_SBOM);
+        if (sbomScan) {
+            if (bean.empty(SBOM_PROJECT_NAME)) {
+                results.add(SBOM_PROJECT_NAME, Resources.i18n_ast_settings_sbom_projectname_message_empty());
+            }
+            if (bean.empty(SBOM_PATH)) {
+                results.add(SBOM_PATH, Resources.i18n_ast_settings_sbom_path_message_empty());
+            }
+        } else if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI) && bean.empty(PROJECT_NAME))
             results.add(PROJECT_NAME, MESSAGE_PROJECT_NAME_EMPTY);
         else if (bean.eq(AST_SETTINGS, AST_SETTINGS_JSON)) {
             // Settings and policy are defined with JSON, let's validate them
@@ -241,8 +250,10 @@ public class AstSettingsService {
                 results.add(JSON_SETTINGS, MESSAGE_JSON_SETTINGS_EMPTY);
             else {
                 try {
-                    UnifiedAiProjScanSettings.parse(bean.get(JSON_SETTINGS));
-                    jsonSettings = UnifiedAiProjScanSettings.loadSettings(bean.get(JSON_SETTINGS));
+                    AictlAiproj.Result aiproj = AictlAiproj.check(ServerEnvironment.get(), bean.get(JSON_SETTINGS));
+                    if (!aiproj.isValid()) {
+                        results.add(JSON_SETTINGS, String.join("; ", aiproj.getErrors()));
+                    }
                 } catch (GenericException e) {
                     results.add(JSON_SETTINGS, e.getDetailedMessage());
                     log.warn(e.getDetailedMessage(), e);
@@ -257,18 +268,27 @@ public class AstSettingsService {
             }
         }
 
-        validateBranchSettings(bean, results, jsonSettings);
         validateScanLabel(bean, results);
 
-        if (bean.empty(INCLUDES))
-            results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
-        if (bean.empty(PATTERN_SEPARATOR))
-            results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_EMPTY);
-        else {
-            try {
-                Pattern.compile(bean.get(PATTERN_SEPARATOR));
-            } catch (PatternSyntaxException e) {
-                results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_INVALID);
+        if (bean.isTrue(RETRY) && ScanStartRetry.parseRetryTime(bean.get(RETRY_TIME)) == null) {
+            results.add(RETRY_TIME, ScanStartRetry.invalidRetryTimeMessage());
+        }
+
+        if (!sbomScan) {
+            validateBranchSettings(bean, results);
+
+            if (bean.empty(INCLUDES)) {
+                results.add(INCLUDES, MESSAGE_INCLUDES_EMPTY);
+            }
+            if (bean.empty(PATTERN_SEPARATOR)) {
+                results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_EMPTY);
+            }
+            else {
+                try {
+                    Pattern.compile(bean.get(PATTERN_SEPARATOR));
+                } catch (PatternSyntaxException e) {
+                    results.add(PATTERN_SEPARATOR, MESSAGE_PATTERN_SEPARATOR_INVALID);
+                }
             }
         }
 
@@ -304,16 +324,6 @@ public class AstSettingsService {
             }
         }
 
-        if (bean.isTrue(REPORTING_SONARGIIF)) {
-            if (bean.empty(REPORTING_SONARGIIF_FILE))
-                results.add(REPORTING_SONARGIIF_FILE, Resources.i18n_ast_settings_mode_synchronous_subjob_export_sonargiif_file_message_empty());
-            if (!bean.empty(REPORTING_SONARGIIF_FILTER)) {
-                Validator.Result result = Validator.validateJsonIssuesFilter(bean.get(REPORTING_SONARGIIF_FILTER));
-                if (result.fail())
-                    results.add(REPORTING_SONARGIIF_FILTER, Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_filter_message_invalid_details(result.getDetails()));
-            }
-        }
-
         if (bean.isTrue(REPORTING_JSON)) {
             if (bean.empty(REPORTING_JSON_SETTINGS))
                 results.add(REPORTING_JSON_SETTINGS, Resources.i18n_ast_settings_mode_synchronous_subjob_export_advanced_settings_message_empty());
@@ -327,35 +337,21 @@ public class AstSettingsService {
 
     private static void validateBranchSettings(
             @NonNull final PropertiesBean bean,
-            @NonNull final VerificationResults results,
-            final UnifiedAiProjScanSettings jsonSettings
+            @NonNull final VerificationResults results
     ) {
-        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_FROM_ENVIRONMENT)) {
+        if (!bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
             return;
         }
 
-        if (bean.eq(BRANCH_SETTINGS, BRANCH_SETTINGS_CUSTOM)) {
-            if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
-                results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
-                return;
-            }
-
-            String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
-            int maxNameLength = 512;
-            if (customBranchName.length() > maxNameLength) {
-                results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
-            }
+        if (bean.empty(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME)) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_EMPTY);
             return;
         }
 
-        if (!bean.eq(AST_SETTINGS, AST_SETTINGS_JSON) || jsonSettings == null) {
-            results.add(BRANCH_SETTINGS_FROM_JSON, MESSAGE_BRANCH_NAME_MISSING_JSON);
-            return;
-        }
-
-        String branchName = jsonSettings.getBranchName();
-        if (branchName == null) {
-            results.add(BRANCH_SETTINGS_FROM_JSON, MESSAGE_BRANCH_NAME_MISSING_JSON);
+        String customBranchName = bean.get(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME);
+        int maxNameLength = 512;
+        if (customBranchName.length() > maxNameLength) {
+            results.add(BRANCH_SETTINGS_CUSTOM_BRANCH_NAME, MESSAGE_CUSTOM_BRANCH_NAME_TOO_LONG);
         }
     }
 
@@ -372,8 +368,8 @@ public class AstSettingsService {
         }
     }
 
-    private static AbstractApiClient createApiClient(@NonNull PropertiesBean bean) {
-        return Factory.client(ConnectionSettings.builder()
+    private static AictlClient createApiClient(@NonNull PropertiesBean bean) {
+        return Factory.client(ServerEnvironment.get(), ConnectionSettings.builder()
                 .url(bean.get(URL))
                 .credentials(TokenCredentials.builder().token(bean.get(TOKEN)).build())
                 .caCertsPem(bean.get(CERTIFICATES))
@@ -381,16 +377,12 @@ public class AstSettingsService {
                 .build());
     }
 
-    /**
-     * @param bean PT AI server connection settings bean
-     * @param results Response that contains diagnostic messages
-     *            that are related to connection check results
-     */
     protected static void checkConnectionSettings(@NonNull PropertiesBean bean, @NonNull final VerificationResults results) {
         // Check connection
         try {
-            AbstractApiClient client = createApiClient(bean);
-            ServerCheckResult res = new Factory().checkServerTasks(client).check();
+            AictlClient client = createApiClient(bean);
+
+            ServerCheckResult res = new CheckServerTask(client).check();
             res.forEach(results::add);
             log.info(res.text());
             results.setResult(res.getState().equals(ERROR) ? FAILURE : SUCCESS);
@@ -407,10 +399,16 @@ public class AstSettingsService {
      */
     protected static void checkAstSettings(@NonNull final PropertiesBean bean, @NonNull final VerificationResults results) {
         try {
-            AbstractApiClient client = createApiClient(bean);
+            AictlClient client = createApiClient(bean);
             // Check if project exists
-            if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI)) {
-                UUID projectId = new Factory().projectTasks(client).searchProject(bean.get(PROJECT_NAME));
+            if (bean.eq(SCAN_TYPE, SCAN_TYPE_SBOM)) {
+                String name = bean.get(SBOM_PROJECT_NAME);
+                UUID projectId = new ProjectTask(client).searchProjectId(name);
+                results.add(projectId != null
+                        ? "SBOM project " + name + " found, ID = " + projectId + ", its SBOM file will be replaced on scan"
+                        : "SBOM project " + name + " not found, it will be created on scan");
+            } else if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI)) {
+                UUID projectId = new ProjectTask(client).searchProjectId(bean.get(PROJECT_NAME));
                 if (null != projectId)
                     results.add("Project " + bean.get(PROJECT_NAME) + " found, ID = " + projectId.toString());
                 else {
@@ -418,8 +416,11 @@ public class AstSettingsService {
                     results.failure();
                 }
             } else {
-                UnifiedAiProjScanSettings settings = UnifiedAiProjScanSettings.loadSettings(bean.getProperties().get(JSON_SETTINGS));
-                results.add("JSON settings are verified, project name is " + settings.getProjectName());
+                AictlAiproj.Result aiproj = AictlAiproj.check(
+                        ServerEnvironment.get(), bean.getProperties().get(JSON_SETTINGS));
+
+                results.add("JSON settings are verified, project name is " + aiproj.getProjectName());
+
                 Policy[] policyJson = JsonPolicyHelper.verify(bean.getProperties().get(JSON_POLICY));
                 if (policyJson != null) {
                     results.add("JSON policy is verified, number of rule sets is " + policyJson.length);
@@ -432,16 +433,13 @@ public class AstSettingsService {
             boolean isAnyReportSelected = bean.eq(REPORTING_REPORT, TRUE) ||
                     bean.eq(REPORTING_RAWDATA, TRUE) ||
                     bean.eq(REPORTING_SARIF, TRUE) ||
-                    bean.eq(REPORTING_SONARGIIF, TRUE) ||
                     bean.eq(REPORTING_JSON, TRUE);
 
             if (!isAnyReportSelected) {
                 return;
             }
 
-            Reports reports = bean.convert();
-            reports = ReportUtils.validate(reports);
-            new Factory().reportsTasks(client).check(reports);
+            ReportUtils.validate(bean.convert());
         } catch (GenericException e) {
             log.warn(e.getDetailedMessage(), e);
             results.add(e);

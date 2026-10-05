@@ -1,10 +1,12 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils;
 
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
+import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.VulnerabilityIssue;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import lombok.NonNull;
+import org.jvnet.localizer.LocaleProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +83,8 @@ public class I18nHelper {
     }
 
     public static String i18n(@NonNull final BaseIssue.Type type) {
-        return TYPE_SUPPLIER_MAP.get(type).get();
+        Supplier<String> caption = TYPE_SUPPLIER_MAP.get(type);
+        return caption == null ? type.name() : caption.get();
     }
 
     public static String i18n(@NonNull final BaseIssue.ApprovalState state) {
@@ -98,5 +101,12 @@ public class I18nHelper {
 
     public static String i18n(@NonNull final Stage stage) {
         return STAGE_SUPPLIER_MAP.get(stage).get();
+    }
+
+    @NonNull
+    public static Reports.Locale uiLocale() {
+        return LocaleProvider.getLocale().getLanguage().equalsIgnoreCase(Reports.Locale.RU.name())
+                ? Reports.Locale.RU
+                : Reports.Locale.EN;
     }
 }

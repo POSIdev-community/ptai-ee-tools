@@ -11,10 +11,6 @@ def st = namespace("jelly:stapler")
 
 def historyLength = 10
 
-link(rel: 'stylesheet', href: "${rootURL}/plugin/ptai-jenkins-plugin/css/plugin.css")
-script(src: "${rootURL}/plugin/ptai-jenkins-plugin/webjars/echarts/echarts.min.js")
-script(src: "${rootURL}/plugin/ptai-jenkins-plugin/js/charts.js")
-
 def createChartPlaceholder(int col, int row, int width, String prefix, String name, String title) {
     String style = "grid-area: ${row} / ${col} / span 1 / span ${width}; "
 
@@ -59,6 +55,10 @@ l.layout(title: "PT AI AST report") {
         st.include(page: "sidepanel.jelly", it: my.project)
     }
     l.main_panel() {
+        link(rel: 'stylesheet', href: "${rootURL}/plugin/ptai-jenkins-plugin/css/plugin.css")
+        script(src: "${rootURL}/plugin/ptai-jenkins-plugin/webjars/echarts/echarts.min.js")
+        script(src: "${rootURL}/plugin/ptai-jenkins-plugin/js/charts.js")
+
         h1(Resources.i18n_ast_result_charts_statistics_label())
         def latestResults = my.getLatestAstResults(historyLength)
         if (null == latestResults || latestResults.isEmpty()) {

@@ -17,12 +17,6 @@ public class StringHelper {
     }
 
     @NonNull
-    public static String arrayAsString(final String[] values) {
-        if (null == values || 0 == values.length) return "[<empty>]";
-        return "[".concat(String.join(", ", values)).concat("]");
-    }
-
-    @NonNull
     public static String listToString(final List<Integer> values) {
         return listToString(", ", values);
     }

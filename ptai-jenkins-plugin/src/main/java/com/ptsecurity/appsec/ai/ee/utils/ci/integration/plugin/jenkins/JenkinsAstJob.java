@@ -2,8 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.TextOutput;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.JsonAstJobSetupOperationsImpl;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.UiAstJobSetupOperationsImpl;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.JenkinsAictlEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.operations.JenkinsAstOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.operations.JenkinsFileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.BuildInfo;
@@ -88,29 +87,15 @@ public class JenkinsAstJob extends GenericAstJob implements TextOutput {
      */
     private List<Transfer> transfers;
 
-    protected String settings;
-
-    protected String policy;
-
     @Override
     protected void init() throws GenericException {
+        environment = new JenkinsAictlEnvironment(workspace, launcher);
         astOps = JenkinsAstOperations.builder()
                 .owner(this)
                 .build();
         fileOps = JenkinsFileOperations.builder()
                 .owner(this)
                 .build();
-
-        if (null != settings)
-            setupOps = JsonAstJobSetupOperationsImpl.builder()
-                .jsonSettings(settings)
-                .jsonPolicy(policy)
-                .owner(this)
-                .build();
-        else
-            setupOps = UiAstJobSetupOperationsImpl.builder()
-                    .owner(this)
-                    .build();
     }
 
     @Override

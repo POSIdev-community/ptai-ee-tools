@@ -285,3 +285,9 @@ options:
 + [Fix] Fixed several vulnerabilities
 ### 20260821
 + [Feature] PT AI v.6.2.0 support approved
+### 20260928
++ [Feature] Jenkins and TeamCity plugins use aictl command line tool to interact with PT AI server
++ [Feature] CLI plugin is removed
++ [Feature] Added SBOM file scanning
++ [Feature] Added scan start retry if the branch is already being scanned
++ [Feature] Added report locale selection in Jenkins plugin

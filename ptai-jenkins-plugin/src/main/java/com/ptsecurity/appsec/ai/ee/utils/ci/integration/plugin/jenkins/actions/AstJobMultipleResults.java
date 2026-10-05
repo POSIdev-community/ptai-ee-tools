@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.BaseJsonChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanDataPacked;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -16,7 +15,6 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ptsecurity.appsec.ai.ee.scan.ScanDataPacked.Type.SCAN_BRIEF_DETAILED;
 
 /**
  * Class implements project-scope basic chart generation that is shown at project page
@@ -64,10 +62,7 @@ public class AstJobMultipleResults implements Action {
             do {
                 final AstJobSingleResult action = build.getAction(AstJobSingleResult.class);
                 if (null == action) break;
-                if (null == action.getScanDataPacked()) break;
-                ScanDataPacked scanDataPacked = action.getScanDataPacked();
-                if (!scanDataPacked.getType().equals(SCAN_BRIEF_DETAILED)) break;
-                scanBriefDetailed = ScanDataPacked.unpackData(scanDataPacked.getData(), ScanBriefDetailed.class);
+                scanBriefDetailed = AstJobSingleResult.unpack(action.getScanDataPacked());
             } while (false);
 
             scanResults.add(BuildScanBriefDetailed.builder()

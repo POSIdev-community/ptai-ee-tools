@@ -5,16 +5,18 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.ptsecurity.appsec.ai.ee.ServerCheckResult;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.AbstractApiClient;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.api.Factory;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlClient;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.Factory;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.PTAIClientTokenIsEmptyException;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.Credentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.credentials.CredentialsImpl;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.serversettings.ServerSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.Validator;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.model.queue.Tasks;
@@ -22,9 +24,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
@@ -43,14 +43,11 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
 
     public FormValidation doCheckServerUrl(@QueryParameter String value) {
         FormValidation res = Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_server_url_message_empty());
-        if (FormValidation.Kind.ERROR == res.kind) return res;
-        return Validator.doCheckFieldUrl(value, Resources.i18n_ast_settings_server_url_message_invalid());
-    }
+        if (FormValidation.Kind.ERROR == res.kind) {
+            return res;
+        }
 
-    public static String lowerFirstLetter(@NonNull final String text) {
-        if (StringUtils.isEmpty(text)) return "";
-        if (1 == text.length()) return text.toLowerCase();
-        return String.valueOf(text.charAt(0)).toLowerCase() + text.substring(1);
+        return Validator.doCheckFieldUrl(value, Resources.i18n_ast_settings_server_url_message_invalid());
     }
 
     public FormValidation doTestServer(
@@ -60,11 +57,13 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
             @QueryParameter("serverInsecure") final boolean serverInsecure) {
         try {
             log.trace("Test PT AI server {} connection", serverUrl);
-            if (!Validator.doCheckFieldNotEmpty(serverUrl))
+            if (!Validator.doCheckFieldNotEmpty(serverUrl)){
                 throw new RuntimeException(Resources.i18n_ast_settings_server_url_message_empty());
-            boolean urlInvalid = !Validator.doCheckFieldUrl(serverUrl);
-            if (!Validator.doCheckFieldNotEmpty(serverCredentialsId))
+            }
+
+            if (!Validator.doCheckFieldNotEmpty(serverCredentialsId)) {
                 throw new RuntimeException(Resources.i18n_ast_settings_server_credentials_message_empty());
+            }
 
             Credentials credentials = CredentialsImpl.getCredentialsById(item, serverCredentialsId);
 
@@ -77,17 +76,19 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
             AdvancedSettings advancedSettings = new AdvancedSettings();
             advancedSettings.apply(pluginDescriptor.getAdvancedSettings());
 
-            AbstractApiClient client = Factory.client(ConnectionSettings.builder()
-                    .url(serverUrl)
-                    .credentials(TokenCredentials.builder().token(ptAiToken).build())
-                    .insecure(serverInsecure)
-                    .caCertsPem(credentials.getServerCaCertificates())
-                    .build(), advancedSettings);
-            ServerCheckResult res = new Factory().checkServerTasks(client).check();
+            AictlClient client = Factory.client(
+                    ControllerEnvironment.get(),
+                    ConnectionSettings.builder()
+                            .url(serverUrl)
+                            .credentials(TokenCredentials.builder().token(ptAiToken).build())
+                            .insecure(serverInsecure)
+                            .caCertsPem(credentials.getServerCaCertificates())
+                            .build(),
+                    advancedSettings);
+
+            ServerCheckResult res = new CheckServerTask(client).check();
             return ServerCheckResult.State.ERROR.equals(res.getState())
                     ? FormValidation.error(res.text())
-                    : ServerCheckResult.State.WARNING.equals(res.getState())
-                    ? FormValidation.warning(res.text())
                     : FormValidation.ok(res.text());
         } catch (Exception e) {
             return Validator.error(e);
@@ -104,12 +105,15 @@ public class ServerSettingsDescriptor extends Descriptor<ServerSettings> {
             @AncestorInPath Item item,
             @QueryParameter String serverCredentialsId) {
         if (item == null && !Jenkins.get().hasPermission(Jenkins.ADMINISTER) ||
-                item != null && !item.hasPermission(Item.EXTENDED_READ))
+                item != null && !item.hasPermission(Item.EXTENDED_READ)) {
             return new StandardListBoxModel().includeCurrentValue(serverCredentialsId);
+        }
 
-        if (item == null)
+        if (item == null) {
             // Construct a fake project
-            item = new FreeStyleProject((ItemGroup)Jenkins.get(), "fake-" + UUID.randomUUID().toString());
+            item = new FreeStyleProject((ItemGroup) Jenkins.get(), "fake-" + UUID.randomUUID());
+        }
+
         return new StandardListBoxModel()
                 .includeEmptyValue()
                 .includeMatchingAs(
