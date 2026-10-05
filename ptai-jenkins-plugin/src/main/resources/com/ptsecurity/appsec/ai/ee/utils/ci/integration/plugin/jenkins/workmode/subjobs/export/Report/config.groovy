@@ -21,6 +21,16 @@ f.entry(
 }
 
 f.entry(
+        title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_locale_label(),
+        field: 'locale') {
+    f.select(
+            clazz: 'ptai-report-locale',
+            'data-templates': descriptor.getDefaultTemplates())
+}
+
+script(src: "${rootURL}/plugin/ptai-jenkins-plugin/js/report-locale.js")
+
+f.entry(
         title: Resources.i18n_ast_settings_mode_synchronous_subjob_export_report_includedfd_label(),
         field: 'includeDfd',
         default: 'true') {

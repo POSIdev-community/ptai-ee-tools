@@ -2,13 +2,11 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.utils.Validator;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.workmode.subjobs.Base;
 import hudson.util.FormValidation;
-import org.jvnet.localizer.LocaleProvider;
+import hudson.util.ListBoxModel;
 import org.kohsuke.stapler.QueryParameter;
-
-import java.util.Locale;
 
 public abstract class Export extends Base {
     public static abstract class ExportDescriptor extends BaseDescriptor {
@@ -28,12 +26,17 @@ public abstract class Export extends Base {
                 return FormValidation.ok();
         }
 
-        public static com.ptsecurity.appsec.ai.ee.scan.reports.Reports.Locale getDefaultLocale() {
-            Locale locale = LocaleProvider.getLocale();
-            if (locale.getLanguage().equalsIgnoreCase(Reports.Locale.RU.name()))
-                return Reports.Locale.RU;
-            else
-                return Reports.Locale.EN;
+        @SuppressWarnings("unused")
+        public FormValidation doCheckLocale(@QueryParameter String value) {
+            return Validator.doCheckLocale(value);
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillLocaleItems() {
+            ListBoxModel result = new ListBoxModel();
+            result.add(Resources.i18n_misc_enums_locale_english_label(), Reports.Locale.EN.getValue());
+            result.add(Resources.i18n_misc_enums_locale_russian_label(), Reports.Locale.RU.getValue());
+            return result;
         }
     }
 

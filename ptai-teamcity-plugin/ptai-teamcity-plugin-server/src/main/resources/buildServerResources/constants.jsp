@@ -58,6 +58,27 @@
 <c:set var="LABEL_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Labels.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
 <c:set var="HINT_BRANCH_SETTINGS_CUSTOM_BRANCH_NAME" value="<%=Hints.BRANCH_SETTINGS_CUSTOM_BRANCH_NAME%>"/>
 
+<c:set var="SCAN_LABEL" value="<%=Params.SCAN_LABEL%>"/>
+<c:set var="LABEL_SCAN_LABEL" value="<%=Labels.SCAN_LABEL%>"/>
+<c:set var="HINT_SCAN_LABEL" value="<%=Hints.SCAN_LABEL%>"/>
+
+<c:set var="SCAN_TYPE" value="<%=Params.SCAN_TYPE%>"/>
+<c:set var="LABEL_SCAN_TYPE" value="<%=Labels.SCAN_TYPE%>"/>
+<c:set var="HINT_SCAN_TYPE" value="<%=Hints.SCAN_TYPE%>"/>
+
+<c:set var="SCAN_TYPE_STANDARD" value="<%=Constants.SCAN_TYPE_STANDARD%>"/>
+<c:set var="LABEL_SCAN_TYPE_STANDARD" value="<%=Labels.SCAN_TYPE_STANDARD%>"/>
+<c:set var="SCAN_TYPE_SBOM" value="<%=Constants.SCAN_TYPE_SBOM%>"/>
+<c:set var="LABEL_SCAN_TYPE_SBOM" value="<%=Labels.SCAN_TYPE_SBOM%>"/>
+
+<c:set var="SBOM_PROJECT_NAME" value="<%=Params.SBOM_PROJECT_NAME%>"/>
+<c:set var="LABEL_SBOM_PROJECT_NAME" value="<%=Labels.SBOM_PROJECT_NAME%>"/>
+<c:set var="HINT_SBOM_PROJECT_NAME" value="<%=Hints.SBOM_PROJECT_NAME%>"/>
+
+<c:set var="SBOM_PATH" value="<%=Params.SBOM_PATH%>"/>
+<c:set var="LABEL_SBOM_PATH" value="<%=Labels.SBOM_PATH%>"/>
+<c:set var="HINT_SBOM_PATH" value="<%=Hints.SBOM_PATH%>"/>
+
 <c:set var="AST_SETTINGS" value="<%=Params.AST_SETTINGS%>"/>
 <c:set var="LABEL_AST_SETTINGS" value="<%=Labels.AST_SETTINGS%>"/>
 <c:set var="HINT_AST_SETTINGS" value="<%=Hints.AST_SETTINGS%>"/>
@@ -116,6 +137,8 @@
 <c:set var="LABEL_REPORTING_REPORT_TEMPLATE" value="<%=Labels.REPORTING_REPORT_TEMPLATE%>"/>
 <c:set var="HINT_REPORTING_REPORT_TEMPLATE" value="<%=Hints.REPORTING_REPORT_TEMPLATE%>"/>
 <c:set var="DEFAULT_REPORTING_REPORT_TEMPLATE" value="<%=ReportsHelper.getDefaultTemplate()%>"/>
+<c:set var="DEFAULT_REPORTING_REPORT_TEMPLATE_ENGLISH" value="<%=ReportsHelper.getDefaultTemplate(Constants.REPORTING_LOCALE_ENGLISH)%>"/>
+<c:set var="DEFAULT_REPORTING_REPORT_TEMPLATE_RUSSIAN" value="<%=ReportsHelper.getDefaultTemplate(Constants.REPORTING_LOCALE_RUSSIAN)%>"/>
 
 <c:set var="REPORTING_REPORT_DATAFLOW" value="<%=Params.REPORTING_REPORT_DATAFLOW%>"/>
 <c:set var="LABEL_REPORTING_REPORT_DATAFLOW" value="<%=Labels.REPORTING_REPORT_DATAFLOW%>"/>
@@ -134,6 +157,10 @@
 <c:set var="REPORTING_REPORT_FILTER" value="<%=Params.REPORTING_REPORT_FILTER%>"/>
 <c:set var="LABEL_REPORTING_REPORT_FILTER" value="<%=Labels.REPORTING_REPORT_FILTER%>"/>
 <c:set var="HINT_REPORTING_REPORT_FILTER" value="<%=Hints.REPORTING_REPORT_FILTER%>"/>
+<c:set var="REPORTING_REPORT_LOCALE" value="<%=Params.REPORTING_REPORT_LOCALE%>"/>
+<c:set var="LABEL_REPORTING_REPORT_LOCALE" value="<%=Labels.REPORTING_REPORT_LOCALE%>"/>
+<c:set var="HINT_REPORTING_REPORT_LOCALE" value="<%=Hints.REPORTING_REPORT_LOCALE%>"/>
+<c:set var="DEFAULT_REPORTING_REPORT_LOCALE" value="<%=Defaults.REPORTING_REPORT_LOCALE%>"/>
 
 
 <c:set var="REPORTING_RAWDATA" value="<%=Params.REPORTING_RAWDATA%>"/>
@@ -148,6 +175,10 @@
 <c:set var="REPORTING_RAWDATA_FILTER" value="<%=Params.REPORTING_RAWDATA_FILTER%>"/>
 <c:set var="LABEL_REPORTING_RAWDATA_FILTER" value="<%=Labels.REPORTING_RAWDATA_FILTER%>"/>
 <c:set var="HINT_REPORTING_RAWDATA_FILTER" value="<%=Hints.REPORTING_RAWDATA_FILTER%>"/>
+<c:set var="REPORTING_RAWDATA_LOCALE" value="<%=Params.REPORTING_RAWDATA_LOCALE%>"/>
+<c:set var="LABEL_REPORTING_RAWDATA_LOCALE" value="<%=Labels.REPORTING_RAWDATA_LOCALE%>"/>
+<c:set var="HINT_REPORTING_RAWDATA_LOCALE" value="<%=Hints.REPORTING_RAWDATA_LOCALE%>"/>
+<c:set var="DEFAULT_REPORTING_RAWDATA_LOCALE" value="<%=Defaults.REPORTING_RAWDATA_LOCALE%>"/>
 
 
 <c:set var="REPORTING_SARIF" value="<%=Params.REPORTING_SARIF%>"/>
@@ -162,21 +193,10 @@
 <c:set var="REPORTING_SARIF_FILTER" value="<%=Params.REPORTING_SARIF_FILTER%>"/>
 <c:set var="LABEL_REPORTING_SARIF_FILTER" value="<%=Labels.REPORTING_SARIF_FILTER%>"/>
 <c:set var="HINT_REPORTING_SARIF_FILTER" value="<%=Hints.REPORTING_SARIF_FILTER%>"/>
-
-
-<c:set var="REPORTING_SONARGIIF" value="<%=Params.REPORTING_SONARGIIF%>"/>
-<c:set var="LABEL_REPORTING_SONARGIIF" value="<%=Labels.REPORTING_SONARGIIF%>"/>
-<c:set var="HINT_REPORTING_SONARGIIF" value="<%=Hints.REPORTING_SONARGIIF%>"/>
-
-<c:set var="REPORTING_SONARGIIF_FILE" value="<%=Params.REPORTING_SONARGIIF_FILE%>"/>
-<c:set var="LABEL_REPORTING_SONARGIIF_FILE" value="<%=Labels.REPORTING_SONARGIIF_FILE%>"/>
-<c:set var="HINT_REPORTING_SONARGIIF_FILE" value="<%=Hints.REPORTING_SONARGIIF_FILE%>"/>
-<c:set var="DEFAULT_REPORTING_SONARGIIF_FILE" value="<%=Defaults.REPORTING_SONARGIIF_FILE%>"/>
-
-<c:set var="REPORTING_SONARGIIF_FILTER" value="<%=Params.REPORTING_SONARGIIF_FILTER%>"/>
-<c:set var="LABEL_REPORTING_SONARGIIF_FILTER" value="<%=Labels.REPORTING_SONARGIIF_FILTER%>"/>
-<c:set var="HINT_REPORTING_SONARGIIF_FILTER" value="<%=Hints.REPORTING_SONARGIIF_FILTER%>"/>
-
+<c:set var="REPORTING_SARIF_LOCALE" value="<%=Params.REPORTING_SARIF_LOCALE%>"/>
+<c:set var="LABEL_REPORTING_SARIF_LOCALE" value="<%=Labels.REPORTING_SARIF_LOCALE%>"/>
+<c:set var="HINT_REPORTING_SARIF_LOCALE" value="<%=Hints.REPORTING_SARIF_LOCALE%>"/>
+<c:set var="DEFAULT_REPORTING_SARIF_LOCALE" value="<%=Defaults.REPORTING_SARIF_LOCALE%>"/>
 
 <c:set var="REPORTING_JSON" value="<%=Params.REPORTING_JSON%>"/>
 <c:set var="LABEL_REPORTING_JSON" value="<%=Labels.REPORTING_JSON%>"/>
@@ -190,6 +210,16 @@
 <c:set var="FULL_SCAN_MODE" value="<%=Params.FULL_SCAN_MODE%>"/>
 <c:set var="LABEL_FULL_SCAN_MODE" value="<%=Labels.FULL_SCAN_MODE%>"/>
 <c:set var="HINT_FULL_SCAN_MODE" value="<%=Hints.FULL_SCAN_MODE%>"/>
+
+<c:set var="RETRY" value="<%=Params.RETRY%>"/>
+<c:set var="LABEL_RETRY" value="<%=Labels.RETRY%>"/>
+<c:set var="HINT_RETRY" value="<%=Hints.RETRY%>"/>
+
+<c:set var="RETRY_TIME" value="<%=Params.RETRY_TIME%>"/>
+<c:set var="LABEL_RETRY_TIME" value="<%=Labels.RETRY_TIME%>"/>
+<c:set var="HINT_RETRY_TIME" value="<%=Hints.RETRY_TIME%>"/>
+<c:set var="DEFAULT_RETRY_TIME" value="<%=Defaults.RETRY_TIME%>"/>
+<c:set var="MAX_RETRY_TIME_LENGTH" value="<%=com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry.MAX_RETRY_TIME_LENGTH%>"/>
 
 <c:set var="VERBOSE" value="<%=Params.VERBOSE%>"/>
 <c:set var="LABEL_VERBOSE" value="<%=Labels.VERBOSE%>"/>
@@ -223,3 +253,4 @@
 <c:set var="TEST_CONTROLLER_PATH" value="<%=Constants.AST_CONTROLLER_PATH%>"/>
 
 <c:set var="FALSE" value="<%=Constants.FALSE%>"/>
+<c:set var="TRUE" value="<%=Constants.TRUE%>"/>

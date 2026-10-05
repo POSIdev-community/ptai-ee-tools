@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.*;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.ID;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.ProjectTemplate.getTemplate;
 import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static com.ptsecurity.misc.tools.helpers.ResourcesHelper.getResource7ZipString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,6 +32,9 @@ public class ScanResultTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
 
             // this checks not work since staticCodeAnalysis was added (v470)
             // if want to fix need change resources generator generateRestApiDataStructures based on this versions
@@ -38,7 +42,9 @@ public class ScanResultTest extends BaseTest {
                     version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
                     version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490 ||
                     version == ApiVersion.V491 || version == ApiVersion.V4100 ||
-                    version == ApiVersion.V4110 || version == ApiVersion.V500) {
+                    version == ApiVersion.V4110 || version == ApiVersion.V500 ||
+                    version == ApiVersion.V520 || version == ApiVersion.V530 ||
+                    version == ApiVersion.V600 || version == ApiVersion.V610) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_OWASP_BRICKS);
@@ -63,6 +69,9 @@ public class ScanResultTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
 
             // this checks not work since staticCodeAnalysis was added (v470)
             // if want to fix need change resources generator generateRestApiDataStructures based on this versions
@@ -70,7 +79,9 @@ public class ScanResultTest extends BaseTest {
                     version == ScanBrief.ApiVersion.V472 || version == ScanBrief.ApiVersion.V480 ||
                     version == ScanBrief.ApiVersion.V481 || version == ScanBrief.ApiVersion.V490 ||
                     version == ScanBrief.ApiVersion.V491 || version == ApiVersion.V4100 ||
-                    version == ApiVersion.V4110 || version == ApiVersion.V500) {
+                    version == ApiVersion.V4110 || version == ApiVersion.V500 ||
+                    version == ApiVersion.V520 || version == ApiVersion.V530 ||
+                    version == ApiVersion.V600 || version == ApiVersion.V610) {
                 continue;
             }
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_SMOKE);
@@ -95,6 +106,10 @@ public class ScanResultTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
+
             ProjectTemplate projectTemplate = getTemplate(ID.PHP_SMOKE);
             String json = getResource7ZipString("json/scan/result/" + version.name().toLowerCase() + "/" + projectTemplate.getName() + ".json.7z");
             assertFalse(StringUtils.isEmpty(json));

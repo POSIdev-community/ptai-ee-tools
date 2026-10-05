@@ -150,6 +150,8 @@ public class ScanBriefDetailed extends ScanBrief {
                 .ptaiAgentName(scanResult.ptaiAgentName)
                 .statistics(scanResult.statistics)
                 .state(scanResult.state)
+                .branchId(scanResult.branchId)
+                .scanLabel(scanResult.scanLabel)
                 .performance(performance)
                 .build();
     }
@@ -169,6 +171,8 @@ public class ScanBriefDetailed extends ScanBrief {
                 .ptaiAgentName(scanResult.ptaiAgentName)
                 .statistics(scanResult.statistics)
                 .state(scanResult.state)
+                .branchId(scanResult.branchId)
+                .scanLabel(scanResult.scanLabel)
                 .performance(performance)
                 .details(Details.builder()
                         .chartData(Details.ChartData.builder()

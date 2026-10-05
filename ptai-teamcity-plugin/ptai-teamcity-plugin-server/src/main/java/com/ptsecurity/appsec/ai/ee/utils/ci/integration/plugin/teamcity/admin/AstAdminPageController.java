@@ -62,7 +62,6 @@ public class AstAdminPageController extends BaseAstController {
                     log.error("Failed to persist PT AI global configuration", e);
                 }
                 FormUtil.removeAllFromSession(request.getSession(), bean.getClass());
-                // writeRedirect(xml, request.getContextPath() + "/admin/admin.html?item=" + PLUGIN_NAME);
                 writeRedirect(xml, request.getContextPath() + "/admin/admin.html");
             }
         }

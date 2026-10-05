@@ -68,6 +68,19 @@ public class ReportsTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Report language falls back to the default one instead of failing")
+    public void localeFallsBackToDefault() {
+        Assertions.assertEquals(Reports.Locale.EN, Reports.Locale.DEFAULT);
+        Assertions.assertEquals(Reports.Locale.DEFAULT, Reports.Locale.of(null));
+        Assertions.assertEquals(Reports.Locale.DEFAULT, Reports.Locale.of(""));
+        Assertions.assertEquals(Reports.Locale.DEFAULT, Reports.Locale.of("  "));
+        Assertions.assertEquals(Reports.Locale.DEFAULT, Reports.Locale.of("kl-KL"));
+        Assertions.assertEquals(Reports.Locale.RU, Reports.Locale.of("ru-RU"));
+        Assertions.assertEquals(Reports.Locale.RU, Reports.Locale.of(" ru-RU "));
+        Assertions.assertEquals(Reports.Locale.EN, Reports.Locale.of("en-US"));
+    }
+
+    @Test
     @SneakyThrows
     @DisplayName("Load filtered report definition with case-insensitive enum values from reports.5.json")
     public void loadFilteredReportDefinition() {

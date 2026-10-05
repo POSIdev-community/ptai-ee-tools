@@ -266,3 +266,28 @@ options:
 + [Feature] Removed Jenkins and TeamCity builds from the CLI plugin's Dockerfile
 ### 20250728
 + [Feature] PT AI v.5.1.0 support approved
+### 20250903
++ [Feature] PT AI v.5.2.0 support approved
++ [Feature] Added support for scanning Scala
+### 20251127
++ [Feature] PT AI v.5.3.0 support approved
++ [Feature] Added scan-label (A commit hash can be used as a scan label)
+### 20260218
++ [Feature] PT AI v.5.4.0 support approved
+### 20260528
++ [Feature] PT AI v.6.0.0 support approved
++ [Feature] Added support for SecretDetection and MaliciousCodeDetection
++ [Feature] Added support for scanning Java 25 version
++ [Feature] Added support for scanning OneC
+### 20260702
++ [Feature] PT AI v.6.1.0 support approved
++ [Feature] Added support for scanning Dart
++ [Fix] Fixed several vulnerabilities
+### 20260821
++ [Feature] PT AI v.6.2.0 support approved
+### 20260928
++ [Feature] Jenkins and TeamCity plugins use aictl command line tool to interact with PT AI server
++ [Feature] CLI plugin is removed
++ [Feature] Added SBOM file scanning
++ [Feature] Added scan start retry if the branch is already being scanned
++ [Feature] Added report locale selection in Jenkins plugin

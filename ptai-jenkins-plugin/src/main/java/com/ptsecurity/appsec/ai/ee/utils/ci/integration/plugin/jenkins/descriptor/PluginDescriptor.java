@@ -1,6 +1,7 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.descriptor;
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.Plugin;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.BranchSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.branchsettings.CustomNameBranchSettings;
@@ -9,6 +10,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.globalcon
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigBase;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigCustom;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.localconfig.ConfigGlobal;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scanlabelsettings.ScanLabelSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsManual;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.scansettings.ScanSettingsUi;
@@ -41,6 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob.RETRY_INTERVAL_SECONDS;
 
 @Slf4j
 @Extension
@@ -99,6 +104,24 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
         return true;
     }
 
+    public FormValidation doCheckSbomProjectName(@QueryParameter String value) {
+        return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_projectname_message_empty());
+    }
+
+    public FormValidation doCheckSbomPath(@QueryParameter String value) {
+        return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_path_message_empty());
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanTypeStandard() {
+        return Plugin.SCAN_TYPE_STANDARD;
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanTypeSbom() {
+        return Plugin.SCAN_TYPE_SBOM;
+    }
+
     /**
      * Method checks if AST job step settings are correct.
      * It doesn't checks PT AI server availability, project existence etc.
@@ -121,7 +144,8 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             final String serverUrl, final String serverCredentialsId,
             final String configName,
             final BranchSettings branchSettings,
-            final String branchName) {
+            final String branchName,
+            final String scanLabel) {
         FormValidation res = null;
         // noinspection ConstantConditions
         do {
@@ -150,6 +174,7 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                     break;
                 }
             }
+
             if (branchSettings instanceof CustomNameBranchSettings) {
                 CustomNameBranchSettings.Descriptor customNameBranchDescriptor = Jenkins.get().getDescriptorByType(
                         CustomNameBranchSettings.Descriptor.class
@@ -157,6 +182,12 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
                 res = customNameBranchDescriptor.doCheckBranchName(branchName);
                 if (FormValidation.Kind.ERROR == res.kind) break;
             }
+
+            ScanLabelSettings.ScanLabelSettingsDescriptor scanLabelSettingsDescriptor = Jenkins.get().getDescriptorByType(
+                    ScanLabelSettings.ScanLabelSettingsDescriptor.class
+            );
+            res = scanLabelSettingsDescriptor.doCheckScanLabel(scanLabel);
+            if (FormValidation.Kind.ERROR == res.kind) break;
         } while (false);
         return res;
     }
@@ -247,6 +278,28 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
     @SuppressWarnings("unused")
     public FormValidation doCheckAdvancedSettings(@QueryParameter String value) {
         return Validator.doCheckFieldAdvancedSettings(value, Resources.i18n_ast_settings_advanced_message_invalid());
+    }
+
+    @SuppressWarnings("unused")
+    public int getDefaultRetryTime() {
+        return DEFAULT_RETRY_TIME_SECONDS;
+    }
+
+    @SuppressWarnings("unused")
+    public int getMinRetryTime() {
+        return RETRY_INTERVAL_SECONDS;
+    }
+
+    @SuppressWarnings("unused")
+    public int getMaxRetryTimeLength() {
+        return ScanStartRetry.MAX_RETRY_TIME_LENGTH;
+    }
+
+    @SuppressWarnings("unused")
+    public FormValidation doCheckRetryTime(@QueryParameter String value) {
+        return ScanStartRetry.parseRetryTime(value) == null
+                ? FormValidation.error(ScanStartRetry.invalidRetryTimeMessage())
+                : FormValidation.ok();
     }
 
     private static boolean isApplicableManifest(Manifest manifest) {

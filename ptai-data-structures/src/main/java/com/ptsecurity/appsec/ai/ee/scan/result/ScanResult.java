@@ -3,11 +3,13 @@ package com.ptsecurity.appsec.ai.ee.scan.result;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue;
-import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuperBuilder
 @NoArgsConstructor

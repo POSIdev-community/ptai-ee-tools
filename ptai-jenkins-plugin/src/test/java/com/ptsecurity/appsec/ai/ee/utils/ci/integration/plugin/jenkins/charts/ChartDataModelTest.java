@@ -21,26 +21,14 @@ class ChartDataModelTest extends BaseTest {
         ObjectMapper mapper = createObjectMapper();
         for (ApiVersion version : ApiVersion.values()) {
             if (version.isDeprecated()) continue;
+            if (!ProjectTemplate.hasSamples("json/scan/result", version)) {
+                continue;
+            }
+
             ProjectTemplate projectTemplate = getTemplate(ProjectTemplate.ID.PHP_OWASP_BRICKS);
             String json = ResourcesHelper.getResource7ZipString("json/scan/result/" + version.name().toLowerCase() + "/" + projectTemplate.getName() + ".json.7z");
             Assertions.assertFalse(StringUtils.isEmpty(json));
             ScanResult scanResult = mapper.readValue(json, ScanResult.class);
         }
-        // StackedAreaChartDataModel model = StackedAreaChartDataModel.create(issuesModelList);
-        /*
-        TypeReference<Map<String,IssuesModel>> typeRef = new TypeReference<Map<String,IssuesModel>>() {};
-        Map<String, IssuesModel> issuesModelMap = Assertions.assertDoesNotThrow(
-                () -> mapper.readValue(new FileInputStream(issuesFile.toFile()), typeRef),
-                "IssuesModel test data load failed");
-
-        List<Triple<Integer, LocalDateTime, IssuesModel>> issuesModelList = new ArrayList<>();
-        int counter = 0;
-        for (String key : issuesModelMap.keySet())
-            issuesModelList.add(new ImmutableTriple<>(counter++, LocalDateTime.parse(key, DateTimeFormatter.ISO_DATE_TIME), issuesModelMap.get(key)));
-        StackedAreaChartDataModel model = StackedAreaChartDataModel.create(issuesModelList);
-        JSONObject jsonObject = BaseJsonChartDataModel.convertObject(model);
-        System.out.println(jsonObject);
-
-         */
     }
 }

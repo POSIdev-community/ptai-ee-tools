@@ -11,9 +11,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +20,10 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,7 +31,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
-import static org.apache.commons.compress.archivers.ArchiveStreamFactory.ZIP;
 import static org.joor.Reflect.on;
 
 @Slf4j
@@ -102,6 +103,88 @@ public class FileCollector {
             owner.info("Zipped sources size is %s (%d bytes)", bytesToString(zip.length()), zip.length());
             return zip;
         }, "File collect failed");
+    }
+
+    public static File collectToFolder(
+            Transfers transfers,
+            @NonNull final File dir,
+            @NonNull final File target,
+            @NonNull final AbstractTool owner) throws GenericException {
+        return call(() -> {
+            owner.fine("Create file collector");
+            FileCollector collector = new FileCollector(transfers, owner);
+
+            checkSourceFolder(dir, owner);
+            owner.info("Sources will be staged to %s", target.getAbsolutePath());
+
+            List<Entry> fileEntries = collector.collectFiles(dir);
+            if (fileEntries.isEmpty()) {
+                throw new IllegalArgumentException("No files are match defined transfer settings");
+            }
+
+            long size = collector.copyCollectedFiles(target, fileEntries);
+            owner.info("Staged sources size is %s (%d bytes)", bytesToString(size), size);
+            return target;
+        }, "File collect failed");
+    }
+
+    private static void checkSourceFolder(@NonNull final File dir, @NonNull final AbstractTool owner) throws GenericException {
+        if (!dir.exists() || !dir.canRead()) {
+            String reason = "Unknown problem with source folder " + dir.getAbsolutePath();
+            if (!dir.exists()) {
+                reason = "Source folder " + dir.getAbsolutePath() + " does not exist";
+            } else if (!dir.canRead()) {
+                reason = "Source folder " + dir.getAbsolutePath() + " can not be read";
+            }
+
+            throw GenericException.raise("File collect failed", new IllegalArgumentException(reason));
+        }
+        owner.info("Folder to collect files from is %s", dir.getAbsolutePath());
+    }
+
+    private long copyCollectedFiles(@NonNull final File target, final List<Entry> files) throws IOException {
+        Path root = target.toPath().toAbsolutePath().normalize();
+        Files.createDirectories(root);
+        long total = 0;
+
+        for (Entry entry : files) {
+            if (entry.entryName.isEmpty()) {
+                continue;
+            }
+
+            Path destination = root.resolve(entry.entryName).toAbsolutePath().normalize();
+            if (!destination.startsWith(root)) {
+                verbose("Skip %s as its entry name %s escapes staging folder", entry.path, entry.entryName);
+                continue;
+            }
+
+            if (Files.isSymbolicLink(entry.path) && !Files.readSymbolicLink(entry.path).toFile().exists()) {
+                verbose("Skip %s as there's no target file exist", entry.path);
+                continue;
+            }
+
+            if (Files.isDirectory(entry.path)) {
+                Files.createDirectories(destination);
+                continue;
+            }
+
+            Files.createDirectories(destination.getParent());
+            if (Files.exists(destination)) {
+                verbose("Entry name %s is not unique, %s overwrites an already staged file", entry.entryName, entry.path);
+            }
+
+            try {
+                Files.deleteIfExists(destination);
+                Files.createLink(destination, entry.path);
+            } catch (IOException | UnsupportedOperationException e) {
+                Files.copy(entry.path, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            total += Files.size(destination);
+            verbose("File %s staged as %s", entry.path, entry.entryName);
+        }
+
+        return total;
     }
 
     private static final int MAX_DETAILS = 20;
@@ -229,8 +312,8 @@ public class FileCollector {
             verbose("Destination folder %s doesn't exist, creating", destDir.getAbsolutePath());
             destDir.mkdirs();
         }
-        OutputStream zfs = new FileOutputStream(zip);
-        ArchiveOutputStream as = new ArchiveStreamFactory().createArchiveOutputStream(ZIP, zfs);
+        OutputStream zfs = Files.newOutputStream(zip.toPath());
+        ZipArchiveOutputStream as = new ZipArchiveOutputStream(zfs);
         verbose("Zip stream created");
 
         for (Entry entry : files) {
@@ -246,7 +329,7 @@ public class FileCollector {
 
             as.putArchiveEntry(new ZipArchiveEntry(entry.entryName));
             if (!Files.isDirectory(entry.path)) {
-                BufferedInputStream is = new BufferedInputStream(new FileInputStream(entry.path.toFile()));
+                BufferedInputStream is = new BufferedInputStream(Files.newInputStream(entry.path.toFile().toPath()));
                 int size = IOUtils.copy(is, as);
                 verbose("%s zipped", bytesToString(size));
                 is.close();

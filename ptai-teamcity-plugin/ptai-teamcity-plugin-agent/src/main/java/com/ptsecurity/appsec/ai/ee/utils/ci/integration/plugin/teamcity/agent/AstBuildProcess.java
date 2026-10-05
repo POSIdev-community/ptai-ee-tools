@@ -7,10 +7,11 @@ import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.ConnectionSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.TokenCredentials;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.AbstractJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.GenericAstJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.ScanStartRetry;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.RawJson;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Report;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Sarif;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.SonarGiif;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstFailed;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.state.FailIfAstUnstable;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Params;
@@ -71,13 +72,21 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         Map<String, String> params = buildRunnerContext.getRunnerParameters();
         Map<String, String> globals = agentRunningBuild.getSharedConfigParameters();
 
-        boolean selectedScanSettingsUi = AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
+        boolean sbomScan = SCAN_TYPE_SBOM.equals(params.get(Params.SCAN_TYPE));
+        boolean selectedScanSettingsUi = !sbomScan && AST_SETTINGS_UI.equals(params.get(Params.AST_SETTINGS));
         String projectName = null;
         String settings = null;
         String policy = null;
-        if (!selectedScanSettingsUi) {
+        String sbomPath = null;
+        if (sbomScan) {
+            projectName = params.get(Params.SBOM_PROJECT_NAME);
+            sbomPath = params.get(Params.SBOM_PATH);
+        } else if (!selectedScanSettingsUi) {
             settings = BaseJsonHelper.minimize(params.get(Params.JSON_SETTINGS));
-            policy = BaseJsonHelper.minimize(params.get(Params.JSON_POLICY));
+            String policyParamValue = params.get(Params.JSON_POLICY);
+            if (policyParamValue != null) {
+                policy = BaseJsonHelper.minimize(params.get(Params.JSON_POLICY));
+            }
         } else
             projectName = params.get(Params.PROJECT_NAME);
 
@@ -108,15 +117,19 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 ? params
                 : globals;
 
-        String branchName = getBranchName(params);
+        String branchName = sbomScan ? null : getBranchName(params);
+        String scanLabel =  params.get(Params.SCAN_LABEL);
 
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
                 .artifactsWatcher(artifactsWatcher)
-                .projectName(selectedScanSettingsUi ? projectName : null)
+                .projectName(sbomScan || selectedScanSettingsUi ? projectName : null)
+                .sbomScan(sbomScan)
+                .sbomPath(sbomPath)
                 .branchName(branchName)
-                .settings(selectedScanSettingsUi ? null : settings)
-                .policy(selectedScanSettingsUi ?  null : policy)
+                .scanLabel(scanLabel)
+                .jsonSettings(sbomScan || selectedScanSettingsUi ? null : settings)
+                .jsonPolicy(sbomScan || selectedScanSettingsUi ? null : policy)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(activeConnectionParams.get(Params.URL))
                         .insecure(TRUE.equals(activeConnectionParams.get(Params.INSECURE)))
@@ -124,6 +137,8 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                         .caCertsPem(activeConnectionParams.get(Params.CERTIFICATES))
                         .build())
                 .fullScanMode(TRUE.equals(params.get(Params.FULL_SCAN_MODE)))
+                .retry(TRUE.equals(params.get(Params.RETRY)))
+                .retryTime(getRetryTime(params))
                 .verbose(TRUE.equals(params.get(Params.VERBOSE)))
                 .transfers(transfers)
                 .async(async)
@@ -135,8 +150,6 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 RawJson.builder().owner(job).rawData(rawData).build().attach(job);
             for (Reports.Sarif sarif : reports.getSarif())
                 Sarif.builder().owner(job).sarif(sarif).build().attach(job);
-            for (Reports.SonarGiif sonarGiif : reports.getSonarGiif())
-                SonarGiif.builder().owner(job).sonar(sonarGiif).build().attach(job);
         }
         if (failIfFailed) new FailIfAstFailed().attach(job);
         if (failIfUnstable) new FailIfAstUnstable().attach(job);
@@ -190,5 +203,15 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         }
 
         return agentRunningBuild.getSharedConfigParameters().get("teamcity.build.branch");
+    }
+
+    private int getRetryTime(Map<String, String> params) {
+        String value = params.get(Params.RETRY_TIME);
+        if (StringUtils.isBlank(value)) {
+            return GenericAstJob.DEFAULT_RETRY_TIME_SECONDS;
+        }
+
+        Integer retryTime = ScanStartRetry.parseRetryTime(value);
+        return retryTime == null ? -1 : retryTime;
     }
 }
