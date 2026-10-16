@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.helpers.json;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
@@ -12,7 +13,8 @@ public class JsonPolicyHelper extends BaseJsonHelper {
     public static Policy[] verify(final String json) throws GenericException {
         if (StringUtils.isEmpty(json)) return null;
         return call(() -> {
-            ObjectMapper mapper = createObjectMapper();
+            ObjectMapper mapper = createObjectMapper()
+                    .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
             return mapper.readValue(json, Policy[].class);
         }, "JSON policy parse failed");
     }

@@ -81,12 +81,10 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         if (sbomScan) {
             projectName = params.get(Params.SBOM_PROJECT_NAME);
             sbomPath = params.get(Params.SBOM_PATH);
+            policy = params.get(Params.SBOM_JSON_POLICY);
         } else if (!selectedScanSettingsUi) {
             settings = BaseJsonHelper.minimize(params.get(Params.JSON_SETTINGS));
-            String policyParamValue = params.get(Params.JSON_POLICY);
-            if (policyParamValue != null) {
-                policy = BaseJsonHelper.minimize(params.get(Params.JSON_POLICY));
-            }
+            policy = params.get(Params.JSON_POLICY);
         } else
             projectName = params.get(Params.PROJECT_NAME);
 
@@ -129,7 +127,7 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
                 .branchName(branchName)
                 .scanLabel(scanLabel)
                 .jsonSettings(sbomScan || selectedScanSettingsUi ? null : settings)
-                .jsonPolicy(sbomScan || selectedScanSettingsUi ? null : policy)
+                .jsonPolicy(selectedScanSettingsUi ? null : policy)
                 .connectionSettings(ConnectionSettings.builder()
                         .url(activeConnectionParams.get(Params.URL))
                         .insecure(TRUE.equals(activeConnectionParams.get(Params.INSECURE)))

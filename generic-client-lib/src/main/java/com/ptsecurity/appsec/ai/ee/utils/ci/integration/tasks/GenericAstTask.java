@@ -80,6 +80,12 @@ public class GenericAstTask extends AbstractTaskImpl {
         }
     }
 
+    public void setProjectPolicyCheck(
+            @NonNull final UUID projectId,
+            final boolean enabled) throws GenericException {
+        client.setProjectPolicyCheck(projectId, enabled);
+    }
+
     @NonNull
     public UUID startScan(
             @NonNull final UUID projectId,

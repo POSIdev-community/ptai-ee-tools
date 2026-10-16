@@ -135,6 +135,13 @@ public class AictlClient {
                 command("set", "project", "policies", "-p", projectId.toString(), "-f", policyPath));
     }
 
+    public void setProjectPolicyCheck(
+            @NonNull final UUID projectId,
+            final boolean enabled) throws GenericException {
+        checked("PT AI project policy check setup failed",
+                command("set", "project", "policy-check", String.valueOf(enabled), "-p", projectId.toString()));
+    }
+
     @NonNull
     public List<AgentInfo> getAgents() throws GenericException {
         AictlResult result = execute(command("get", "agents"));

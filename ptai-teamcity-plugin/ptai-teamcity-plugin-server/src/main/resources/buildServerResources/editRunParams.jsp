@@ -84,7 +84,7 @@
             BS.MultilineProperties.updateVisible();
         };
 
-        var ptaiSbomFieldRows = [ 'row_${SBOM_PROJECT_NAME}', 'row_${SBOM_PATH}' ];
+        var ptaiSbomFieldRows = [ 'row_${SBOM_PROJECT_NAME}', 'row_${SBOM_PATH}', 'row_${SBOM_JSON_POLICY}' ];
         var ptaiStandardScanFieldRows = [ 'row_${BRANCH_SETTINGS}', 'row_${AST_SETTINGS}', 'row_${FULL_SCAN_MODE}' ];
 
         ptaiScanScopeShowHide = function (show) {
@@ -375,6 +375,23 @@
             <props:textProperty name="${SBOM_PATH}" className="longField"/>
             <span class="smallNote">${HINT_SBOM_PATH}</span>
             <span class="error" id="error_${SBOM_PATH}"></span>
+        </td>
+    </tr>
+
+    <tr id="row_${SBOM_JSON_POLICY}">
+        <th>
+            <label for="${SBOM_JSON_POLICY}">${LABEL_SBOM_JSON_POLICY}</label>
+        </th>
+        <td>
+            <props:multilineProperty
+                    name="${SBOM_JSON_POLICY}"
+                    className="longField"
+                    linkTitle=""
+                    rows="3"
+                    cols="49"
+                    expanded="${true}"
+                    note="${HINT_SBOM_JSON_POLICY}"/>
+            <span class="error" id="error_${SBOM_JSON_POLICY}"></span>
         </td>
     </tr>
 

@@ -90,6 +90,14 @@ div(class: 'ptai-scan-type-block',
             field: 'sbomPath') {
         f.textbox()
     }
+
+    f.entry(
+            title: _('sbomJsonPolicy'),
+            field: 'sbomJsonPolicy') {
+        f.textarea(
+                style: 'height:100px',
+                checkMethod: 'post')
+    }
 }
 
 f.property(field: 'scanLabelSettings')

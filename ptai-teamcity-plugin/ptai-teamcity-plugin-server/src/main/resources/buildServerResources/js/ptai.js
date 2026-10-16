@@ -251,6 +251,10 @@ PtaiTaskSettingsForm = OO.extend(PtaiAbstractSettingsForm, {
                 this.handle("ptaiJsonPolicy", elem);
             },
 
+            onPtaiSbomJsonPolicyError: function (elem) {
+                this.handle("ptaiSbomJsonPolicy", elem);
+            },
+
             onPtaiIncludesError: function (elem) {
                 this.handle("ptaiIncludes", elem);
             },

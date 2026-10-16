@@ -112,6 +112,10 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
         return Validator.doCheckFieldNotEmpty(value, Resources.i18n_ast_settings_sbom_path_message_empty());
     }
 
+    public FormValidation doCheckSbomJsonPolicy(@QueryParameter String value) {
+        return Validator.doCheckFieldSbomJsonPolicy(value);
+    }
+
     @SuppressWarnings("unused")
     public String getScanTypeStandard() {
         return Plugin.SCAN_TYPE_STANDARD;

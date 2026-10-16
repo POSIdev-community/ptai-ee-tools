@@ -8,6 +8,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.aictl.ControllerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.SbomPolicy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.UrlHelper;
@@ -89,6 +90,21 @@ public class Validator {
                 return FormValidation.ok(Resources.i18n_ast_settings_type_manual_json_policy_message_empty());
             else
                 return FormValidation.ok(Resources.i18n_ast_settings_type_manual_json_policy_message_success(policy.length));
+        } catch (Exception e) {
+            return Validator.error(e);
+        }
+    }
+
+    public static FormValidation doCheckFieldSbomJsonPolicy(String value) {
+        try {
+            Policy[] policy = SbomPolicy.parse(value);
+            if (policy == null) {
+                return FormValidation.ok();
+            } else if (policy.length == 0) {
+                return FormValidation.ok(Resources.i18n_ast_settings_type_manual_json_policy_message_empty());
+            } else {
+                return FormValidation.ok(Resources.i18n_ast_settings_type_manual_json_policy_message_success(policy.length));
+            }
         } catch (Exception e) {
             return Validator.error(e);
         }

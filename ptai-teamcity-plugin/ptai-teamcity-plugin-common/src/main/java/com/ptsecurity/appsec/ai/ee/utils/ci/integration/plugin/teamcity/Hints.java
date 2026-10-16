@@ -31,6 +31,12 @@ public class Hints {
     public static final String SCAN_TYPE = "Choose whether project sources or an SBOM file are scanned";
     public static final String SBOM_PROJECT_NAME = "PT AI SBOM project name";
     public static final String SBOM_PATH = "SBOM file path relative to the checkout directory";
+    public static final String SBOM_JSON_POLICY =
+            "Project security policies in JSON format." +
+                    "<br>" +
+                    "If the field is empty, the policies configured for the project in PT AI are used." +
+                    "<br>" +
+                    "If you need to scan project without policy use [] value";
 
     public static final String AST_SETTINGS = "Choose how AST settings are defined";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
@@ -41,7 +47,7 @@ public class Hints {
     public static final String JSON_POLICY =
             "Project SAST policy in JSON format." +
                     "<br>" +
-                    "If this parameter is empty then SAST policy will be downloaded from PT AI EE server." +
+                    "If the field is empty, the policies configured for the project in PT AI are used." +
                     "<br>" +
                     "If you need to scan project without policy use [] value";
 
