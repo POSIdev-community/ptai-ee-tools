@@ -7,7 +7,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions.A
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions.Utils.AbstractUI
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions.Utils.Chart
 import lib.LayoutTagLib
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.DurationFormatUtils
 
 import java.time.Duration
