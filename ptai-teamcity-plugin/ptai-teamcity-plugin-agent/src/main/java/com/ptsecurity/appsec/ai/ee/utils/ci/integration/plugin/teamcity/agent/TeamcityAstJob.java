@@ -38,6 +38,11 @@ public class TeamcityAstJob extends GenericAstJob implements TextOutput {
     @NonNull
     private ArtifactsWatcher artifactsWatcher;
 
+    @NonNull
+    private String runnerId;
+
+    private String runnerName;
+
     protected static final String BUILD_PROBLEM_TYPE = "PT_AI_AST";
 
     @Override

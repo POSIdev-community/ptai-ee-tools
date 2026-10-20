@@ -151,6 +151,10 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         return scanReports;
     }
 
+    public ScanReports loadedScanReports() {
+        return scanReports;
+    }
+
     /**
      * Method sets up AST job and executes it. Method returns FAILED if:
      * - AST complete, policy assessment failed and "fail-if-failed" is defined

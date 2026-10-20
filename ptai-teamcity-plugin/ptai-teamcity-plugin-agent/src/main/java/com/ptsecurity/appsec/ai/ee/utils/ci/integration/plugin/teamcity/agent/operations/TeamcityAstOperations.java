@@ -5,11 +5,15 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfer;
 import com.ptsecurity.appsec.ai.ee.scan.sources.Transfers;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.TeamcityScanStatistics;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.agent.TeamcityAstJob;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.FileCollector;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.SbomPath;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
+import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -89,7 +94,42 @@ public class TeamcityAstOperations implements AstOperations {
     }
 
     @Override
-    public void scanCompleteCallback(@NonNull final ScanBrief scanBrief, @NonNull final ScanBriefDetailed.Performance performance) throws GenericException {
+    public void scanCompleteCallback(@NonNull final ScanBrief scanBrief, @NonNull final ScanBriefDetailed.Performance performance) {
+        try {
+            TeamcityScanStatistics statistics = TeamcityScanStatistics.builder()
+                    .pluginVersion(TeamcityScanStatistics.class.getPackage().getImplementationVersion())
+                    .runnerId(owner.getRunnerId())
+                    .runnerName(owner.getRunnerName())
+                    .scanType(owner.isSbomScan() ? TeamcityScanStatistics.ScanType.SBOM : TeamcityScanStatistics.ScanType.STANDARD)
+                    .sbomPath(owner.isSbomScan() ? owner.getSbomPath() : null)
+                    .scanBriefDetailed(scanBriefDetailed(scanBrief, performance))
+                    .build();
 
+            File file = owner.getAgent().getBuildTempDirectory().toPath()
+                    .resolve("ptai-statistics")
+                    .resolve(owner.getRunnerId())
+                    .resolve(TeamcityScanStatistics.FILE_NAME).toFile();
+
+            FileUtils.writeStringToFile(file, BaseJsonHelper.serialize(statistics), StandardCharsets.UTF_8);
+            owner.getArtifactsWatcher().addNewArtifactsPath(
+                    file.getAbsolutePath() + "=>" + TeamcityScanStatistics.artifactsFolder(owner.getRunnerId()));
+
+            owner.fine("PT AI scan statistics saved");
+        } catch (Exception e) {
+            owner.warning("PT AI scan statistics save failed: " + e.getMessage());
+            log.debug("Exception details", e);
+        }
+    }
+
+    @NonNull
+    private ScanBriefDetailed scanBriefDetailed(
+            @NonNull final ScanBrief scanBrief,
+            @NonNull final ScanBriefDetailed.Performance performance) throws GenericException {
+        ScanReports reports = owner.loadedScanReports();
+        if (scanBrief.getUseAsyncScan() || reports == null) {
+            return ScanBriefDetailed.create(scanBrief, performance);
+        }
+
+        return ScanBriefDetailed.create(GenericAstTask.applyBrief(reports.convert(scanBrief), scanBrief), performance);
     }
 }
