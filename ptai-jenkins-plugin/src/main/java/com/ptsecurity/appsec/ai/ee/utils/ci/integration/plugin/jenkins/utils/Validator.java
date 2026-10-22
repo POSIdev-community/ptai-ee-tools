@@ -99,9 +99,9 @@ public class Validator {
         try {
             Policy[] policy = SbomPolicy.parse(value);
             if (policy == null) {
-                return FormValidation.ok();
+                return FormValidation.ok(Resources.i18n_ast_settings_sbom_policy_message_empty());
             } else if (policy.length == 0) {
-                return FormValidation.ok(Resources.i18n_ast_settings_type_manual_json_policy_message_empty());
+                return FormValidation.ok(Resources.i18n_ast_settings_sbom_policy_message_clear());
             } else {
                 return FormValidation.ok(Resources.i18n_ast_settings_type_manual_json_policy_message_success(policy.length));
             }

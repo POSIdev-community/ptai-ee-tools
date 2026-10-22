@@ -132,7 +132,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
      * @param scanSettings AST settings mode: UI- or JSON-based
      * @param config Config mode: global- or task-defined
      * @param jsonSettings JSON-defined AST settings
-     * @param jsonPolicy JSON-defined policy
      * @param projectName PT AI project name for UI-defined AST settings mode
      * @param serverUrl PT AI server URL for task-defined private config
      * @param serverCredentialsId PT AI credentials Id for task-defined private config
@@ -143,7 +142,7 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
      */
     public FormValidation doTestProjectFields(
             final ScanSettings scanSettings, final ConfigBase config,
-            final String jsonSettings, final String jsonPolicy,
+            final String jsonSettings,
             final String projectName,
             final String serverUrl, final String serverCredentialsId,
             final String configName,
@@ -160,8 +159,6 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             } else if (scanSettings instanceof  ScanSettingsManual) {
                 ScanSettingsManual.Descriptor scanSettingsManualDescriptor = Jenkins.get().getDescriptorByType(ScanSettingsManual.Descriptor.class);
                 res = scanSettingsManualDescriptor.doCheckJsonSettings(jsonSettings);
-                if (FormValidation.Kind.ERROR == res.kind) break;
-                res = scanSettingsManualDescriptor.doCheckJsonPolicy(jsonPolicy);
                 if (FormValidation.Kind.ERROR == res.kind) break;
             }
             if (config instanceof ConfigGlobal) {

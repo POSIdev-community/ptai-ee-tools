@@ -36,7 +36,8 @@ public class Hints {
                     "<br>" +
                     "If the field is empty, the policies configured for the project in PT AI are used." +
                     "<br>" +
-                    "If you need to scan project without policy use [] value";
+                    "Use [] to remove policy rules from the project: the policy check setting in PT AI is not changed, " +
+                    "but with no rules the policy is not checked";
 
     public static final String AST_SETTINGS = "Choose how AST settings are defined";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();

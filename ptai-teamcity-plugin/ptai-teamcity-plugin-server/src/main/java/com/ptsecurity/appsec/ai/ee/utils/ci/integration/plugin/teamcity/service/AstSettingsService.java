@@ -436,9 +436,9 @@ public class AstSettingsService {
 
                 Policy[] policy = SbomPolicy.parse(bean.get(SBOM_JSON_POLICY));
                 if (policy == null) {
-                    results.add("SBOM project security policies are not defined, PT AI project ones are used");
+                    results.add(Resources.i18n_ast_settings_sbom_policy_message_empty());
                 } else if (policy.length == 0) {
-                    results.add(Resources.i18n_ast_settings_type_manual_json_policy_message_empty());
+                    results.add(Resources.i18n_ast_settings_sbom_policy_message_clear());
                 } else {
                     results.add(Resources.i18n_ast_settings_type_manual_json_policy_message_success(policy.length));
                 }

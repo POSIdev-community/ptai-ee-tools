@@ -291,7 +291,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
         check = descriptor.doTestProjectFields(
                 sbomScan ? null : scanSettings, config,
-                jsonSettings, null,
+                jsonSettings,
                 projectName,
                 serverUrl, credentialsId, configName,
                 sbomScan ? null : branchSettings,

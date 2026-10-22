@@ -11,13 +11,6 @@ public class SbomPolicy {
             return null;
         }
 
-        Policy[] policy = JsonPolicyHelper.verify(json);
-        if (policy == null) {
-            throw GenericException.raise(
-                    "JSON policy must be an array of rules",
-                    new IllegalArgumentException(json));
-        }
-
-        return policy;
+        return JsonPolicyHelper.verify(json);
     }
 }

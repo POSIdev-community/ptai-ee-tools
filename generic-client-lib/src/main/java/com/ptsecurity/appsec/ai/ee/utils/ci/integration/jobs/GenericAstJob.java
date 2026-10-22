@@ -378,7 +378,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
         setProjectPolicy(genericAstTask);
         if (policy.length == 0) {
-            info("SBOM project security policy rules are cleared");
+            info("SBOM project security policy rules are removed: policy check setting is not changed, but with no rules the policy is not checked");
             return;
         }
 
