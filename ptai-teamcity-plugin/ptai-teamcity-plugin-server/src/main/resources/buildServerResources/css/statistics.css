@@ -1,0 +1,63 @@
+.ptai-statistics {
+    max-width: 1100px;
+}
+
+.ptai-step + .ptai-step {
+    margin-top: 32px;
+}
+
+.ptai-table-title {
+    margin: 16px 0 6px;
+}
+
+.ptai-table {
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.ptai-table td {
+    padding: 4px 8px;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+}
+
+.ptai-table-label {
+    width: 300px;
+}
+
+.ptai-red td {
+    color: #d93025;
+}
+
+.ptai-green td {
+    color: #1e8e3e;
+}
+
+.ptai-message {
+    margin: 8px 0;
+}
+
+.ptai-charts {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+.ptai-chart-cell {
+    padding: 0 8px 16px 0;
+    min-width: 0;
+}
+
+.ptai-chart-cell.ptai-wide {
+    grid-column: 1 / span 2;
+}
+
+.ptai-chart {
+    width: 100%;
+}
+
+.ptai-pie {
+    height: 250px;
+}
+
+.ptai-no-data {
+    display: none;
+}

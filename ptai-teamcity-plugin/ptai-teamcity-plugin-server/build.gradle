@@ -5,6 +5,10 @@ plugins {
 
 group = "${rootGroup}.ptai-teamcity-plugin"
 
+configurations {
+    echarts
+}
+
 dependencies {
     implementation project(':ptai-teamcity-plugin:ptai-teamcity-plugin-common')
     agent project(path: ':ptai-teamcity-plugin:ptai-teamcity-plugin-agent', configuration: 'plugin')
@@ -13,7 +17,25 @@ dependencies {
 
     // provided "org.jetbrains.teamcity:server-api:${teamcityVersion}"
     // provided "org.jetbrains.teamcity.internal:server:${teamcityVersion}"
+
+    // https://mvnrepository.com/artifact/org.webjars/echarts
+    echarts 'org.webjars:echarts:5.0.2'
 }
+
+def echartsResources = layout.buildDirectory.dir("generated/echarts").get().asFile
+
+def unpackEcharts = tasks.register('unpackEcharts', Copy) {
+    from({ zipTree(configurations.echarts.singleFile) }) {
+        include 'META-INF/resources/webjars/echarts/*/echarts.min.js'
+        eachFile { path = "buildServerResources/js/${name}" }
+    }
+
+    includeEmptyDirs = false
+    into echartsResources
+}
+
+sourceSets.main.resources.srcDir echartsResources
+processResources.dependsOn unpackEcharts
 
 teamcity {
     version = teamcityVersion
@@ -36,6 +58,7 @@ teamcity {
                 parameter 'git-hash', "${versionDetails.gitHash}"
                 parameter 'git-hash-full', "${versionDetails.gitHashFull}"
                 parameter 'git-branch', "${versionDetails.branchName}"
+                parameter 'build-time', "${buildTimestamp}"
             }
         }
     }

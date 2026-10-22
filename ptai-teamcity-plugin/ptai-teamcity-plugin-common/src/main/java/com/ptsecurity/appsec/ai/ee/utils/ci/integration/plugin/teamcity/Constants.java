@@ -20,6 +20,8 @@ public class Constants {
 
     public static final String ADMIN_CONTROLLER_PATH = "/" + PREFIX + "/admin.html";
     public static final String AST_CONTROLLER_PATH = "/" + PREFIX + "/ast.html";
+    public static final String STATISTICS_BUILD_CONTROLLER_PATH = "/" + PREFIX + "/statistics/build.html";
+    public static final String STATISTICS_BUILD_TYPE_CONTROLLER_PATH = "/" + PREFIX + "/statistics/buildType.html";
 
     public static final String SUCCESS = "SUCCESS";
     public static final String FAILURE = "FAILURE";
