@@ -134,6 +134,7 @@ public class ScanTrendCharts {
             @NonNull final Locale locale) {
         List<BuildScanBriefDetailed> builds = sorted(buildList);
         ChartDataModel chart = createChart(builds);
+        addSeries(chart, createIssuesSeries(builds, total(locale), TOTAL_COLOR, ScanResultCharts::notDiscarded), false);
 
         for (BaseIssue.Type type : BaseIssue.Type.values()) {
             addSeries(chart, createIssuesSeries(builds, I18nHelper.i18n(type, locale), typeColor(type),
