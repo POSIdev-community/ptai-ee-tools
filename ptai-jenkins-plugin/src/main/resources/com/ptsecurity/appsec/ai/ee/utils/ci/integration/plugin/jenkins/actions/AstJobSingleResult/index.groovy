@@ -117,6 +117,9 @@ class UI extends AbstractUI {
 }
 
 UI ui = new UI((my as AstJobSingleResult).urlName)
+if (my.sbomScan) {
+    [Chart.Type.SUSPECTED_STATE_PIE, Chart.Type.SCAN_MODE_PIE].each { ui.charts.remove(ui.chartsMap.remove(it)) }
+}
 
 l.layout(title: Resources.i18n_ast_result_label()) {
     l.side_panel() {
@@ -136,11 +139,13 @@ l.layout(title: Resources.i18n_ast_result_label()) {
         def scanSettings = [:]
         scanSettings[Resources.i18n_ast_settings_base_projectname_label()] = "${scanBriefDetailed.projectName}"
 
-        def branch = scanBriefDetailed.scanSettings.branchName;
-        if (null != branch) {
-            scanSettings[Resources.i18n_ast_settings_branch_name_label()] = "${branch}"
-        } else {
-            scanSettings[Resources.i18n_ast_settings_branch_name_label()] = Resources.i18n_misc_strings_empty()
+        if (!my.sbomScan) {
+            def branch = scanBriefDetailed.scanSettings.branchName;
+            if (null != branch) {
+                scanSettings[Resources.i18n_ast_settings_branch_name_label()] = "${branch}"
+            } else {
+                scanSettings[Resources.i18n_ast_settings_branch_name_label()] = Resources.i18n_misc_strings_empty()
+            }
         }
 
         def label = scanBriefDetailed.scanLabel;
@@ -150,22 +155,24 @@ l.layout(title: Resources.i18n_ast_result_label()) {
             scanSettings[Resources.i18n_ast_settings_scan_label()] = Resources.i18n_misc_strings_empty()
         }
 
-        def url = scanBriefDetailed.scanSettings.url;
-        if (null == url) url = Resources.i18n_misc_strings_empty();
-        scanSettings[Resources.i18n_ast_settings_base_url_label()] = url
+        if (!my.sbomScan) {
+            def url = scanBriefDetailed.scanSettings.url;
+            if (null == url) url = Resources.i18n_misc_strings_empty();
+            scanSettings[Resources.i18n_ast_settings_base_url_label()] = url
 
-        def languages = scanBriefDetailed.scanSettings.languages
-        if (!languages && scanBriefDetailed.scanSettings.language != null){
-            languages = [scanBriefDetailed.scanSettings.language]
-        }
+            def languages = scanBriefDetailed.scanSettings.languages
+            if (!languages && scanBriefDetailed.scanSettings.language != null){
+                languages = [scanBriefDetailed.scanSettings.language]
+            }
 
-        if (!languages) {
-            scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = Resources.i18n_misc_strings_empty()
-        } else if (languages.size() == 1) {
-            scanSettings[Resources.i18n_ast_settings_base_programminglanguage_label()] = "${languages[0].getValue()}"
-        } else {
-            scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = languages
-                    .collect { "${it.getValue()}" }.join(", ")
+            if (!languages) {
+                scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = Resources.i18n_misc_strings_empty()
+            } else if (languages.size() == 1) {
+                scanSettings[Resources.i18n_ast_settings_base_programminglanguage_label()] = "${languages[0].getValue()}"
+            } else {
+                scanSettings[Resources.i18n_ast_settings_base_programminglanguages_label()] = languages
+                        .collect { "${it.getValue()}" }.join(", ")
+            }
         }
 
         scanSettings[Resources.i18n_ast_settings_mode_label()] = scanBriefDetailed.getUseAsyncScan()
@@ -227,6 +234,15 @@ l.layout(title: Resources.i18n_ast_result_label()) {
             for (Chart chart : ui.charts) createChartPlaceholder(my, chart)
         }
 
+        String sourceCodeCharts = my.sbomScan ? "" : """
+            createDistributionPieChart(
+                "${ui.chartsMap[Chart.Type.SUSPECTED_STATE_PIE].divId}", 
+                ${my.getVulnerabilitySuspectedPie()});
+            createDistributionPieChart(
+                "${ui.chartsMap[Chart.Type.SCAN_MODE_PIE].divId}", 
+                ${my.getVulnerabilityScanModePie()});
+        """
+
         script """
             // Read / store big bar charts data and find widest Y-axis title width to shift all vertical axes to same position    
             var options = [];
@@ -246,12 +262,7 @@ l.layout(title: Resources.i18n_ast_result_label()) {
             createDistributionPieChart(
                 "${ui.chartsMap[Chart.Type.APPROVAL_STATUS_PIE].divId}", 
                 ${my.getVulnerabilityApprovalStatePie()});
-            createDistributionPieChart(
-                "${ui.chartsMap[Chart.Type.SUSPECTED_STATE_PIE].divId}", 
-                ${my.getVulnerabilitySuspectedPie()});
-            createDistributionPieChart(
-                "${ui.chartsMap[Chart.Type.SCAN_MODE_PIE].divId}", 
-                ${my.getVulnerabilityScanModePie()});
+            ${sourceCodeCharts}
         """
     }
 }

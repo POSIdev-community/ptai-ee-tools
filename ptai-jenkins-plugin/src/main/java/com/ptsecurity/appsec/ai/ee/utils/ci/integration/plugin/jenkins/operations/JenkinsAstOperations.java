@@ -118,6 +118,7 @@ public class JenkinsAstOperations implements AstOperations {
                 .build();
         AstJobSingleResult action = new AstJobSingleResult(owner.getRun());
         action.setScanDataPacked(scanDataPacked);
+        action.setSbomScan(owner.isSbomScan());
         owner.getRun().addAction(action);
     }
 

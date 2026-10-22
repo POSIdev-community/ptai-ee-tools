@@ -48,6 +48,10 @@ public class AstJobSingleResult implements RunAction2, SimpleBuildStep.LastBuild
     @Setter
     protected ScanDataPacked scanDataPacked;
 
+    @Getter
+    @Setter
+    protected boolean sbomScan;
+
     protected transient ScanBriefDetailed scanBriefDetailed = null;
 
     public ScanBriefDetailed loadScanBriefDetailed() {
