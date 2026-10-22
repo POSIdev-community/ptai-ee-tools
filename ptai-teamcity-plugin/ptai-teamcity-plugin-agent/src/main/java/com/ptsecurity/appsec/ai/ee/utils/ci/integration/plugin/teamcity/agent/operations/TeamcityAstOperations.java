@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -116,7 +117,7 @@ public class TeamcityAstOperations implements AstOperations {
 
             owner.fine("PT AI scan statistics saved");
         } catch (Exception e) {
-            owner.warning("PT AI scan statistics save failed: " + e.getMessage());
+            owner.warning("PT AI scan statistics save failed: " + StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
             log.debug("Exception details", e);
         }
     }
@@ -124,12 +125,17 @@ public class TeamcityAstOperations implements AstOperations {
     @NonNull
     private ScanBriefDetailed scanBriefDetailed(
             @NonNull final ScanBrief scanBrief,
-            @NonNull final ScanBriefDetailed.Performance performance) throws GenericException {
+            @NonNull final ScanBriefDetailed.Performance performance) {
         ScanReports reports = owner.loadedScanReports();
         if (scanBrief.getUseAsyncScan() || reports == null) {
             return ScanBriefDetailed.create(scanBrief, performance);
         }
 
-        return ScanBriefDetailed.create(GenericAstTask.applyBrief(reports.convert(scanBrief), scanBrief), performance);
+        try {
+            return ScanBriefDetailed.create(GenericAstTask.applyBrief(reports.convert(scanBrief), scanBrief), performance);
+        } catch (GenericException e) {
+            log.debug("Scan report conversion failed, saving scan brief only", e);
+            return ScanBriefDetailed.create(scanBrief, performance);
+        }
     }
 }
