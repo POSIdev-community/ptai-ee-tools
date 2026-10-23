@@ -3,6 +3,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlResult;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.InvalidSecurityPolicyException;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -103,6 +104,10 @@ public class ScanStartRetry {
     }
 
     static boolean retryable(@NonNull final Throwable error) {
+        if (error instanceof InvalidSecurityPolicyException) {
+            return false;
+        }
+
         for (Throwable cause = error; cause != null; cause = cause.getCause()) {
             if (cause instanceof AictlException) {
                 return AictlResult.ExitCode.VALIDATION != ((AictlException) cause).getKind();

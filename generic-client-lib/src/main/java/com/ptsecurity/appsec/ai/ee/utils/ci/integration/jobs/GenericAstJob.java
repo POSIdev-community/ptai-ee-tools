@@ -1,13 +1,16 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
+import com.ptsecurity.appsec.ai.ee.helpers.json.JsonPolicyHelper;
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanDiagnostic;
+import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.Resources;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.AictlAiproj;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.exceptions.InvalidSecurityPolicyException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.EventConsumer;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.Base;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs.subjobs.export.Export;
@@ -15,6 +18,8 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.AstOperations
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.operations.FileOperations;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.PolicyHelp;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.SbomPolicy;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.*;
@@ -277,6 +282,14 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
     protected void startSourcesScan(@NonNull final GenericAstTask genericAstTask) throws GenericException {
         ScanStartRetry scanStartRetry = scanStartRetry();
+        if (StringUtils.isNotEmpty(jsonSettings) && StringUtils.isNotBlank(jsonPolicy)) {
+            try {
+                JsonPolicyHelper.verify(jsonPolicy);
+            } catch (GenericException e) {
+                throw policyFailure(e);
+            }
+        }
+
         setupProject(genericAstTask);
 
         process(Stage.ZIP);
@@ -336,15 +349,41 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         }
 
         ScanStartRetry scanStartRetry = scanStartRetry();
+        Policy[] policy;
+        try {
+            policy = SbomPolicy.parse(jsonPolicy);
+        } catch (GenericException e) {
+            throw policyFailure(e);
+        }
+
         String sbomFile = astOps.sbomFile(sbomPath);
         scanResultId = scanStartRetry.run(() -> {
             process(Stage.UPLOAD);
             projectId = genericAstTask.setupSbomProject(projectName, sbomFile);
             fine("PT AI SBOM project %s id is %s, SBOM file %s uploaded", projectName, projectId, sbomFile);
+            setupSbomProjectPolicy(genericAstTask, policy);
 
             process(Stage.ENQUEUED);
             return genericAstTask.startSbomScan(projectId, scanLabel);
         });
+    }
+
+    protected void setupSbomProjectPolicy(
+            @NonNull final GenericAstTask genericAstTask,
+            final Policy[] policy) throws GenericException {
+        if (policy == null) {
+            fine("SBOM project security policies are not defined, PT AI project ones are used");
+            return;
+        }
+
+        setProjectPolicy(genericAstTask);
+        if (policy.length == 0) {
+            info("SBOM project security policy rules are removed: policy check setting is not changed, but with no rules the policy is not checked");
+            return;
+        }
+
+        genericAstTask.setProjectPolicyCheck(projectId, true);
+        info("SBOM project security policy is set up, rules count is %d, policy check is enabled", policy.length);
     }
 
     @NonNull
@@ -412,9 +451,35 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         }
 
         genericAstTask.setProjectSettings(projectId, jsonSettings);
-        if (StringUtils.isNotEmpty(jsonPolicy)) {
-            genericAstTask.setProjectPolicy(projectId, jsonPolicy);
+        if (StringUtils.isNotBlank(jsonPolicy)) {
+            setProjectPolicy(genericAstTask);
         }
+    }
+
+    protected void setProjectPolicy(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+        try {
+            genericAstTask.setProjectPolicy(projectId, jsonPolicy);
+        } catch (GenericException e) {
+            throw policyFailure(e);
+        }
+    }
+
+    @NonNull
+    protected GenericException policyFailure(@NonNull final GenericException e) {
+        return new InvalidSecurityPolicyException(e);
+    }
+
+    @Override
+    public JobExecutionResult processException(@NonNull final GenericException e) {
+        JobExecutionResult result = super.processException(e);
+        if (e instanceof InvalidSecurityPolicyException) {
+            String help = PolicyHelp.message(client);
+            if (help != null) {
+                info(help);
+            }
+        }
+
+        return result;
     }
 
     protected void appendStatistics() throws GenericException {

@@ -121,6 +121,9 @@ public class Plugin extends Builder implements SimpleBuildStep {
     @Getter
     private String sbomPath;
 
+    @Getter
+    private String sbomJsonPolicy;
+
     @NonNull
     public String getScanType() {
         return SCAN_TYPE_SBOM.equals(scanType) ? SCAN_TYPE_SBOM : SCAN_TYPE_STANDARD;
@@ -143,6 +146,11 @@ public class Plugin extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setSbomPath(final String sbomPath) {
         this.sbomPath = sbomPath;
+    }
+
+    @DataBoundSetter
+    public void setSbomJsonPolicy(final String sbomJsonPolicy) {
+        this.sbomJsonPolicy = sbomJsonPolicy;
     }
 
     @DataBoundConstructor
@@ -196,8 +204,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
         // Get all descriptors that may be used by plugin:
         // "UI-defined" scan settings descriptor
         ScanSettingsUi.Descriptor scanSettingsUiDescriptor = Jenkins.get().getDescriptorByType(ScanSettingsUi.Descriptor.class);
-        // "JSON-defined" scan settings descriptor
-        ScanSettingsManual.Descriptor scanSettingsManualDescriptor = Jenkins.get().getDescriptorByType(ScanSettingsManual.Descriptor.class);
         // "PT AI EE server connection settings are defined globally" descriptor
         ConfigGlobal.Descriptor configGlobalDescriptor = Jenkins.get().getDescriptorByType(ConfigGlobal.Descriptor.class);
         // "PT AI EE server connection settings are defined locally" descriptor
@@ -224,6 +230,8 @@ public class Plugin extends Builder implements SimpleBuildStep {
             if (check.kind == FormValidation.Kind.ERROR) {
                 throw new AbortException(check.getMessage());
             }
+
+            jsonPolicy = sbomJsonPolicy;
         } else if (selectedScanSettingsUi) {
             projectName = ((ScanSettingsUi) scanSettings).getProjectName();
             log.trace("UI-defined project name before macro replacement is {}", projectName);
@@ -238,10 +246,6 @@ public class Plugin extends Builder implements SimpleBuildStep {
             if (StringUtils.isBlank(jsonSettings)) {
                 throw new SettingsMustBeSetUpException(i18n_ast_settings_type_manual_json_settings_message_empty());
             }
-
-            check = scanSettingsManualDescriptor.doCheckJsonPolicy(jsonPolicy);
-            if (FormValidation.Kind.ERROR == check.kind)
-                throw new AbortException(check.getMessage());
 
             log.trace("JSON-defined project settings before macro replacement is {}", jsonSettings);
             jsonSettings = BaseJsonHelper.replaceMacro(jsonSettings, (s -> Util.replaceMacro(s, buildInfo.getEnvVars())));
@@ -287,7 +291,7 @@ public class Plugin extends Builder implements SimpleBuildStep {
 
         check = descriptor.doTestProjectFields(
                 sbomScan ? null : scanSettings, config,
-                jsonSettings, jsonPolicy,
+                jsonSettings,
                 projectName,
                 serverUrl, credentialsId, configName,
                 sbomScan ? null : branchSettings,

@@ -66,6 +66,12 @@ public class Params {
     public static final String SBOM_PATH = PARAM("SbomPath");
 
     /**
+     * SBOM project security policy (optional value) defined via JSON. This value used if
+     * SCAN_TYPE equals to {@link Constants#SCAN_TYPE_SBOM}
+     */
+    public static final String SBOM_JSON_POLICY = PARAM("SbomJsonPolicy");
+
+    /**
      * Defines how code AST settings are defined. If this field equals to
      * {@link Constants#AST_SETTINGS_JSON} then settings are defined via two JSONs, if
      * equals to {@link Constants#AST_SETTINGS_UI} then settings are defined via viewer

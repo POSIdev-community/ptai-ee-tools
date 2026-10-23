@@ -20,6 +20,10 @@
             ${LABEL_SBOM_PATH}:
             <props:displayValue name="${SBOM_PATH}" emptyValue=""/>
         </div>
+        <div class="nestedParameter">
+            ${LABEL_SBOM_JSON_POLICY}:
+            <props:displayValue name="${SBOM_JSON_POLICY}" emptyValue=""/>
+        </div>
     </c:when>
     <c:when test="${propertiesBean.properties[AST_SETTINGS] == AST_SETTINGS_UI}">
         <div class="nestedParameter">

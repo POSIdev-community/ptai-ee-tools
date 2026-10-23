@@ -14,9 +14,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.admin.As
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.aictl.ServerEnvironment;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.CheckServerTask;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.ProjectTask;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ReportUtils;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.ScanLabelValidator;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.Validator;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.utils.*;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import com.ptsecurity.misc.tools.helpers.CallHelper;
 import com.ptsecurity.misc.tools.helpers.CertificateHelper;
@@ -103,6 +101,10 @@ public class AstSettingsService {
 
     public static VerificationResults checkAstSettings(@NonNull final PropertiesBean bean, @NonNull VerificationResults results, boolean parametersOnly) {
         validateAstSettings(bean, results);
+        if (!parametersOnly) {
+            addPolicyHelp(bean, results);
+        }
+
         if (!parametersOnly && results.isSuccess()) checkAstSettings(bean, results);
         return results;
     }
@@ -146,7 +148,7 @@ public class AstSettingsService {
         res.fill(AST_SETTINGS, request);
 
         if (SCAN_TYPE_SBOM.equals(res.get(SCAN_TYPE)))
-            res.fill(SBOM_PROJECT_NAME, request).fill(SBOM_PATH, request);
+            res.fill(SBOM_PROJECT_NAME, request).fill(SBOM_PATH, request).fill(SBOM_JSON_POLICY, request);
         else if (AST_SETTINGS_JSON.equals(res.get(AST_SETTINGS)))
             res.fill(JSON_SETTINGS, request).fill(JSON_POLICY, request);
         else if (AST_SETTINGS_UI.equals(res.get(AST_SETTINGS)))
@@ -242,6 +244,12 @@ public class AstSettingsService {
             if (bean.empty(SBOM_PATH)) {
                 results.add(SBOM_PATH, Resources.i18n_ast_settings_sbom_path_message_empty());
             }
+            try {
+                SbomPolicy.parse(bean.get(SBOM_JSON_POLICY));
+            } catch (GenericException e) {
+                results.add(SBOM_JSON_POLICY, e.getDetailedMessage());
+                log.warn(e.getDetailedMessage(), e);
+            }
         } else if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI) && bean.empty(PROJECT_NAME))
             results.add(PROJECT_NAME, MESSAGE_PROJECT_NAME_EMPTY);
         else if (bean.eq(AST_SETTINGS, AST_SETTINGS_JSON)) {
@@ -335,6 +343,24 @@ public class AstSettingsService {
         }
     }
 
+    private static void addPolicyHelp(@NonNull final PropertiesBean bean, @NonNull final VerificationResults results) {
+        boolean policyFailed = results.stream()
+                .anyMatch(r -> JSON_POLICY.equals(r.getLeft()) || SBOM_JSON_POLICY.equals(r.getLeft()));
+
+        if (!policyFailed) {
+            return;
+        }
+
+        try {
+            String help = PolicyHelp.message(createApiClient(bean));
+            if (help != null) {
+                results.add(help);
+            }
+        } catch (GenericException e) {
+            log.debug("PT AI client create failed, policy syntax documentation link is skipped", e);
+        }
+    }
+
     private static void validateBranchSettings(
             @NonNull final PropertiesBean bean,
             @NonNull final VerificationResults results
@@ -407,6 +433,15 @@ public class AstSettingsService {
                 results.add(projectId != null
                         ? "SBOM project " + name + " found, ID = " + projectId + ", its SBOM file will be replaced on scan"
                         : "SBOM project " + name + " not found, it will be created on scan");
+
+                Policy[] policy = SbomPolicy.parse(bean.get(SBOM_JSON_POLICY));
+                if (policy == null) {
+                    results.add(Resources.i18n_ast_settings_sbom_policy_message_empty());
+                } else if (policy.length == 0) {
+                    results.add(Resources.i18n_ast_settings_sbom_policy_message_clear());
+                } else {
+                    results.add(Resources.i18n_ast_settings_type_manual_json_policy_message_success(policy.length));
+                }
             } else if (bean.eq(AST_SETTINGS, AST_SETTINGS_UI)) {
                 UUID projectId = new ProjectTask(client).searchProjectId(bean.get(PROJECT_NAME));
                 if (null != projectId)

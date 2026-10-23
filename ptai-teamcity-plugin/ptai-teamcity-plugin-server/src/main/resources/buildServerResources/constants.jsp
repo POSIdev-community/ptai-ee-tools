@@ -79,6 +79,10 @@
 <c:set var="LABEL_SBOM_PATH" value="<%=Labels.SBOM_PATH%>"/>
 <c:set var="HINT_SBOM_PATH" value="<%=Hints.SBOM_PATH%>"/>
 
+<c:set var="SBOM_JSON_POLICY" value="<%=Params.SBOM_JSON_POLICY%>"/>
+<c:set var="LABEL_SBOM_JSON_POLICY" value="<%=Labels.SBOM_JSON_POLICY%>"/>
+<c:set var="HINT_SBOM_JSON_POLICY" value="<%=Hints.SBOM_JSON_POLICY%>"/>
+
 <c:set var="AST_SETTINGS" value="<%=Params.AST_SETTINGS%>"/>
 <c:set var="LABEL_AST_SETTINGS" value="<%=Labels.AST_SETTINGS%>"/>
 <c:set var="HINT_AST_SETTINGS" value="<%=Hints.AST_SETTINGS%>"/>

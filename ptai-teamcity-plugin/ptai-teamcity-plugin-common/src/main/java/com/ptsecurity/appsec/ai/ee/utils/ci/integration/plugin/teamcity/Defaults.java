@@ -71,6 +71,11 @@ public class Defaults {
     public static final String SBOM_PATH = "";
 
     /**
+     * See {@link Params#SBOM_JSON_POLICY}.
+     */
+    public static final String SBOM_JSON_POLICY = "";
+
+    /**
      * See {@link Params#AST_SETTINGS} and {@link Constants#AST_SETTINGS_UI}
      */
     public static final String AST_SETTINGS = AST_SETTINGS_UI;
