@@ -2,10 +2,7 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.statist
 
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.Constants;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.TeamcityScanStatistics;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifactsViewMode;
 import lombok.Getter;
@@ -46,6 +43,12 @@ public class ScanStatisticsReader {
                 }
             });
 
+    private final SBuildServer server;
+
+    public ScanStatisticsReader(@NonNull final SBuildServer server) {
+        this.server = server;
+    }
+
     public boolean hasStatistics(@NonNull final SBuild build) {
         if (!build.isFinished()) {
             return false;
@@ -72,9 +75,14 @@ public class ScanStatisticsReader {
                 continue;
             }
 
-            TeamcityScanStatistics statistics = cache
-                    .computeIfAbsent(build.getBuildId() + ":" + runner.getId(), key -> Optional.ofNullable(parse(build, artifact)))
-                    .orElse(null);
+            String key = build.getBuildId() + ":" + runner.getId();
+            Optional<TeamcityScanStatistics> cached = cache.get(key);
+            if (cached == null) {
+                cached = Optional.ofNullable(parse(build, artifact));
+                cache.putIfAbsent(key, cached);
+            }
+
+            TeamcityScanStatistics statistics = cached.orElse(null);
 
             result.add(new Step(runner.getId(), StringUtils.defaultIfEmpty(runner.getName(), runner.getId()), statistics));
         }
@@ -91,10 +99,16 @@ public class ScanStatisticsReader {
 
     @NonNull
     public List<SFinishedBuild> trendBuilds(@NonNull final SBuildType buildType) {
-        return buildType.getHistory().stream()
-                .filter(build -> !build.isPersonal())
-                .limit(TREND_BUILDS)
-                .collect(Collectors.toList());
+        List<SFinishedBuild> result = new ArrayList<>();
+        server.getHistory().processEntries(buildType.getBuildTypeId(), null, false, false, false, build -> {
+            if (!build.isPersonal()) {
+                result.add(build);
+            }
+
+            return result.size() < TREND_BUILDS;
+        });
+
+        return result;
     }
 
     public TeamcityScanStatistics trendStatistics(@NonNull final SBuild build) {
@@ -102,9 +116,15 @@ public class ScanStatisticsReader {
         Collections.reverse(steps);
         return steps.stream()
                 .map(Step::getStatistics)
-                .filter(Objects::nonNull)
+                .filter(ScanStatisticsReader::hasTrendData)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private static boolean hasTrendData(final TeamcityScanStatistics statistics) {
+        return statistics != null
+                && statistics.getScanBriefDetailed() != null
+                && !Boolean.TRUE.equals(statistics.getScanBriefDetailed().getUseAsyncScan());
     }
 
     public static boolean hasPtaiRunner(@NonNull final SBuildType buildType) {
