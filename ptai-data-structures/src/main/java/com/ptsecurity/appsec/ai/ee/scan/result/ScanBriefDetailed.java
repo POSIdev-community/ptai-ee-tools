@@ -36,6 +36,7 @@ public class ScanBriefDetailed extends ScanBrief {
             @SuperBuilder
             @NoArgsConstructor
             @AllArgsConstructor
+            @EqualsAndHashCode
             public static class BaseIssueCountFields {
                 /**
                  * See {@link BaseIssue#getLevel()} description
@@ -97,6 +98,7 @@ public class ScanBriefDetailed extends ScanBrief {
             @SuperBuilder
             @NoArgsConstructor
             @AllArgsConstructor
+            @EqualsAndHashCode(callSuper = true)
             public static class BaseIssueCount extends BaseIssueCountFields {
                 @JsonProperty
                 protected Long count;

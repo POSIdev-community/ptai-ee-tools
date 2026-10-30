@@ -121,6 +121,8 @@ public class AstBuildProcess implements BuildProcess, Callable<BuildFinishedStat
         job = TeamcityAstJob.builder()
                 .agent(agentRunningBuild)
                 .artifactsWatcher(artifactsWatcher)
+                .runnerId(buildRunnerContext.getId())
+                .runnerName(buildRunnerContext.getName())
                 .projectName(sbomScan || selectedScanSettingsUi ? projectName : null)
                 .sbomScan(sbomScan)
                 .sbomPath(sbomPath)

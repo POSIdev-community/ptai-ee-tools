@@ -1,15 +1,16 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.actions;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.BaseJsonChartDataModel;
-import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.ChartDataModel;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.charts.BuildScanBriefDetailed;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.charts.ScanTrendCharts;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.jenkins.charts.JsonChartConverter;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.sf.json.JSONObject;
+import org.jvnet.localizer.LocaleProvider;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import java.util.ArrayList;
@@ -37,17 +38,6 @@ public class AstJobMultipleResults implements Action {
     @Override
     public String getUrlName() {
         return "ptaiTrend";
-    }
-
-    @Getter
-    @Setter
-    @SuperBuilder
-    @NoArgsConstructor
-    public static class BuildScanBriefDetailed {
-        @JsonProperty
-        protected Integer buildNumber;
-        @JsonProperty
-        protected ScanBriefDetailed scanBriefDetailed;
     }
 
     @NonNull
@@ -84,6 +74,6 @@ public class AstJobMultipleResults implements Action {
     @SuppressWarnings("unused") // Called by groovy view
     public JSONObject getVulnerabilityLevelTrendChart(final int resultsNumber) {
         final List<BuildScanBriefDetailed> issuesModelList = getLatestAstResults(resultsNumber);
-        return BaseJsonChartDataModel.convertObject(ChartDataModel.create(issuesModelList));
+        return JsonChartConverter.convertObject(ScanTrendCharts.levelTrend(issuesModelList, LocaleProvider.getLocale()));
     }
 }
