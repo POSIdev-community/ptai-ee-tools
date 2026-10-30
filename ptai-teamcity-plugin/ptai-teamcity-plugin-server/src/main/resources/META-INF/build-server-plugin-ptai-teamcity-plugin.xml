@@ -12,4 +12,9 @@
     <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.runner.AstBuildStartContextProcessor" init-method="register"/>
     <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.runner.AstEditRunTypeControllerExtension"/>
     <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.runner.AstSettingsPageController"/>
+    <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.statistics.ScanStatisticsReader"/>
+    <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.statistics.ScanStatisticsController"/>
+    <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.statistics.AstBuildResultsTab"/>
+    <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.statistics.AstBuildSummaryExtension"/>
+    <bean class="com.ptsecurity.appsec.ai.ee.utils.ci.integration.plugin.teamcity.statistics.AstBuildTypeStatisticsTab"/>
 </beans>
