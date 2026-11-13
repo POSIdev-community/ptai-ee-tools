@@ -1,0 +1,41 @@
+{
+  "scanInfo": {},
+  "statistic": {
+    "totalFileCount": 4,
+    "scannedFileCount": 3
+  },
+  "items": [
+    {
+      "id": "race-condition-1",
+      "typeKey": "RaceCondition",
+      "type": { "value": "Race Condition", "displayName": "Race condition" },
+      "level": { "value": "level-high" },
+      "language": "Python",
+      "approvalState": "None",
+      "cweId": "362",
+      "sourceFile": "src/shared.py",
+      "startLine": 12,
+      "startColumn": 5,
+      "endLine": 13,
+      "endColumn": 20,
+      "vulnerableCode": "counter += 1",
+      "owasp": [ { "value": "A04" } ]
+    },
+    {
+      "id": "secret-1",
+      "typeKey": "Secret",
+      "type": { "value": "Password", "displayName": "Password" },
+      "level": { "value": "level-medium" },
+      "language": "Python",
+      "approvalState": "Discard"
+    },
+    {
+      "id": "vulnerability-1",
+      "typeKey": "Vulnerability",
+      "type": { "value": "SQL Injection", "displayName": "SQL Injection" },
+      "level": { "value": "level-high" },
+      "scanMode": "Unknown",
+      "approvalState": "Approval"
+    }
+  ]
+}

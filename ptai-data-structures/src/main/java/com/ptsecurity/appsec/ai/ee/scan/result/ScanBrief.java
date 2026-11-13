@@ -45,7 +45,9 @@ public class ScanBrief {
         V530("5.3.0"),
         V600("6.0.0"),
         V610("6.1.0"),
-        V620("6.2.0");
+        V620("6.2.0"),
+        V630("6.3.0"),
+        V640("6.4.0");
 
         private final String prefix;
 

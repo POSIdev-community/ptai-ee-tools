@@ -81,6 +81,27 @@ public class AictlReportFiltersTest {
     }
 
     @Test
+    @DisplayName("Static reports include Race Condition and ASINT findings")
+    public void staticModules() {
+        IssuesFilter filters = new IssuesFilter();
+        filters.setSourceTypes(Collections.singletonList(SourceType.STATIC));
+
+        assertEquals(Arrays.asList(
+                "--scan-module", "StaticCodeAnalysis",
+                "--scan-module", "PatternMatching",
+                "--scan-module", "Components",
+                "--scan-module", "SoftwareCompositionAnalysis",
+                "--scan-module", "Configuration",
+                "--scan-module", "MaliciousCodeDetection",
+                "--scan-module", "SecretDetection",
+                "--scan-module", "RaceConditionDetection",
+                "--scan-module", "Asint"), AictlReportFilters.arguments(filters));
+
+        filters.setSourceTypes(Collections.singletonList(SourceType.ALL));
+        assertTrue(AictlReportFilters.arguments(filters).isEmpty());
+    }
+
+    @Test
     @DisplayName("A report with no filter is asked for as it is")
     public void noFilter() {
         assertTrue(AictlReportFilters.arguments(null).isEmpty());
