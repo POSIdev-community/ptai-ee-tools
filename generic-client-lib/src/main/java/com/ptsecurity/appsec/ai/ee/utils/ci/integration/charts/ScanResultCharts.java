@@ -8,6 +8,7 @@ import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.VulnerabilityIssue;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -123,7 +124,9 @@ public class ScanResultCharts {
         Map<Pair<BaseIssue.Level, String>, Long> levelTitleCountMap = distribution.stream()
                 .filter(ScanResultCharts::notDiscarded)
                 .collect(Collectors.groupingBy(
-                        issue -> new ImmutablePair<>(issue.getLevel(), issue.getTitle().get(titleLocale)),
+                        issue -> new ImmutablePair<>(issue.getLevel(), StringUtils.defaultIfBlank(
+                                issue.getTitle() == null ? null : issue.getTitle().get(titleLocale),
+                                I18nHelper.missingIssueType(locale))),
                         Collectors.summingLong(ScanResultCharts::count)));
 
         List<LevelTitleCount> levelTitleCount = new ArrayList<>();

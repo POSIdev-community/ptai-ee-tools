@@ -2,10 +2,11 @@ package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report;
 
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanBrief;
+import com.ptsecurity.appsec.ai.ee.scan.result.ScanBriefDetailed;
 import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
-import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseIssue;
-import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.BaseSourceIssue;
-import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.VulnerabilityIssue;
+import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.charts.BaseJsonChartDataModel;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.charts.I18nHelper;
 import com.ptsecurity.misc.tools.BaseTest;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
@@ -19,12 +20,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Convert PT AI JSON report to scan result")
 public class ScanResultConverterTest extends BaseTest {
     private static final String EN = "/json/aictl/scan-result-report.en.json";
     private static final String RU = "/json/aictl/scan-result-report.ru.json";
+    private static final String AIE_640 = "/json/aictl/scan-result-report.6.4.json";
 
     @SneakyThrows
     private static byte[] resource(final String name) {
@@ -77,6 +80,59 @@ public class ScanResultConverterTest extends BaseTest {
     private static ScanResult convert() {
         return ScanResultConverter.convert(
                 brief(), AieJsonReport.parse(stream(EN)), AieJsonReport.parse(stream(RU)));
+    }
+
+    @Test
+    @DisplayName("JSON v2 carries Race Condition coordinates and classifiers in AIE 6.4")
+    public void convertRaceCondition() {
+        AieJsonReport report = AieJsonReport.parse(stream(AIE_640));
+        assertEquals(AieJsonReport.Schema.JSON_V2, report.getSchema());
+        ScanBrief source = brief();
+        source.setPtaiServerVersion("6.4.0.12345");
+        source.setApiVersion(ScanBrief.ApiVersion.fromString(source.getPtaiServerVersion()));
+        ScanResult result = ScanResultConverter.convert(source, report, null);
+
+        assertEquals(ScanBrief.ApiVersion.V640, result.getApiVersion());
+        assertEquals(source.getPtaiServerVersion(), result.getPtaiServerVersion());
+        assertEquals(3, result.getIssues().size());
+        assertEquals(4, result.getStatistics().getTotalFileCount());
+        assertTrue(result.getIssues().get(0) instanceof RaceConditionIssue);
+        RaceConditionIssue race = (RaceConditionIssue) result.getIssues().get(0);
+        assertEquals(BaseIssue.Type.RACECONDITION, race.getClazz());
+        assertEquals(BaseIssue.Level.HIGH, race.getLevel());
+        assertEquals(ScanBrief.ScanSettings.Language.PYTHON, race.getLanguage());
+        assertEquals(java.util.Collections.singletonList("362"), race.getCweId());
+        assertEquals(java.util.Collections.singletonList("A04"), race.getOwaspId());
+        assertEquals("src/shared.py", race.getVulnerableExpression().getFile());
+        assertEquals(12, race.getVulnerableExpression().getBeginLine());
+        assertEquals(5, race.getVulnerableExpression().getBeginColumn());
+        assertEquals(13, race.getVulnerableExpression().getEndLine());
+        assertEquals(20, race.getVulnerableExpression().getEndColumn());
+        assertEquals("counter += 1", race.getVulnerableExpression().getValue());
+
+        assertTrue(result.getIssues().get(1) instanceof SecretIssue);
+        assertEquals(ScanBrief.ScanSettings.Language.PYTHON, result.getIssues().get(1).getLanguage());
+        assertEquals(VulnerabilityIssue.ScanMode.UNKNOWN,
+                ((VulnerabilityIssue) result.getIssues().get(2)).getScanMode());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Race Condition survives saved build results and appears in scan statistics")
+    public void persistRaceCondition() {
+        ScanResult result = ScanResultConverter.convert(brief(),
+                AieJsonReport.parse(stream(AIE_640)), null);
+        ScanResult restored = createObjectMapper().readValue(createObjectMapper().writeValueAsBytes(result), ScanResult.class);
+        assertTrue(restored.getIssues().get(0) instanceof RaceConditionIssue);
+        RaceConditionIssue race = (RaceConditionIssue) restored.getIssues().get(0);
+        assertEquals("src/shared.py", race.getVulnerableExpression().getFile());
+        assertEquals("Race condition", restored.getI18n().get(race.getIssueTypeKey()).get(Reports.Locale.EN).getTitle());
+        assertEquals(1, ScanBriefDetailed.createBaseIssueDistributionData(restored).stream()
+                .filter(count -> count.getClazz() == BaseIssue.Type.RACECONDITION)
+                .mapToLong(ScanBriefDetailed.Details.ChartData.BaseIssueCount::getCount).sum());
+        assertNotNull(BaseJsonChartDataModel.TYPE_COLORS.get(BaseIssue.Type.RACECONDITION));
+        assertEquals("Race condition", I18nHelper.TYPE_MAP.get(BaseIssue.Type.RACECONDITION).toString(java.util.Locale.ENGLISH));
+        assertEquals("Гонка данных", I18nHelper.TYPE_MAP.get(BaseIssue.Type.RACECONDITION).toString(new java.util.Locale("ru")));
     }
 
     @Test

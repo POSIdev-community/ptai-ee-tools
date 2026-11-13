@@ -154,6 +154,13 @@ public class ScanResultConverter {
                 issue = value;
                 break;
             }
+            case "racecondition": {
+                RaceConditionIssue value = new RaceConditionIssue();
+                value.setVulnerableExpression(place(item, schema, snippet));
+                appendSourceClassifiers(item, value);
+                issue = value;
+                break;
+            }
             case "maliciouscode": {
                 MaliciousCodeIssue value = new MaliciousCodeIssue();
                 value.setVulnerableExpression(place(item, schema, snippet));

@@ -35,6 +35,7 @@ public class BaseJsonChartDataModel {
         TYPE_COLORS.put(BaseIssue.Type.FINGERPRINT_SCA, 0xffb8ff);
         TYPE_COLORS.put(BaseIssue.Type.SECRET, 0xe1e892);
         TYPE_COLORS.put(BaseIssue.Type.MALICIOUSCODE, 0xc98aa4);
+        TYPE_COLORS.put(BaseIssue.Type.RACECONDITION, 0x9a8ac9);
 
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.HIGH));
         APPROVAL_COLORS.put(BaseIssue.ApprovalState.AUTO_APPROVAL, LEVEL_COLORS.get(BaseIssue.Level.MEDIUM));
