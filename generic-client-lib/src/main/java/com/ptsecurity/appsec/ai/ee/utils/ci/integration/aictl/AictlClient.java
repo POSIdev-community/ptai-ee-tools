@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
 import com.ptsecurity.appsec.ai.ee.scan.settings.Policy;
@@ -18,6 +19,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.ptsecurity.misc.tools.helpers.BaseJsonHelper.createObjectMapper;
+import static com.ptsecurity.misc.tools.helpers.CallHelper.call;
 
 @Slf4j
 @Getter
@@ -367,13 +371,8 @@ public class AictlClient {
     public Policy.State checkPolicies(
             @NonNull final UUID projectId,
             @NonNull final UUID scanResultId) throws GenericException {
-        AictlResult result = execute(
+        AictlResult result = checked("PT AI project scan policy state read failed",
                 command("scan", "check-policies", scanResultId.toString(), "-p", projectId.toString()));
-
-        if (!result.isSuccess()) {
-            log.debug("PT AI project scan policy state read failed: {}", result.errorMessage());
-            return Policy.State.NONE;
-        }
 
         String state = result.getStdout().trim();
         if ("Rejected".equalsIgnoreCase(state)) {
@@ -384,7 +383,44 @@ public class AictlClient {
             return Policy.State.CONFIRMED;
         }
 
-        return Policy.State.NONE;
+        if ("None".equalsIgnoreCase(state)) {
+            return Policy.State.NONE;
+        }
+
+        throw GenericException.raise("PT AI project scan policy state read failed",
+                new IllegalStateException("Unexpected policy state: " + state));
+    }
+
+    public boolean isScanPolicyCheckEnabled(
+            @NonNull final UUID projectId,
+            @NonNull final UUID scanResultId) throws GenericException {
+        AictlResult result = checked("PT AI scan settings read failed",
+                command("get", "scan", "aiproj", scanResultId.toString(), "-p", projectId.toString()));
+
+        JsonNode settings = call(() ->
+                createObjectMapper().readTree(result.getStdout()), "PT AI scan settings read failed");
+
+        if (settings == null || !settings.isObject()) {
+            throw GenericException.raise("PT AI scan settings read failed",
+                    new IllegalStateException("Expected aiproj settings"));
+        }
+
+        return settings.path("UseSecurityPolicies").asBoolean(false);
+    }
+
+    public boolean hasProjectPolicies(@NonNull final UUID projectId) throws GenericException {
+        AictlResult result = checked("PT AI project policies read failed",
+                command("get", "project", "policies", "-p", projectId.toString()));
+
+        JsonNode policies = call(() ->
+                createObjectMapper().readTree(result.getStdout()), "PT AI project policies read failed");
+
+        if (policies == null || !policies.isArray()) {
+            throw GenericException.raise("PT AI project policies read failed",
+                    new IllegalStateException("Expected security policy rules array"));
+        }
+
+        return !policies.isEmpty();
     }
 
     public void getScanAiproj(
