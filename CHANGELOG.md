@@ -291,3 +291,10 @@ options:
 + [Feature] Added SBOM file scanning
 + [Feature] Added scan start retry if the branch is already being scanned
 + [Feature] Added report locale selection in Jenkins plugin
+### 20261113
++ [Feature] PT AI v.6.4.0 support approved
++ [Feature] Added support for Race Condition detection results
++ [Feature] Added security policy configuration and checks for SBOM scans in Jenkins and TeamCity
++ [Feature] Added scan statistics and trends to TeamCity, including vulnerability distributions and scan duration history
++ [Fix] Fixed compatibility with Jenkins 2.579+
++ [Fix] Fixed minor bugs

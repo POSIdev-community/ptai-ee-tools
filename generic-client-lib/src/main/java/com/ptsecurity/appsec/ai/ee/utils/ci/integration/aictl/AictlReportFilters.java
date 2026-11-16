@@ -19,7 +19,7 @@ public class AictlReportFilters {
     private static final List<String> STATIC_SCAN_MODULES = Arrays.asList(
             "StaticCodeAnalysis", "PatternMatching", "Components",
             "SoftwareCompositionAnalysis", "Configuration",
-            "MaliciousCodeDetection", "SecretDetection");
+            "MaliciousCodeDetection", "SecretDetection", "RaceConditionDetection", "Asint");
 
     private static final String BLACKBOX_SCAN_MODULE = "BlackBox";
 

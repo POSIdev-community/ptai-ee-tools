@@ -29,7 +29,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -37,10 +37,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -83,9 +80,10 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
 
     @Override
     public boolean configure(StaplerRequest request, JSONObject formData) {
+        List<Config> configs = Collections.emptyList();
+        String newAdvancedSettings = advancedSettings;
         // noinspection ConstantConditions
         do {
-            globalConfigs.clear();
             if (formData.isEmpty()) break;
 
             Object jsonConfigs = formData.get("globalConfigs");
@@ -95,11 +93,13 @@ public class PluginDescriptor extends BuildStepDescriptor<Builder> {
             if ((jsonConfigs instanceof JSONArray) && ((JSONArray) jsonConfigs).isEmpty()) break;
             if ((jsonConfigs instanceof JSONObject) && ((JSONObject) jsonConfigs).isEmpty()) break;
 
-            globalConfigs.replaceBy(request.bindJSONToList(Config.class, jsonConfigs));
+            configs = request.bindJSONToList(Config.class, jsonConfigs);
 
-            advancedSettings = formData.getString("advancedSettings");
+            newAdvancedSettings = formData.getString("advancedSettings");
         } while (false);
 
+        globalConfigs.replaceBy(configs);
+        advancedSettings = newAdvancedSettings;
         save();
         return true;
     }
