@@ -45,6 +45,7 @@ public class I18nHelper {
         TYPE_MAP.put(BaseIssue.Type.FINGERPRINT_SCA, Resources._i18n_misc_enums_vulnerability_clazz_fingerprint());
         TYPE_MAP.put(BaseIssue.Type.SECRET, Resources._i18n_misc_enums_vulnerability_clazz_secret());
         TYPE_MAP.put(BaseIssue.Type.MALICIOUSCODE, Resources._i18n_misc_enums_vulnerability_clazz_maliciouscode());
+        TYPE_MAP.put(BaseIssue.Type.RACECONDITION, Resources._i18n_misc_enums_vulnerability_clazz_racecondition());
 
         APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.APPROVAL, Resources._i18n_misc_enums_vulnerability_approval_confirmed());
         APPROVAL_STATE_MAP.put(BaseIssue.ApprovalState.AUTO_APPROVAL, Resources._i18n_misc_enums_vulnerability_approval_auto());
@@ -102,6 +103,10 @@ public class I18nHelper {
 
     public static String i18n(@NonNull final Stage stage, @NonNull final Locale locale) {
         return STAGE_MAP.get(stage).toString(locale);
+    }
+
+    public static String missingIssueType(@NonNull final Locale locale) {
+        return Resources._i18n_ast_result_charts_issuetype_none_label().toString(locale);
     }
 
     @NonNull
