@@ -11,6 +11,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.AieJsonRepo
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.Mappings;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.UnsupportedReportSchemaException;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.Sleeper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,10 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 
 import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSettings.SettingInfo.AST_JOB_POLL_INTERVAL;
 
@@ -34,8 +37,22 @@ import static com.ptsecurity.appsec.ai.ee.utils.ci.integration.domain.AdvancedSe
 public class GenericAstTask extends AbstractTaskImpl {
     public static final String DEFAULT_BRANCH_NAME = "default";
 
+    private static final int POLICY_WAIT_TIMEOUT_SECONDS = 20;
+
+    private final LongSupplier clock;
+    private final Sleeper policySleeper;
+
     public GenericAstTask(@NonNull final AictlClient client) {
+        this(client, System::nanoTime, TimeUnit.MILLISECONDS::sleep);
+    }
+
+    GenericAstTask(
+            @NonNull final AictlClient client,
+            @NonNull final LongSupplier clock,
+            @NonNull final Sleeper policySleeper) {
         super(client);
+        this.clock = clock;
+        this.policySleeper = policySleeper;
     }
 
     @NonNull
@@ -353,7 +370,45 @@ public class GenericAstTask extends AbstractTaskImpl {
 
     @NonNull
     public Policy.State getPolicyState(@NonNull final ScanBrief scanBrief) throws GenericException {
-        return client.checkPolicies(scanBrief.getProjectId(), scanBrief.getId());
+        UUID projectId = scanBrief.getProjectId();
+        UUID scanResultId = scanBrief.getId();
+
+        Policy.State state = client.checkPolicies(projectId, scanResultId);
+        if (state != Policy.State.NONE ||
+                scanBrief.getState() != ScanBrief.State.DONE ||
+                !client.isScanPolicyCheckEnabled(projectId, scanResultId) ||
+                !client.hasProjectPolicies(projectId)) {
+            return state;
+        }
+
+        long interval = TimeUnit.SECONDS.toMillis(Math.max(1, advancedSettings.getInt(AST_JOB_POLL_INTERVAL)));
+        long started = clock.getAsLong();
+        long duration = TimeUnit.SECONDS.toNanos(POLICY_WAIT_TIMEOUT_SECONDS);
+
+        if (client.getConsole() != null) {
+            client.getConsole().info(
+                    "Waiting for security policy assessment, timeout is %d seconds", POLICY_WAIT_TIMEOUT_SECONDS);
+        }
+
+        while (state == Policy.State.NONE) {
+            long remaining = duration - (clock.getAsLong() - started);
+            if (remaining <= 0) {
+                throw GenericException.raise("PT AI scan policy assessment timed out",
+                        new TimeoutException("No policy assessment result for scan " + scanResultId
+                                + " within " + POLICY_WAIT_TIMEOUT_SECONDS + " seconds"));
+            }
+
+            try {
+                policySleeper.sleep(Math.min(interval, Math.max(1, TimeUnit.NANOSECONDS.toMillis(remaining))));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw GenericException.raise("PT AI scan policy assessment wait interrupted", e);
+            }
+
+            state = client.checkPolicies(projectId, scanResultId);
+        }
+
+        return state;
     }
 
     @NonNull
