@@ -147,30 +147,6 @@ public class AictlClient {
     }
 
     @NonNull
-    public List<AgentInfo> getAgents() throws GenericException {
-        AictlResult result = execute(command("get", "agents"));
-        if (!result.isSuccess()) {
-            log.debug("PT AI scan agents read failed: {}", result.errorMessage());
-            return Collections.emptyList();
-        }
-
-        List<AgentInfo> agents = new ArrayList<>();
-        for (String[] row : TableParser.rows(result.getStdout())) {
-            String id = TableParser.cell(row, 0);
-            if (id.isEmpty()) {
-                continue;
-            }
-
-            agents.add(new AgentInfo(id,
-                    TableParser.cell(row, 1),
-                    TableParser.cell(row, 2),
-                    TableParser.cell(row, 3),
-                    TableParser.cell(row, 4)));
-        }
-        return agents;
-    }
-
-    @NonNull
     public UUID createBranch(
             @NonNull final UUID projectId,
             @NonNull final String branchName,

@@ -95,7 +95,8 @@ public class ScanBrief {
     @Getter
     @Setter
     @JsonProperty
-    protected String ptaiAgentVersion;
+    @Builder.Default
+    protected String ptaiAgentVersion = "";
 
     @Getter
     @Setter

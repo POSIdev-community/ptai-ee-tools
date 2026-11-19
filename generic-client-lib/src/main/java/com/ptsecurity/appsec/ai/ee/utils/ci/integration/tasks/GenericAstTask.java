@@ -286,14 +286,11 @@ public class GenericAstTask extends AbstractTaskImpl {
             final String projectName,
             @NonNull final ScanBrief.ScanSettings scanSettings) throws GenericException {
         String serverVersion = client.getServerVersion();
-        AgentInfo agent = soleAgent();
 
         return ScanBrief.builder()
                 .apiVersion(apiVersion(serverVersion))
                 .ptaiServerUrl(client.getConnectionSettings().getUrl())
                 .ptaiServerVersion(serverVersion)
-                .ptaiAgentVersion(agent == null ? "" : agent.getVersion())
-                .ptaiAgentName(agent == null ? null : agent.getName())
                 .id(scanResultId)
                 .projectId(projectId)
                 .projectName(projectName == null ? "" : projectName)
@@ -301,22 +298,6 @@ public class GenericAstTask extends AbstractTaskImpl {
                 .scanLabel(scanLabel)
                 .scanSettings(scanSettings)
                 .build();
-    }
-
-    private AgentInfo soleAgent() {
-        try {
-            List<AgentInfo> agents = client.getAgents();
-            if (agents.size() == 1) {
-                return agents.get(0);
-            }
-
-            log.debug("Scan agent is left unnamed: server has {} of them and aictl does not "
-                    + "tell which one runs a scan", agents.size());
-        } catch (Exception e) {
-            log.debug("PT AI scan agents read failed", e);
-        }
-
-        return null;
     }
 
     @NonNull
