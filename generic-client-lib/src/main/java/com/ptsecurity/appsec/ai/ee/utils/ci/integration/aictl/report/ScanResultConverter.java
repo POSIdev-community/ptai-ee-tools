@@ -25,6 +25,11 @@ public class ScanResultConverter {
             final AieJsonReport russian) throws GenericException {
         ScanResult result = new ScanResult();
         copyBrief(scanBrief, result);
+        String agentVersion = Nodes.get(english.getScanInfo(), "scanAgentVersion").textValue();
+        if (agentVersion != null && !agentVersion.isEmpty()) {
+            result.setPtaiAgentVersion(agentVersion);
+        }
+
         appendStatistics(english, result);
 
         Map<String, String> russianTitles = titles(russian);
