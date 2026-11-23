@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
 import com.ptsecurity.appsec.ai.ee.scan.reports.Reports;
@@ -13,6 +14,7 @@ import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.ScanReports
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.aictl.report.UnsupportedReportSchemaException;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.functions.Sleeper;
 import com.ptsecurity.misc.tools.exceptions.GenericException;
+import com.ptsecurity.misc.tools.helpers.BaseJsonHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -95,6 +97,17 @@ public class GenericAstTask extends AbstractTaskImpl {
         } finally {
             client.getEnvironment().delete(path);
         }
+    }
+
+    public void setProjectPolicy(
+            @NonNull final UUID projectId,
+            @NonNull final String jsonPolicy,
+            final boolean enabled) throws GenericException {
+        ObjectNode policy = BaseJsonHelper.createObjectMapper().createObjectNode()
+                .put("checkSecurityPoliciesAccordance", enabled)
+                .put("securityPolicies", jsonPolicy);
+
+        setProjectPolicy(projectId, policy.toString());
     }
 
     public void setProjectPolicyCheck(
