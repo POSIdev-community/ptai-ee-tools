@@ -93,7 +93,6 @@ public class GenericAstTaskPolicyTest {
         return ScanBrief.builder()
                 .ptaiServerUrl("https://ptai.example.org")
                 .ptaiServerVersion("6.4.0")
-                .ptaiAgentVersion("")
                 .projectId(PROJECT_ID)
                 .projectName("policy-test")
                 .id(SCAN_ID)

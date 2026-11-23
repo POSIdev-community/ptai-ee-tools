@@ -1,5 +1,7 @@
 {
-  "scanInfo": {},
+  "scanInfo": {
+    "scanAgentVersion": "6.4.0.12345"
+  },
   "statistic": {
     "totalFileCount": 4,
     "scannedFileCount": 3

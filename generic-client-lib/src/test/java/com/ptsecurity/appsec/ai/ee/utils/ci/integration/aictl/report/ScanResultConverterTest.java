@@ -7,10 +7,13 @@ import com.ptsecurity.appsec.ai.ee.scan.result.ScanResult;
 import com.ptsecurity.appsec.ai.ee.scan.result.issue.types.*;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.charts.BaseJsonChartDataModel;
 import com.ptsecurity.appsec.ai.ee.utils.ci.integration.charts.I18nHelper;
+import com.ptsecurity.appsec.ai.ee.utils.ci.integration.tasks.GenericAstTask;
 import com.ptsecurity.misc.tools.BaseTest;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -152,6 +155,33 @@ public class ScanResultConverterTest extends BaseTest {
         assertEquals(591, statistics.getTotalFileCount());
         assertEquals(591, statistics.getScannedFileCount());
         assertEquals(0, statistics.getTotalUrlCount());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Save the agent version from JSON v2 in build statistics")
+    public void readScanAgentVersion() {
+        ScanBrief source = brief();
+        ScanReports reports = new ScanReports(AieJsonReport.parse(stream(AIE_640)), null);
+        ScanResult result = GenericAstTask.applyBrief(reports.convert(source), source);
+        ScanBriefDetailed detailed = ScanBriefDetailed.create(result, new ScanBriefDetailed.Performance());
+        ScanBriefDetailed restored = createObjectMapper().readValue(
+                createObjectMapper().writeValueAsBytes(detailed), ScanBriefDetailed.class);
+
+        assertEquals("6.4.0.12345", restored.getPtaiAgentVersion());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{}", "{\"scanAgentVersion\":\"\"}", "{\"scanAgentVersion\":null}"})
+    @DisplayName("Keep the brief agent version when the report has no version")
+    public void keepScanAgentVersion(final String scanInfo) {
+        String json = "{\"scanInfo\":" + scanInfo + ",\"statistic\":{},\"issues\":[]}";
+        AieJsonReport report = AieJsonReport.parse(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
+        ScanBrief source = brief();
+
+        assertEquals(
+                source.getPtaiAgentVersion(),
+                ScanResultConverter.convert(source, report, null).getPtaiAgentVersion());
     }
 
     @Test
