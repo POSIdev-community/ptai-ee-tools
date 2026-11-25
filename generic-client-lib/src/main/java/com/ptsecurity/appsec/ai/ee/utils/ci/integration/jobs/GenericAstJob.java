@@ -1,5 +1,6 @@
 package com.ptsecurity.appsec.ai.ee.utils.ci.integration.jobs;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ptsecurity.appsec.ai.ee.helpers.json.JsonPolicyHelper;
 import com.ptsecurity.appsec.ai.ee.scan.errors.Error;
 import com.ptsecurity.appsec.ai.ee.scan.progress.Stage;
@@ -286,12 +287,13 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
 
     protected void startSourcesScan(@NonNull final GenericAstTask genericAstTask) throws GenericException {
         ScanStartRetry scanStartRetry = scanStartRetry();
-        if (StringUtils.isNotEmpty(jsonSettings) && StringUtils.isNotBlank(jsonPolicy)) {
-            try {
-                JsonPolicyHelper.verify(jsonPolicy);
-            } catch (GenericException e) {
-                throw policyFailure(e);
-            }
+        Policy[] policy;
+        try {
+            policy = StringUtils.isNotEmpty(jsonSettings) && StringUtils.isNotBlank(jsonPolicy)
+                    ? JsonPolicyHelper.verify(jsonPolicy)
+                    : null;
+        } catch (GenericException e) {
+            throw policyFailure(e);
         }
 
         setupProject(genericAstTask);
@@ -309,7 +311,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             }
 
             scanResultId = scanStartRetry.run(() -> {
-                setupProjectSettings(genericAstTask);
+                setupProjectSettings(genericAstTask, policy);
 
                 if (StringUtils.isNotEmpty(sourcesPath)) {
                     process(Stage.UPLOAD);
@@ -380,7 +382,7 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             return;
         }
 
-        setProjectPolicy(genericAstTask);
+        setProjectPolicy(genericAstTask, null);
         if (policy.length == 0) {
             info("SBOM project security policy rules are removed: policy check setting is not changed, but with no rules the policy is not checked");
             return;
@@ -449,20 +451,36 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
         fine("PT AI project %s id is %s", projectName, projectId);
     }
 
-    protected void setupProjectSettings(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+    protected void setupProjectSettings(
+            @NonNull final GenericAstTask genericAstTask,
+            final Policy[] policy) throws GenericException {
         if (StringUtils.isEmpty(jsonSettings)) {
             return;
         }
 
-        genericAstTask.setProjectSettings(projectId, jsonSettings);
-        if (StringUtils.isNotBlank(jsonPolicy)) {
-            setProjectPolicy(genericAstTask);
+        if (policy == null) {
+            genericAstTask.setProjectSettings(projectId, jsonSettings);
+            return;
         }
+
+        ObjectNode settings = call(
+                () -> BaseJsonHelper.createObjectMapper().readValue(jsonSettings, ObjectNode.class),
+                "JSON settings read failed");
+
+        settings.remove("UseSecurityPolicies");
+        genericAstTask.setProjectSettings(projectId, settings.toString());
+        setProjectPolicy(genericAstTask, policy.length > 0);
     }
 
-    protected void setProjectPolicy(@NonNull final GenericAstTask genericAstTask) throws GenericException {
+    protected void setProjectPolicy(
+            @NonNull final GenericAstTask genericAstTask,
+            final Boolean enabled) throws GenericException {
         try {
-            genericAstTask.setProjectPolicy(projectId, jsonPolicy);
+            if (enabled == null) {
+                genericAstTask.setProjectPolicy(projectId, jsonPolicy);
+            } else {
+                genericAstTask.setProjectPolicy(projectId, jsonPolicy, enabled);
+            }
         } catch (GenericException e) {
             throw policyFailure(e);
         }
