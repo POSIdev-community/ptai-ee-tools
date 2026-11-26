@@ -19,8 +19,11 @@ import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -107,6 +110,12 @@ public class GenericAstJobPolicyTest {
                 .build();
     }
 
+    private static JsonNode readPolicyUpdate(@NonNull final String call) throws IOException {
+        String policyPrefix = "policies " + PROJECT_ID + " ";
+        assertTrue(call.startsWith(policyPrefix), call);
+        return BaseJsonHelper.createObjectMapper().readTree(call.substring(policyPrefix.length()));
+    }
+
     @Test
     @DisplayName("Standard rules enable the check even if AIPROJ disables it")
     public void sourcesRulesOverrideDisabledCheck() throws Exception {
@@ -118,10 +127,7 @@ public class GenericAstJobPolicyTest {
         assertEquals(2, task.calls.size(), task.calls.toString());
         assertEquals("settings " + PROJECT_ID + " {\"Version\":\"1.11\"}", task.calls.get(0));
 
-        String policyPrefix = "policies " + PROJECT_ID + " ";
-        assertTrue(task.calls.get(1).startsWith(policyPrefix), task.calls.toString());
-
-        JsonNode policy = BaseJsonHelper.createObjectMapper().readTree(task.calls.get(1).substring(policyPrefix.length()));
+        JsonNode policy = readPolicyUpdate(task.calls.get(1));
         assertTrue(policy.path("checkSecurityPoliciesAccordance").asBoolean());
         assertEquals(RULES, policy.path("securityPolicies").asText());
     }
@@ -141,17 +147,18 @@ public class GenericAstJobPolicyTest {
                 task.calls.get(1));
     }
 
-    @Test
-    @DisplayName("Standard without rules applies AIPROJ without replacing project policies")
-    public void sourcesWithoutPolicyApplySettingsOnly() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @DisplayName("Standard without a supplied policy preserves project rules and check state")
+    public void sourcesWithoutPolicyIgnoreUseSecurityPolicies(final boolean enabled) {
         RecordingAstTask task = task(null);
-        String settings = "{\"Version\":\"1.11\",\"UseSecurityPolicies\":false}";
+        String settings = "{\"Version\":\"1.11\",\"UseSecurityPolicies\":" + enabled + "}";
         GenericAstJob job = sourcesJob(settings, null);
 
         job.setupProjectSettings(task, null);
 
         assertEquals(1, task.calls.size(), task.calls.toString());
-        assertEquals("settings " + PROJECT_ID + " " + settings, task.calls.get(0));
+        assertEquals("settings " + PROJECT_ID + " {\"Version\":\"1.11\"}", task.calls.get(0));
     }
 
     @Test
@@ -164,26 +171,30 @@ public class GenericAstJobPolicyTest {
     }
 
     @Test
-    @DisplayName("[] clears rules and leaves policy check as it is")
-    public void emptyArrayClearsRules() {
+    @DisplayName("SBOM [] clears rules and disables the check in a single update")
+    public void emptyArrayClearsRulesAndDisablesCheck() {
         RecordingAstTask task = task(null);
         setup(job("[]"), task);
         assertEquals(1, task.calls.size(), task.calls.toString());
-        assertEquals("policies " + PROJECT_ID + " []", task.calls.get(0));
+        assertEquals(
+                "policies " + PROJECT_ID + " {\"checkSecurityPoliciesAccordance\":false,\"securityPolicies\":\"[]\"}",
+                task.calls.get(0));
     }
 
     @Test
-    @DisplayName("Rules array is saved as is and policy check is enabled")
-    public void rulesEnablePolicyCheck() {
+    @DisplayName("SBOM rules are saved as is and the check is enabled in a single update")
+    public void rulesEnablePolicyCheck() throws IOException {
         RecordingAstTask task = task(null);
         setup(job(RULES), task);
-        assertEquals(2, task.calls.size(), task.calls.toString());
-        assertEquals("policies " + PROJECT_ID + " " + RULES, task.calls.get(0));
-        assertEquals("policy-check " + PROJECT_ID + " true", task.calls.get(1));
+        assertEquals(1, task.calls.size(), task.calls.toString());
+
+        JsonNode policy = readPolicyUpdate(task.calls.get(0));
+        assertTrue(policy.path("checkSecurityPoliciesAccordance").asBoolean());
+        assertEquals(RULES, policy.path("securityPolicies").asText());
     }
 
     @Test
-    @DisplayName("Rejected rules stop the step before policy check is enabled and aren't retried")
+    @DisplayName("Rejected SBOM policy updates stop the step and aren't retried")
     public void rejectedRulesAreNotRetried() {
         GenericException rejected = new AictlException(
                 "PT AI project policy save failed",

@@ -34,10 +34,9 @@ public class Hints {
     public static final String SBOM_JSON_POLICY =
             "Project security policies in JSON format." +
                     "<br>" +
-                    "If the field is empty, the policies configured for the project in PT AI are used." +
+                    "If the field is empty, the policy settings configured for the project in PT AI are used." +
                     "<br>" +
-                    "Use [] to remove policy rules from the project: the policy check setting in PT AI is not changed, " +
-                    "but with no rules the policy is not checked";
+                    "Use [] to remove policy rules from the project and disable the policy check.";
 
     public static final String AST_SETTINGS = "Choose how AST settings are defined";
     public static final String AST_SETTINGS_JSON = Resources.i18n_ast_settings_type_manual_label();
