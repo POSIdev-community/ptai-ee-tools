@@ -382,13 +382,12 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             return;
         }
 
-        setProjectPolicy(genericAstTask, null);
+        setProjectPolicy(genericAstTask, policy.length > 0);
         if (policy.length == 0) {
-            info("SBOM project security policy rules are removed: policy check setting is not changed, but with no rules the policy is not checked");
+            info("SBOM project security policy rules are removed and policy check is disabled");
             return;
         }
 
-        genericAstTask.setProjectPolicyCheck(projectId, true);
         info("SBOM project security policy is set up, rules count is %d, policy check is enabled", policy.length);
     }
 
@@ -458,29 +457,22 @@ public abstract class GenericAstJob extends AbstractJob implements EventConsumer
             return;
         }
 
-        if (policy == null) {
-            genericAstTask.setProjectSettings(projectId, jsonSettings);
-            return;
-        }
-
         ObjectNode settings = call(
                 () -> BaseJsonHelper.createObjectMapper().readValue(jsonSettings, ObjectNode.class),
                 "JSON settings read failed");
 
         settings.remove("UseSecurityPolicies");
         genericAstTask.setProjectSettings(projectId, settings.toString());
-        setProjectPolicy(genericAstTask, policy.length > 0);
+        if (policy != null) {
+            setProjectPolicy(genericAstTask, policy.length > 0);
+        }
     }
 
     protected void setProjectPolicy(
             @NonNull final GenericAstTask genericAstTask,
-            final Boolean enabled) throws GenericException {
+            final boolean enabled) throws GenericException {
         try {
-            if (enabled == null) {
-                genericAstTask.setProjectPolicy(projectId, jsonPolicy);
-            } else {
-                genericAstTask.setProjectPolicy(projectId, jsonPolicy, enabled);
-            }
+            genericAstTask.setProjectPolicy(projectId, jsonPolicy, enabled);
         } catch (GenericException e) {
             throw policyFailure(e);
         }
